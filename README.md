@@ -8,5 +8,9 @@ Backend for Workery application server implemented in Golang. This is a rewrite 
 4. Rewrite with good [API documents](https://github.com/over55/workery-server/wiki).
 5. Deploy on Ubuntu.
 
+## Documentation
+
+The documentation can be found [here](https://github.com/over55/workery-server/wiki).
+
 ## License
 This library is licensed under the **AGPLv3 license**. See [LICENSE](LICENSE) for more information. Copyrighted ©2021 [Over 55 (London) Inc.](https://o55.ca/).
