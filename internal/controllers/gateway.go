@@ -111,9 +111,17 @@ func (h *BaseHandler) postLogin(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    // Start our session.
+    sessionExpiryTime := time.Hour * 24 * 7 // 1 week
+    sessionUuid := uuid.NewString()
+	err = h.SessionManager.SaveUser(ctx, sessionUuid, user, sessionExpiryTime)
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+	}
+
     // Generate our JWT token.
-    expiryTime := time.Hour * 24 * 7 // 1 week
-    accessToken, refreshToken, err := utils.GenerateJWTTokenPair(h.SecretSigningKeyBin, user.Uuid, expiryTime)
+    accessToken, refreshToken, err := utils.GenerateJWTTokenPair(h.SecretSigningKeyBin, sessionUuid, sessionExpiryTime)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -141,23 +149,40 @@ func (h *BaseHandler) postRefreshToken(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // // For debugging purposes, print our output so you can see the code working.
+    // For debugging purposes, print our output so you can see the code working.
     log.Println(requestData.Value)
 
+    ctx := r.Context()
+
     // Verify our refresh token.
-    user_uuid, err := utils.ProcessJWTToken(h.SecretSigningKeyBin, requestData.Value)
+    sessionUuid, err := utils.ProcessJWTToken(h.SecretSigningKeyBin, requestData.Value)
     if err != nil {
         http.Error(w, "Unauthorized - refresh token expired or invalid", http.StatusUnauthorized)
         return
     }
 
-    // Generate our JWT token.
-    expiryTime := time.Hour * 24 * 7 // 1 week
-    accessToken, refreshToken, err := utils.GenerateJWTTokenPair(h.SecretSigningKeyBin, user_uuid, expiryTime)
+    // Lookup our user profile in the session or return 500 error.
+    user, err := h.SessionManager.GetUser(ctx, sessionUuid)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
+
+    // Generate our JWT token.
+    newSessionUuid := uuid.NewString()
+    newSessionExpiryTime := time.Hour * 24 * 7 // 1 week
+    accessToken, refreshToken, err := utils.GenerateJWTTokenPair(h.SecretSigningKeyBin, newSessionUuid, newSessionExpiryTime)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Save our new session.
+	err = h.SessionManager.SaveUser(ctx, newSessionUuid, user, newSessionExpiryTime)
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+	}
 
     // Finally return success.
     responseData := models.RefreshTokenResponse{

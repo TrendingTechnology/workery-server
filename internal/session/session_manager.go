@@ -5,6 +5,7 @@ import (
     "encoding/json"
     "context"
     "github.com/go-redis/redis/v8"
+    "time"
 
     "github.com/over55/workery-server/internal/models"
 )
@@ -15,7 +16,7 @@ type SessionManager struct {
 
 func New() *SessionManager {
     rdb := redis.NewClient(&redis.Options{
-       Addr:     "localhost:6379",
+       Addr:     "localhost:6379", //TODO: Add variable config
        Password: "", // no password set
        DB:       0,  // use default DB
    })
@@ -24,12 +25,12 @@ func New() *SessionManager {
    }
 }
 
-func (sm *SessionManager) SaveUser(ctx context.Context, sessionUuid string, user *models.User) error {
+func (sm *SessionManager) SaveUser(ctx context.Context, sessionUuid string, user *models.User, d time.Duration) error {
     userBin, err := json.Marshal(user)
     if err != nil {
         return err
     }
-    err = sm.rdb.Set(ctx, sessionUuid, userBin, 0).Err()
+    err = sm.rdb.Set(ctx, sessionUuid, userBin, d).Err()
     if err != nil {
         return err
     }
