@@ -8,6 +8,7 @@ import (
 type User struct {
     Id uint64
     Uuid string
+    TenantId uint64
     Email string
     FirstName string
     LastName string
@@ -15,7 +16,7 @@ type User struct {
     State int8
     Timezone string
     CreatedTime time.Time
-    SessionUuid string
+    ModifiedTime time.Time
 }
 
 type UserRepository interface {

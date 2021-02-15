@@ -22,7 +22,7 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
     ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := "INSERT INTO users (uuid, email, first_name, last_name, password_hash, state, timezone, created_time, session_uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+	query := "INSERT INTO users (uuid, tenant_id, email, first_name, last_name, password_hash, state, timezone, created_time, modified_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -33,6 +33,7 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
 	_, err = stmt.ExecContext(
 		ctx,
 		m.Uuid,
+        m.TenantId,
 		m.Email,
 		m.FirstName,
         m.LastName,
@@ -40,7 +41,7 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
         m.State,
         m.Timezone,
         m.CreatedTime,
-        m.SessionUuid,
+        m.ModifiedTime,
 	)
 	return err
 }
@@ -49,7 +50,7 @@ func (r *UserRepo) Update(ctx context.Context, m *models.User) error {
     ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := "UPDATE users SET email = $1, first_name = $2, last_name = $3, password_hash = $4, state = $5, timezone = $6, created_time = $7, session_uuid = $8 WHERE id = $9"
+	query := "UPDATE users SET email = $1, first_name = $2, last_name = $3, password_hash = $4, state = $5, timezone = $6, created_time = $7, modified_time = $8 WHERE id = $9"
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -65,7 +66,7 @@ func (r *UserRepo) Update(ctx context.Context, m *models.User) error {
         m.State,
         m.Timezone,
         m.CreatedTime,
-        m.SessionUuid,
+        m.ModifiedTime,
         m.Id,
 	)
 	return err
@@ -77,10 +78,11 @@ func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error)
 
 	m := new(models.User)
 
-	query := "SELECT id, uuid, email, first_name, last_name, password_hash, state, timezone, created_time, session_uuid FROM users WHERE id = $1"
+	query := "SELECT id, uuid, tenant_id, email, first_name, last_name, password_hash, state, timezone, created_time, modified_time FROM users WHERE id = $1"
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
         &m.Id,
         &m.Uuid,
+        &m.TenantId,
 		&m.Email,
 		&m.FirstName,
         &m.LastName,
@@ -88,7 +90,7 @@ func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error)
         &m.State,
         &m.Timezone,
         &m.CreatedTime,
-        &m.SessionUuid,
+        &m.ModifiedTime,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -107,10 +109,11 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, 
 
 	m := new(models.User)
 
-	query := "SELECT id, uuid, email, first_name, last_name, password_hash, state, timezone, created_time, session_uuid FROM users WHERE email = $1"
+	query := "SELECT id, uuid, tenant_id, email, first_name, last_name, password_hash, state, timezone, created_time, modified_time FROM users WHERE email = $1"
 	err := r.db.QueryRowContext(ctx, query, email).Scan(
         &m.Id,
         &m.Uuid,
+        &m.TenantId,
 		&m.Email,
 		&m.FirstName,
         &m.LastName,
@@ -118,7 +121,7 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, 
         &m.State,
         &m.Timezone,
         &m.CreatedTime,
-        &m.SessionUuid,
+        &m.ModifiedTime,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
