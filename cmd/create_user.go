@@ -83,6 +83,7 @@ func runAddUser() {
 		Email: cuEmail,
 		PasswordHash: passwordHash,
 		State: int8(cuState),
+		Role: int8(cuRole),
 		Timezone: "utc",
 		CreatedTime: time.Now(),
 		ModifiedTime: time.Now(),

@@ -22,6 +22,11 @@ type LoginRequest struct {
 
 // The struct used to represent the system's response when the `login` POST request was a success.
 type LoginResponse struct {
+	TenantId uint64     `json:"tenant_id"`
+	FirstName string     `json:"first_name"`
+	LastName string     `json:"last_name"`
+	Email string        `json:"email"`
+	Role int8           `json:"role"`
 	AccessToken string `json:"access_token"`
     RefreshToken string `json:"refresh_token"`
 }

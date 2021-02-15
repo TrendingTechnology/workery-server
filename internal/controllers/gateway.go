@@ -129,6 +129,11 @@ func (h *BaseHandler) postLogin(w http.ResponseWriter, r *http.Request) {
 
     // Finally return success.
     responseData := models.LoginResponse{
+        FirstName: user.FirstName,
+        LastName: user.LastName,
+        Email: user.Email,
+        Role: user.Role,
+        TenantId: user.TenantId,
         AccessToken: accessToken,
         RefreshToken: refreshToken,
     }
