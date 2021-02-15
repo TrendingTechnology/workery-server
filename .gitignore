@@ -167,33 +167,32 @@ env
 env/pip-selfcheck.json
 *.csv#
 
+#—————————
+# GOLANG
+#—————————
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
 #—————————————————————————————
 # Application Specific Ignores
 #—————————————————————————————
-# Important Note: Make sure this is the name of the virtualenv directory
-# that you set when you where setting up the project.
-# Do not share our secret configuration file.
-workery/workery/.env
 
-# Do not share our converage file.
-coverage.txt
+# Do not share production data used to populate the project's database.
+data
 
-# Do not share your `sqlite3` database related files.
-workery/db.sqlite3
-workery/db.sqlite3-journal
-
-# Do not share your 'django-haystack' related files.
-workery/workery/whoosh_index
-
-# Do not share real-life production data.
-prod_*.csv
-
-# Project related notes.
-private_notes.txt
-
-# Do not share collected static files.
-workery/workery/static
-workery/staticfiles
-
-# Do not share compiled PDF invoices from our `invoicebuilder` microservice.
-workery/media/*.pdf
+# Do not share developer's private notebook
+private.txt
