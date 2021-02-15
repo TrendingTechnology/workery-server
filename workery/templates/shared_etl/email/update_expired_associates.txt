@@ -1,6 +1,0 @@
-Attention staff,
-
-Associate #{{ associate.id }} ({{ associate }}) was automatically set as away as of {{ tenant_todays_date }} because {{ reason }}.
-
-Thank you,
-Workery.ca

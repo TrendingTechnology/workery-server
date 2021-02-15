@@ -1,7 +1,0 @@
-# -*- coding: utf-8 -*-
-from tenant_api.serializers.partner_crud.partner_list_create import PartnerListCreateSerializer
-from tenant_api.serializers.partner_crud.partner_retrieve_update import PartnerRetrieveUpdateDestroySerializer
-from tenant_api.serializers.partner_crud.partner_contact_update import PartnerContactUpdateSerializer
-from tenant_api.serializers.partner_crud.partner_address_update import PartnerAddressUpdateSerializer
-from tenant_api.serializers.partner_crud.partner_metrics_update import PartnerMetricsUpdateSerializer
-from tenant_api.serializers.partner_crud.partner_file_upload import PartnerFileUploadListCreateSerializer

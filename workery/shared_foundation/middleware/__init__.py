@@ -1,1 +1,0 @@
-from shared_foundation.middleware.ip_middleware import IPMiddleware
