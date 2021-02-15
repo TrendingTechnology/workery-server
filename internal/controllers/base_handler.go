@@ -44,6 +44,8 @@ func (h *BaseHandler) HandleRequests(w http.ResponseWriter, r *http.Request) {
         } else {
             h.getVersion(w, r)
         }
+    case n == 1 && p[0] == "login" && r.Method == http.MethodPost:
+        h.postLogin(w, r)
     default:
         http.NotFound(w, r)
     }
