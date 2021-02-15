@@ -9,4 +9,4 @@ Backend for Workery application server implemented in Golang. This is a rewrite 
 5. Deploy on Ubuntu.
 
 ## License
-This library is licensed under the **BSD** license. See [LICENSE](LICENSE) for more information.
+This library is licensed under the **AGPLv3 license**. See [LICENSE](LICENSE) for more information. Copyrighted ©2021 [Over 55 (London) Inc.](https://o55.ca/).
