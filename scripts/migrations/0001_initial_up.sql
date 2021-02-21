@@ -412,7 +412,25 @@ CREATE TABLE associate_insurance_requirements (
 CREATE UNIQUE INDEX idx_associate_insurance_requirement_uuid
 ON associate_insurance_requirements (uuid);
 
--- TODO: associate_activity_sheets
+CREATE TABLE ongoing_work_orders (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    customer_id BIGINT NOT NULL,
+    associate_id BIGINT NOT NULL,
+    state SMALLINT NOT NULL DEFAULT 0,
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NOT NULL,
+    last_modified_by_id BIGINT NOT NULL,
+    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    FOREIGN KEY (associate_id) REFERENCES associates(id),
+    FOREIGN KEY (created_by_id) REFERENCES users(id),
+    FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
+);
+CREATE UNIQUE INDEX idx_ongoing_work_order_uuid
+ON ongoing_work_orders (uuid);
 
 CREATE TABLE work_orders (
     id BIGSERIAL PRIMARY KEY,
@@ -467,7 +485,7 @@ CREATE TABLE work_orders (
     invoice_balance_owing_amount FLOAT NOT NULL DEFAULT 0,
     visits SMALLINT NOT NULL DEFAULT 0,
     cloned_from_id BIGINT NOT NULL,
-    -- ongoing_work_order,
+    ongoing_order_id BIGINT NOT NULL,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     created_by_id BIGINT NOT NULL,
     last_modified_by_id BIGINT NOT NULL,
@@ -477,10 +495,52 @@ CREATE TABLE work_orders (
     FOREIGN KEY (associate_id) REFERENCES associates(id),
     FOREIGN KEY (invoice_service_fee_id) REFERENCES work_order_service_fees(id),
     FOREIGN KEY (created_by_id) REFERENCES users(id),
+    FOREIGN KEY (ongoing_order_id) REFERENCES ongoing_work_orders(id),
     FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
 );
 CREATE UNIQUE INDEX idx_work_order_uuid
 ON work_orders (uuid);
+
+CREATE TABLE work_order_ongoings (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    order_id BIGINT NOT NULL,
+    ongoing_order_id BIGINT NOT NULL,
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NOT NULL,
+    last_modified_by_id BIGINT NOT NULL,
+    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (order_id) REFERENCES ongoing_work_orders(id),
+    FOREIGN KEY (ongoing_order_id) REFERENCES associates(id),
+    FOREIGN KEY (created_by_id) REFERENCES users(id),
+    FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
+);
+CREATE UNIQUE INDEX idx_work_order_ongoing_uuid
+ON work_order_ongoings (uuid);
+
+CREATE TABLE activity_sheet_items (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    order_id BIGINT NOT NULL,
+    ongoing_order_id BIGINT NOT NULL,
+    associate_id BIGINT NOT NULL,
+    comment_id BIGINT NOT NULL,
+    state SMALLINT NOT NULL DEFAULT 0,
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NOT NULL,
+    last_modified_by_id BIGINT NOT NULL,
+    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (order_id) REFERENCES work_orders(id),
+    FOREIGN KEY (ongoing_order_id) REFERENCES ongoing_work_orders(id),
+    FOREIGN KEY (associate_id) REFERENCES associates(id),
+    FOREIGN KEY (comment_id) REFERENCES comments(id)
+);
+CREATE UNIQUE INDEX idx_activity_sheet_item_uuid
+ON activity_sheet_items (uuid);
 
 CREATE TABLE work_order_tags (
     id BIGSERIAL PRIMARY KEY,
@@ -655,15 +715,401 @@ CREATE TABLE work_order_deposits (
     FOREIGN KEY (created_by_id) REFERENCES users(id),
     FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
 );
-CREATE UNIQUE INDEX idx_work_order_comment_uuid
-ON work_order_comments (uuid);
+CREATE UNIQUE INDEX idx_work_order_deposit_uuid
+ON work_order_deposits (uuid);
 
--- TODO: Staff
--- TODO: Activity Sheet Items
--- TODO: Ongoing Work
--- TODO: Partner
+CREATE TABLE task_items (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    type_of SMALLINT NOT NULL DEFAULT 0,
+    title VARCHAR (63) NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    due_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    is_closed BOOLEAN NOT NULL DEFAULT FALSE,
+    was_postponed BOOLEAN NOT NULL DEFAULT FALSE,
+    closing_reason SMALLINT NOT NULL DEFAULT 0,
+    closing_reason_other VARCHAR (1024) NOT NULL DEFAULT '',
+    order_id BIGINT NOT NULL,
+    ongoing_order_id BIGINT NOT NULL,
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NOT NULL,
+    last_modified_by_id BIGINT NOT NULL,
+    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (order_id) REFERENCES work_orders(id),
+    FOREIGN KEY (ongoing_order_id) REFERENCES ongoing_work_orders(id),
+    FOREIGN KEY (created_by_id) REFERENCES users(id),
+    FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
+);
+CREATE UNIQUE INDEX idx_task_item_uuid
+ON task_items (uuid);
+
+-------------
+
+
+CREATE TABLE customers (
+    -- customer.py
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    type_of SMALLINT NOT NULL DEFAULT 0,
+    indexed_text VARCHAR (511) NOT NULL DEFAULT '',
+    is_ok_to_email BOOLEAN NOT NULL DEFAULT FALSE,
+    is_ok_to_text BOOLEAN NOT NULL DEFAULT FALSE,
+    is_business BOOLEAN NOT NULL DEFAULT FALSE,
+    is_senior BOOLEAN NOT NULL DEFAULT FALSE,
+    is_support BOOLEAN NOT NULL DEFAULT FALSE,
+    job_info_read VARCHAR (127) NOT NULL DEFAULT '',
+    how_hear_old SMALLINT NOT NULL DEFAULT 0,
+    how_hear_id BIGINT NOT NULL,
+    how_hear_other VARCHAR (2055) NOT NULL DEFAULT '',
+    state SMALLINT NOT NULL DEFAULT 0,
+    deactivation_reason SMALLINT NOT NULL DEFAULT 0,
+    deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NOT NULL,
+    last_modified_by_id BIGINT NOT NULL,
+    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    organization_name VARCHAR (255) NOT NULL DEFAULT '',
+    organization_type_of SMALLINT NOT NULL DEFAULT 0,
+
+    -- abstract_postal_address.py
+    address_country VARCHAR (127) NOT NULL DEFAULT '',
+    address_region VARCHAR (127) NOT NULL DEFAULT '',
+    address_locality VARCHAR (127) NOT NULL DEFAULT '',
+    post_office_box_number VARCHAR (255) NOT NULL DEFAULT '',
+    postal_code VARCHAR (127) NOT NULL DEFAULT '',
+    street_address VARCHAR (127) NOT NULL DEFAULT '',
+    street_address_extra VARCHAR (127) NOT NULL DEFAULT '',
+
+    -- abstract_person.py
+    given_name VARCHAR (63) NOT NULL DEFAULT '',
+    middle_name VARCHAR (63) NOT NULL DEFAULT '',
+    last_name VARCHAR (63) NOT NULL DEFAULT '',
+    birthdate VARCHAR (31) NOT NULL DEFAULT '',
+    join_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    nationality VARCHAR (63) NOT NULL DEFAULT '',
+    gender VARCHAR (31) NOT NULL DEFAULT '',
+    tax_id VARCHAR (127) NOT NULL DEFAULT '',
+
+    -- abstract_geo_coorindate.py
+    elevation FLOAT NOT NULL DEFAULT 0,
+    latitude FLOAT NOT NULL DEFAULT 0,
+    longitude FLOAT NOT NULL DEFAULT 0,
+
+    -- abstract_contact_point.py
+    area_served VARCHAR (127) NOT NULL DEFAULT '',
+    available_language VARCHAR (127) NOT NULL DEFAULT '',
+    contact_type VARCHAR (127) NOT NULL DEFAULT '',
+    email VARCHAR (255) NOT NULL DEFAULT '',
+    fax_number VARCHAR (127) NOT NULL DEFAULT '',
+    telephone VARCHAR (127) NOT NULL DEFAULT '',
+    telephone_type_of SMALLINT NOT NULL DEFAULT 0,
+    telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
+    other_telephone VARCHAR (127) NOT NULL DEFAULT '',
+    other_telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
+    other_telephone_type_of SMALLINT NOT NULL DEFAULT 0,
+
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (how_hear_id) REFERENCES how_hear_about_us_items(id),
+    FOREIGN KEY (created_by_id) REFERENCES users(id),
+    FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
+);
+CREATE UNIQUE INDEX idx_customer_uuid
+ON customers (uuid);
+
+CREATE TABLE customer_tags (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    customer_id BIGINT NOT NULL,
+    tag_id BIGINT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    FOREIGN KEY (tag_id) REFERENCES tags(id)
+);
+CREATE UNIQUE INDEX idx_customer_tag_uuid
+ON customer_tags (uuid);
+
+CREATE TABLE customer_comments (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    customer_id BIGINT NOT NULL,
+    comment_id BIGINT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (comment_id) REFERENCES comments(id),
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+CREATE UNIQUE INDEX idx_customer_comment_uuid
+ON customer_comments (uuid);
+
+-- TODO: avatar_image -> PrivateImageUpload
+
+CREATE TABLE staff (
+    -- customer.py
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    type_of SMALLINT NOT NULL DEFAULT 0,
+    indexed_text VARCHAR (511) NOT NULL DEFAULT '',
+    is_ok_to_email BOOLEAN NOT NULL DEFAULT FALSE,
+    is_ok_to_text BOOLEAN NOT NULL DEFAULT FALSE,
+    how_hear_old SMALLINT NOT NULL DEFAULT 0,
+    how_hear_id BIGINT NOT NULL,
+    how_hear_other VARCHAR (2055) NOT NULL DEFAULT '',
+    state SMALLINT NOT NULL DEFAULT 0,
+    deactivation_reason SMALLINT NOT NULL DEFAULT 0,
+    deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NOT NULL,
+    last_modified_by_id BIGINT NOT NULL,
+    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+
+    -- abstract_postal_address.py
+    address_country VARCHAR (127) NOT NULL DEFAULT '',
+    address_region VARCHAR (127) NOT NULL DEFAULT '',
+    address_locality VARCHAR (127) NOT NULL DEFAULT '',
+    post_office_box_number VARCHAR (255) NOT NULL DEFAULT '',
+    postal_code VARCHAR (127) NOT NULL DEFAULT '',
+    street_address VARCHAR (127) NOT NULL DEFAULT '',
+    street_address_extra VARCHAR (127) NOT NULL DEFAULT '',
+
+    -- abstract_person.py
+    given_name VARCHAR (63) NOT NULL DEFAULT '',
+    middle_name VARCHAR (63) NOT NULL DEFAULT '',
+    last_name VARCHAR (63) NOT NULL DEFAULT '',
+    birthdate VARCHAR (31) NOT NULL DEFAULT '',
+    join_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    nationality VARCHAR (63) NOT NULL DEFAULT '',
+    gender VARCHAR (31) NOT NULL DEFAULT '',
+    tax_id VARCHAR (127) NOT NULL DEFAULT '',
+
+    -- abstract_geo_coorindate.py
+    elevation FLOAT NOT NULL DEFAULT 0,
+    latitude FLOAT NOT NULL DEFAULT 0,
+    longitude FLOAT NOT NULL DEFAULT 0,
+
+    -- abstract_contact_point.py
+    area_served VARCHAR (127) NOT NULL DEFAULT '',
+    available_language VARCHAR (127) NOT NULL DEFAULT '',
+    contact_type VARCHAR (127) NOT NULL DEFAULT '',
+    email VARCHAR (255) NOT NULL DEFAULT '',
+    fax_number VARCHAR (127) NOT NULL DEFAULT '',
+    telephone VARCHAR (127) NOT NULL DEFAULT '',
+    telephone_type_of SMALLINT NOT NULL DEFAULT 0,
+    telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
+    other_telephone VARCHAR (127) NOT NULL DEFAULT '',
+    other_telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
+    other_telephone_type_of SMALLINT NOT NULL DEFAULT 0,
+    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- avatar_image_id BIGINT NOT NULL,
+    personal_email VARCHAR (255) NOT NULL DEFAULT '',
+    emergency_contact_name VARCHAR (127) NOT NULL DEFAULT '',
+    emergency_contact_relationship VARCHAR (127) NOT NULL DEFAULT '',
+    emergency_contact_telephone VARCHAR (127) NOT NULL DEFAULT '',
+    emergency_contact_alternative_telephone VARCHAR (127) NOT NULL DEFAULT '',
+    police_check TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (how_hear_id) REFERENCES how_hear_about_us_items(id),
+    FOREIGN KEY (created_by_id) REFERENCES users(id),
+    FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
+);
+CREATE UNIQUE INDEX idx_staff_uuid
+ON staff (uuid);
+
+CREATE TABLE staff_tags (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    staff_id BIGINT NOT NULL,
+    tag_id BIGINT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (staff_id) REFERENCES staff(id),
+    FOREIGN KEY (tag_id) REFERENCES tags(id)
+);
+CREATE UNIQUE INDEX idx_staff_tag_uuid
+ON staff_tags (uuid);
+
+CREATE TABLE staff_comments (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    staff_id BIGINT NOT NULL,
+    comment_id BIGINT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (staff_id) REFERENCES staff(id),
+    FOREIGN KEY (comment_id) REFERENCES comments(id)
+);
+CREATE UNIQUE INDEX idx_staff_comment_uuid
+ON staff_comments (uuid);
+
+------------------------------------------------------------
+
+CREATE TABLE partners (
+    -- customer.py
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    type_of SMALLINT NOT NULL DEFAULT 0,
+    organization_name VARCHAR (255) NOT NULL DEFAULT '',
+    organization_type_of SMALLINT NOT NULL DEFAULT 0,
+    business VARCHAR (63) NOT NULL DEFAULT '',
+    indexed_text VARCHAR (511) NOT NULL DEFAULT '',
+    is_ok_to_email BOOLEAN NOT NULL DEFAULT FALSE,
+    is_ok_to_text BOOLEAN NOT NULL DEFAULT FALSE,
+    hourly_salary_desired SMALLINT NOT NULL DEFAULT 0,
+    limit_special VARCHAR (255) NOT NULL DEFAULT '',
+    dues_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    commercial_insurance_expiry_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    auto_insurance_expiry_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    wsib_number VARCHAR (127) NOT NULL DEFAULT '',
+    wsib_insurance_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    police_check TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    drivers_license_class VARCHAR (31) NOT NULL DEFAULT '',
+    how_hear_old SMALLINT NOT NULL DEFAULT 0,
+    how_hear_id BIGINT NOT NULL,
+    how_hear_other VARCHAR (2055) NOT NULL DEFAULT '',
+    is_business BOOLEAN NOT NULL DEFAULT FALSE,
+    is_senior BOOLEAN NOT NULL DEFAULT FALSE,
+    is_support BOOLEAN NOT NULL DEFAULT FALSE,
+    job_info_read VARCHAR (127) NOT NULL DEFAULT '',
+    state SMALLINT NOT NULL DEFAULT 0,
+    deactivation_reason SMALLINT NOT NULL DEFAULT 0,
+    deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NOT NULL,
+    last_modified_by_id BIGINT NOT NULL,
+    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    score FLOAT NOT NULL DEFAULT 0,
+    -- away_log_id BIGINT NOT NULL,
+
+    -- abstract_postal_address.py
+    address_country VARCHAR (127) NOT NULL DEFAULT '',
+    address_region VARCHAR (127) NOT NULL DEFAULT '',
+    address_locality VARCHAR (127) NOT NULL DEFAULT '',
+    post_office_box_number VARCHAR (255) NOT NULL DEFAULT '',
+    postal_code VARCHAR (127) NOT NULL DEFAULT '',
+    street_address VARCHAR (127) NOT NULL DEFAULT '',
+    street_address_extra VARCHAR (127) NOT NULL DEFAULT '',
+
+    -- abstract_person.py
+    given_name VARCHAR (63) NOT NULL DEFAULT '',
+    middle_name VARCHAR (63) NOT NULL DEFAULT '',
+    last_name VARCHAR (63) NOT NULL DEFAULT '',
+    birthdate VARCHAR (31) NOT NULL DEFAULT '',
+    join_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    nationality VARCHAR (63) NOT NULL DEFAULT '',
+    gender VARCHAR (31) NOT NULL DEFAULT '',
+    tax_id VARCHAR (127) NOT NULL DEFAULT '',
+
+    -- abstract_geo_coorindate.py
+    elevation FLOAT NOT NULL DEFAULT 0,
+    latitude FLOAT NOT NULL DEFAULT 0,
+    longitude FLOAT NOT NULL DEFAULT 0,
+
+    -- abstract_contact_point.py
+    area_served VARCHAR (127) NOT NULL DEFAULT '',
+    available_language VARCHAR (127) NOT NULL DEFAULT '',
+    contact_type VARCHAR (127) NOT NULL DEFAULT '',
+    email VARCHAR (255) NOT NULL DEFAULT '',
+    fax_number VARCHAR (127) NOT NULL DEFAULT '',
+    telephone VARCHAR (127) NOT NULL DEFAULT '',
+    telephone_type_of SMALLINT NOT NULL DEFAULT 0,
+    telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
+    other_telephone VARCHAR (127) NOT NULL DEFAULT '',
+    other_telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
+    other_telephone_type_of SMALLINT NOT NULL DEFAULT 0,
+    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    balance_owing_amount FLOAT NOT NULL DEFAULT 0,
+    -- avatar_image_id BIGINT NOT NULL,
+    emergency_contact_name VARCHAR (127) NOT NULL DEFAULT '',
+    emergency_contact_relationship VARCHAR (127) NOT NULL DEFAULT '',
+    emergency_contact_telephone VARCHAR (127) NOT NULL DEFAULT '',
+    emergency_contact_alternative_telephone VARCHAR (127) NOT NULL DEFAULT '',
+    service_fee_id BIGINT NOT NULL,
+
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (how_hear_id) REFERENCES how_hear_about_us_items(id),
+    FOREIGN KEY (created_by_id) REFERENCES users(id),
+    FOREIGN KEY (last_modified_by_id) REFERENCES users(id),
+    -- FOREIGN KEY (away_log_id) REFERENCES away_log(id),
+    FOREIGN KEY (service_fee_id) REFERENCES work_order_service_fees(id)
+);
+CREATE UNIQUE INDEX idx_partner_uuid
+ON partners (uuid);
+
+CREATE TABLE partner_vehicle_types (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    partner_id BIGINT NOT NULL,
+    vehicle_type_id BIGINT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (partner_id) REFERENCES partners(id),
+    FOREIGN KEY (vehicle_type_id) REFERENCES vehicle_types(id)
+);
+CREATE UNIQUE INDEX idx_partner_vehicle_type_uuid
+ON partner_vehicle_types (uuid);
+
+CREATE TABLE partner_skill_sets (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    partner_id BIGINT NOT NULL,
+    skill_set_id BIGINT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (partner_id) REFERENCES partners(id),
+    FOREIGN KEY (skill_set_id) REFERENCES skill_sets(id)
+);
+CREATE UNIQUE INDEX idx_partner_skill_set_uuid
+ON partner_skill_sets (uuid);
+
+CREATE TABLE partner_tags (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    partner_id BIGINT NOT NULL,
+    tag_id BIGINT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (partner_id) REFERENCES partners(id),
+    FOREIGN KEY (tag_id) REFERENCES tags(id)
+);
+CREATE UNIQUE INDEX idx_partner_tag_uuid
+ON partner_tags (uuid);
+
+CREATE TABLE partner_comments (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    partner_id BIGINT NOT NULL,
+    comment_id BIGINT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (partner_id) REFERENCES partners(id),
+    FOREIGN KEY (comment_id) REFERENCES comments(id)
+);
+CREATE UNIQUE INDEX idx_partner_comment_uuid
+ON partner_comments (uuid);
+
+CREATE TABLE partner_insurance_requirements (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    partner_id BIGINT NOT NULL,
+    insurance_requirement_id BIGINT NOT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (partner_id) REFERENCES partners(id),
+    FOREIGN KEY (insurance_requirement_id) REFERENCES insurance_requirements(id)
+);
+CREATE UNIQUE INDEX idx_partner_insurance_requirement_uuid
+ON partner_insurance_requirements (uuid);
+
 -- TODO: Private File Upload
 -- TODO: Private Image Upload
 -- TODO: Public Image Upload
--- TODO: Task Items
 -- TODO: Unified Search Item

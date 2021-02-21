@@ -1,18 +1,25 @@
--- TODO: Staff
--- TODO: Activity Sheet Items
--- TODO: Ongoing Work
--- TODO: Partner
 -- TODO: Private File Upload
 -- TODO: Private Image Upload
 -- TODO: Public Image Upload
--- TODO: Task Items
 -- TODO: Unified Search Item
+DROP TABLE partner_insurance_requirements CASCADE;
+DROP TABLE partner_comments CASCADE;
+DROP TABLE partner_tags CASCADE;
+DROP TABLE partner_skill_sets CASCADE;
+DROP TABLE partner_vehicle_types CASCADE;
+DROP TABLE partner CASCADE;
+DROP TABLE staff_comments CASCADE;
+DROP TABLE staff_tags CASCADE;
+DROP TABLE staff CASCADE;
+DROP TABLE work_order_ongoings CASCADE;
 DROP TABLE work_order_deposits CASCADE;
 DROP TABLE work_order_invoices CASCADE;
 DROP TABLE work_order_comments CASCADE;
 DROP TABLE work_order_skill_sets CASCADE;
 DROP TABLE work_order_tags CASCADE;
+DROP TABLE activity_sheet_items CASCADE;
 DROP TABLE work_orders CASCADE;
+DROP TABLE ongoing_work_orders CASCADE;
 DROP TABLE associate_insurance_requirements CASCADE;
 DROP TABLE associate_comments CASCADE;
 DROP TABLE associate_tags CASCADE;
