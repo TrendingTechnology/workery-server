@@ -83,7 +83,7 @@ func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error)
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&m.Id, &m.Uuid,	&m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordHash, &m.State,
+		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordHash, &m.State,
 		&m.Role, &m.Timezone, &m.CreatedTime, &m.ModifiedTime,
 	)
 	if err != nil {

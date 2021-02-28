@@ -8,7 +8,10 @@ import (
 type Tenant struct {
 	Id                      uint64    `json:"id"`
 	Uuid                    string    `json:"uuid"`
+	AlternateName           string    `json:"alternate_name"`
+	Description             string    `json:"description"`
 	Name                    string    `json:"name"`
+	Url                     string    `json:"url"`
 	State                   int8      `json:"state"`
 	Timezone                string    `json:"timestamp"`
 	CreatedTime             time.Time `json:"created_time"`

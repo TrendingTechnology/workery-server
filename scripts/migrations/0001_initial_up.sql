@@ -1,8 +1,11 @@
 CREATE TABLE tenants (
-    -- Core
+    -- base
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
-    name VARCHAR (50) NULL,
+    alternate_name VARCHAR (255) NULL,
+    description TEXT NOT NULL DEFAULT '',
+    name VARCHAR (255) NULL,
+    url VARCHAR (255) NULL,
     state SMALLINT NOT NULL,
     timezone VARCHAR (63) NOT NULL DEFAULT 'utc',
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),

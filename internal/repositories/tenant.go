@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/over55/workery-server/internal/models"
@@ -24,7 +25,7 @@ func (r *TenantRepo) Insert(ctx context.Context, m *models.Tenant) error {
 
 	query := `
     INSERT INTO tenants (
-        uuid, name, state, timezone, created_time, modified_time,
+        uuid, alternate_name, description, name, url, state, timezone, created_time, modified_time,
         address_country, address_region, address_locality, post_office_box_number,
         postal_code, street_address, street_address_extra, elevation, latitude,
         longitude, area_served, available_language, contact_type, email, fax_number,
@@ -32,19 +33,20 @@ func (r *TenantRepo) Insert(ctx context.Context, m *models.Tenant) error {
         other_telephone_extension, other_telephone_type_of
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-        $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27
+        $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30
     )
     `
 
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
+		log.Println("Insert")
 		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.Name, m.State, m.Timezone, m.CreatedTime, m.ModifiedTime,
+		m.Uuid, m.AlternateName, m.Description, m.Name, m.Url, m.State, m.Timezone, m.CreatedTime, m.ModifiedTime,
 		m.AddressCountry, m.AddressRegion, m.AddressLocality, m.PostOfficeBoxNumber,
 		m.PostalCode, m.StreetAddress, m.StreetAddressExtra, m.Elevation, m.Latitude,
 		m.Longitude, m.AreaServed, m.AvailableLanguage, m.ContactType, m.Email, m.FaxNumber,
@@ -62,33 +64,34 @@ func (r *TenantRepo) Update(ctx context.Context, m *models.Tenant) error {
     UPDATE
         tenants
     SET
-        name = $1, state = $2, timezone = $3, created_time = $4, modified_time = $5,
-        address_country = $6, address_region = $7, address_locality = $8,
-        post_office_box_number = $9, postal_code = $10, street_address = $11,
-        street_address_extra = $12, elevation = $13, latitude = $14, longitude = $15,
-        area_served = $16, available_language = $17, contact_type = $18, email = $19,
-        fax_number = $20, telephone = $20, telephone_type_of = $21,
-        telephone_extension = $22, other_telephone = $23, other_telephone_extension = $24,
-        other_telephone_type_of = $25
+        alternate_name = $1, description = $2, name = $3, url = $4, state = $5, timezone = $6, created_time = $7, modified_time = $8,
+        address_country = $9, address_region = $10, address_locality = $11,
+        post_office_box_number = $12, postal_code = $13, street_address = $14,
+        street_address_extra = $15, elevation = $16, latitude = $17, longitude = $18,
+        area_served = $19, available_language = $20, contact_type = $21, email = $22,
+        fax_number = $23, telephone = $24, telephone_type_of = $25,
+        telephone_extension = $26, other_telephone = $27, other_telephone_extension = $28,
+        other_telephone_type_of = $29
     WHERE
-        id = $26
+        id = $30
     `
 
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
+		log.Println("Update")
 		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Name, m.State, m.Timezone, m.CreatedTime, m.ModifiedTime,
+		m.AlternateName, m.Description, m.Name, m.Url, m.State, m.Timezone, m.CreatedTime, m.ModifiedTime,
 		m.AddressCountry, m.AddressRegion, m.AddressLocality,
-        m.PostOfficeBoxNumber, m.PostalCode, m.StreetAddress,
+		m.PostOfficeBoxNumber, m.PostalCode, m.StreetAddress,
 		m.StreetAddressExtra, m.Elevation, m.Latitude, m.Longitude,
-        m.AreaServed, m.AvailableLanguage, m.ContactType, m.Email,
+		m.AreaServed, m.AvailableLanguage, m.ContactType, m.Email,
 		m.FaxNumber, m.Telephone, m.TelephoneTypeOf,
-        m.TelephoneExtension, m.OtherTelephone, m.OtherTelephoneExtension,
+		m.TelephoneExtension, m.OtherTelephone, m.OtherTelephoneExtension,
 		m.OtherTelephoneTypeOf, m.Id,
 	)
 	return err
@@ -102,7 +105,7 @@ func (r *TenantRepo) GetById(ctx context.Context, id uint64) (*models.Tenant, er
 
 	query := `
     SELECT
-        id, uuid, name, state, timezone, created_time, modified_time,
+        id, uuid, alternate_name, description, name, url, state, timezone, created_time, modified_time,
         address_country, address_region, address_locality, post_office_box_number,
         postal_code, street_address, street_address_extra, elevation, latitude,
         longitude, area_served, available_language, contact_type, email, fax_number,
@@ -114,13 +117,13 @@ func (r *TenantRepo) GetById(ctx context.Context, id uint64) (*models.Tenant, er
         id = $1
     `
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&m.Id, &m.Uuid, &m.Name, &m.State, &m.Timezone, &m.CreatedTime, &m.ModifiedTime,
-        &m.AddressCountry, &m.AddressRegion, &m.AddressLocality,
-        &m.PostOfficeBoxNumber, &m.PostalCode, &m.StreetAddress,
+		&m.Id, &m.Uuid, &m.AlternateName, &m.Description, &m.Name, &m.Url, &m.State, &m.Timezone, &m.CreatedTime, &m.ModifiedTime,
+		&m.AddressCountry, &m.AddressRegion, &m.AddressLocality,
+		&m.PostOfficeBoxNumber, &m.PostalCode, &m.StreetAddress,
 		&m.StreetAddressExtra, &m.Elevation, &m.Latitude, &m.Longitude,
-        &m.AreaServed, &m.AvailableLanguage, &m.ContactType, &m.Email,
+		&m.AreaServed, &m.AvailableLanguage, &m.ContactType, &m.Email,
 		&m.FaxNumber, &m.Telephone, &m.TelephoneTypeOf,
-        &m.TelephoneExtension, &m.OtherTelephone, &m.OtherTelephoneExtension,
+		&m.TelephoneExtension, &m.OtherTelephone, &m.OtherTelephoneExtension,
 		&m.OtherTelephoneTypeOf,
 	)
 	if err != nil {
@@ -142,7 +145,7 @@ func (r *TenantRepo) GetByName(ctx context.Context, name string) (*models.Tenant
 
 	query := `
     SELECT
-        id, uuid, name, state, timezone, created_time, modified_time,
+        id, uuid, alternate_name, description, name, url, state, timezone, created_time, modified_time,
         address_country, address_region, address_locality, post_office_box_number,
         postal_code, street_address, street_address_extra, elevation, latitude,
         longitude, area_served, available_language, contact_type, email, fax_number,
@@ -154,13 +157,13 @@ func (r *TenantRepo) GetByName(ctx context.Context, name string) (*models.Tenant
         name = $1
     `
 	err := r.db.QueryRowContext(ctx, query, name).Scan(
-		&m.Id, &m.Uuid, &m.Name, &m.State, &m.Timezone, &m.CreatedTime, &m.ModifiedTime,
-        &m.AddressCountry, &m.AddressRegion, &m.AddressLocality,
-        &m.PostOfficeBoxNumber, &m.PostalCode, &m.StreetAddress,
+		&m.Id, &m.Uuid, &m.AlternateName, &m.Description, &m.Name, &m.Url, &m.State, &m.Timezone, &m.CreatedTime, &m.ModifiedTime,
+		&m.AddressCountry, &m.AddressRegion, &m.AddressLocality,
+		&m.PostOfficeBoxNumber, &m.PostalCode, &m.StreetAddress,
 		&m.StreetAddressExtra, &m.Elevation, &m.Latitude, &m.Longitude,
-        &m.AreaServed, &m.AvailableLanguage, &m.ContactType, &m.Email,
+		&m.AreaServed, &m.AvailableLanguage, &m.ContactType, &m.Email,
 		&m.FaxNumber, &m.Telephone, &m.TelephoneTypeOf,
-        &m.TelephoneExtension, &m.OtherTelephone, &m.OtherTelephoneExtension,
+		&m.TelephoneExtension, &m.OtherTelephone, &m.OtherTelephoneExtension,
 		&m.OtherTelephoneTypeOf,
 	)
 	if err != nil {
