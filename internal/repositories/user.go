@@ -22,8 +22,12 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
     ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := "INSERT INTO users (uuid, tenant_id, email, first_name, last_name, password_hash, state, role, timezone, created_time, modified_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
-
+	query := `
+    INSERT INTO users (
+        uuid, tenant_id, email, first_name, last_name, password_hash, state, role, timezone, created_time, modified_time
+    ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+    )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -51,7 +55,13 @@ func (r *UserRepo) Update(ctx context.Context, m *models.User) error {
     ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := "UPDATE users SET email = $1, first_name = $2, last_name = $3, password_hash = $4, state = $5, role = $6, timezone = $7, created_time = $8, modified_time = $9 WHERE id = $10"
+	query := `
+    UPDATE
+        users
+    SET
+        email = $1, first_name = $2, last_name = $3, password_hash = $4, state = $5, role = $6, timezone = $7, created_time = $8, modified_time = $9
+    WHERE
+        id = $10`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -80,7 +90,13 @@ func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error)
 
 	m := new(models.User)
 
-	query := "SELECT id, uuid, tenant_id, email, first_name, last_name, password_hash, state, role, timezone, created_time, modified_time FROM users WHERE id = $1"
+	query := `
+    SELECT
+        id, uuid, tenant_id, email, first_name, last_name, password_hash, state, role, timezone, created_time, modified_time
+    FROM
+        users
+    WHERE
+        id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
         &m.Id,
         &m.Uuid,
@@ -112,7 +128,13 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, 
 
 	m := new(models.User)
 
-	query := "SELECT id, uuid, tenant_id, email, first_name, last_name, password_hash, state, role, timezone, created_time, modified_time FROM users WHERE email = $1"
+	query := `
+    SELECT
+        id, uuid, tenant_id, email, first_name, last_name, password_hash, state, role, timezone, created_time, modified_time
+    FROM
+        users
+    WHERE
+        email = $1`
 	err := r.db.QueryRowContext(ctx, query, email).Scan(
         &m.Id,
         &m.Uuid,
@@ -144,8 +166,13 @@ func (r *UserRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, erro
 
     var exists bool
 
-    query := `SELECT 1 FROM users WHERE id = $1;`
-
+    query := `
+    SELECT
+        1
+    FROM
+        users
+    WHERE
+        id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&exists)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -164,8 +191,13 @@ func (r *UserRepo) CheckIfExistsByEmail(ctx context.Context, email string) (bool
 
     var exists bool
 
-    query := `SELECT 1 FROM users WHERE email = $1;`
-
+    query := `
+    SELECT
+        1
+    FROM
+        users
+    WHERE
+        email = $1`
 	err := r.db.QueryRowContext(ctx, query, email).Scan(&exists)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
