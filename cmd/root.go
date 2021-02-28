@@ -31,7 +31,7 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "ccdata-server",
+	Use:   "workery-server",
 	Short: "",
 	Long: ``,
 	Run: func(cmd *cobra.Command, args []string) {

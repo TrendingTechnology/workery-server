@@ -32,7 +32,7 @@ func (r *TenantRepo) Insert(ctx context.Context, m *models.Tenant) error {
         other_telephone_extension, other_telephone_type_of
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-        $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27,
+        $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27
     )
     `
 
