@@ -2,11 +2,11 @@ package models
 
 // The struct used to represent the user's `register` POST request data.
 type RegisterRequest struct {
-	TenantId uint64     `json:"tenant_id,string"`
-	FirstName string     `json:"first_name"`
-	LastName string     `json:"last_name"`
-	Email string        `json:"email"`
-	Password string     `json:"password"`
+	TenantId  uint64 `json:"tenant_id,string"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 }
 
 // The struct used to represent the system's response when the `register` POST request was a success.
@@ -16,28 +16,28 @@ type RegisterResponse struct {
 
 // The struct used to represent the user's `login` POST request data.
 type LoginRequest struct {
-	Email string    `json:"email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 // The struct used to represent the system's response when the `login` POST request was a success.
 type LoginResponse struct {
-	TenantId uint64     `json:"tenant_id"`
-	FirstName string     `json:"first_name"`
-	LastName string     `json:"last_name"`
-	Email string        `json:"email"`
-	Role int8           `json:"role"`
-	AccessToken string `json:"access_token"`
-    RefreshToken string `json:"refresh_token"`
+	TenantId     uint64 `json:"tenant_id"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Email        string `json:"email"`
+	Role         int8   `json:"role"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 // The struct used to represent the user's `refresh token` POST request data.
 type RefreshTokenRequest struct {
-	Value string     `json:"value"`
+	Value string `json:"value"`
 }
 
 // The struct used to represent the system's response when the `refresh token` POST request was a success.
 type RefreshTokenResponse struct {
-	AccessToken string `json:"access_token"`
-    RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }

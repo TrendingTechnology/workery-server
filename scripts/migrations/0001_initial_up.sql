@@ -1,11 +1,39 @@
 CREATE TABLE tenants (
+    -- Core
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
     name VARCHAR (50) NULL,
     state SMALLINT NOT NULL,
     timezone VARCHAR (63) NOT NULL DEFAULT 'utc',
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
+    modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+
+    -- abstract_postal_address.py
+    address_country VARCHAR (127) NOT NULL DEFAULT '',
+    address_region VARCHAR (127) NOT NULL DEFAULT '',
+    address_locality VARCHAR (127) NOT NULL DEFAULT '',
+    post_office_box_number VARCHAR (255) NOT NULL DEFAULT '',
+    postal_code VARCHAR (127) NOT NULL DEFAULT '',
+    street_address VARCHAR (127) NOT NULL DEFAULT '',
+    street_address_extra VARCHAR (127) NOT NULL DEFAULT '',
+
+    -- abstract_geo_coorindate.py
+    elevation FLOAT NOT NULL DEFAULT 0,
+    latitude FLOAT NOT NULL DEFAULT 0,
+    longitude FLOAT NOT NULL DEFAULT 0,
+
+    -- abstract_contact_point.py
+    area_served VARCHAR (127) NOT NULL DEFAULT '',
+    available_language VARCHAR (127) NOT NULL DEFAULT '',
+    contact_type VARCHAR (127) NOT NULL DEFAULT '',
+    email VARCHAR (255) NOT NULL DEFAULT '',
+    fax_number VARCHAR (127) NOT NULL DEFAULT '',
+    telephone VARCHAR (127) NOT NULL DEFAULT '',
+    telephone_type_of SMALLINT NOT NULL DEFAULT 0,
+    telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
+    other_telephone VARCHAR (127) NOT NULL DEFAULT '',
+    other_telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
+    other_telephone_type_of SMALLINT NOT NULL DEFAULT 0
 );
 CREATE UNIQUE INDEX idx_tenant_uuid
 ON tenants (uuid);

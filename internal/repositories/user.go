@@ -1,30 +1,31 @@
 package repositories
 
 import (
-    "context"
+	"context"
 	"database/sql"
-    "time"
+	"time"
 
-    "github.com/over55/workery-server/internal/models"
+	"github.com/over55/workery-server/internal/models"
 )
 
 type UserRepo struct {
-    db *sql.DB
+	db *sql.DB
 }
 
 func NewUserRepo(db *sql.DB) *UserRepo {
-    return &UserRepo{
-        db: db,
-    }
+	return &UserRepo{
+		db: db,
+	}
 }
 
 func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
-    ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	query := `
     INSERT INTO users (
-        uuid, tenant_id, email, first_name, last_name, password_hash, state, role, timezone, created_time, modified_time
+        uuid, tenant_id, email, first_name, last_name, password_hash, state,
+		role, timezone, created_time, modified_time
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
     )`
@@ -36,23 +37,14 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid,
-        m.TenantId,
-		m.Email,
-		m.FirstName,
-        m.LastName,
-        m.PasswordHash,
-        m.State,
-        m.Role,
-        m.Timezone,
-        m.CreatedTime,
-        m.ModifiedTime,
+		m.Uuid, m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordHash, m.State,
+		m.Role, m.Timezone, m.CreatedTime, m.ModifiedTime,
 	)
 	return err
 }
 
 func (r *UserRepo) Update(ctx context.Context, m *models.User) error {
-    ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	query := `
@@ -70,46 +62,29 @@ func (r *UserRepo) Update(ctx context.Context, m *models.User) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Email,
-		m.FirstName,
-		m.LastName,
-        m.PasswordHash,
-        m.State,
-        m.Role,
-        m.Timezone,
-        m.CreatedTime,
-        m.ModifiedTime,
-        m.Id,
+		m.Email, m.FirstName, m.LastName, m.PasswordHash, m.State, m.Role, m.Timezone, m.CreatedTime, m.ModifiedTime,
+		m.Id,
 	)
 	return err
 }
 
 func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error) {
-    ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	m := new(models.User)
 
 	query := `
     SELECT
-        id, uuid, tenant_id, email, first_name, last_name, password_hash, state, role, timezone, created_time, modified_time
+        id, uuid, tenant_id, email, first_name, last_name, password_hash, state,
+		role, timezone, created_time, modified_time
     FROM
         users
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-        &m.Id,
-        &m.Uuid,
-        &m.TenantId,
-		&m.Email,
-		&m.FirstName,
-        &m.LastName,
-        &m.PasswordHash,
-        &m.State,
-        &m.Role,
-        &m.Timezone,
-        &m.CreatedTime,
-        &m.ModifiedTime,
+		&m.Id, &m.Uuid,	&m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordHash, &m.State,
+		&m.Role, &m.Timezone, &m.CreatedTime, &m.ModifiedTime,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -123,31 +98,22 @@ func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error)
 }
 
 func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, error) {
-    ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	m := new(models.User)
 
 	query := `
     SELECT
-        id, uuid, tenant_id, email, first_name, last_name, password_hash, state, role, timezone, created_time, modified_time
+        id, uuid, tenant_id, email, first_name, last_name, password_hash, state,
+		role, timezone, created_time, modified_time
     FROM
         users
     WHERE
         email = $1`
 	err := r.db.QueryRowContext(ctx, query, email).Scan(
-        &m.Id,
-        &m.Uuid,
-        &m.TenantId,
-		&m.Email,
-		&m.FirstName,
-        &m.LastName,
-        &m.PasswordHash,
-        &m.State,
-        &m.Role,
-        &m.Timezone,
-        &m.CreatedTime,
-        &m.ModifiedTime,
+		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordHash, &m.State,
+		&m.Role, &m.Timezone, &m.CreatedTime, &m.ModifiedTime,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -164,9 +130,9 @@ func (r *UserRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, erro
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-    var exists bool
+	var exists bool
 
-    query := `
+	query := `
     SELECT
         1
     FROM
@@ -189,9 +155,9 @@ func (r *UserRepo) CheckIfExistsByEmail(ctx context.Context, email string) (bool
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-    var exists bool
+	var exists bool
 
-    query := `
+	query := `
     SELECT
         1
     FROM
@@ -211,17 +177,17 @@ func (r *UserRepo) CheckIfExistsByEmail(ctx context.Context, email string) (bool
 }
 
 func (r *UserRepo) InsertOrUpdate(ctx context.Context, m *models.User) error {
-    if m.Id == 0 {
-        return r.Insert(ctx, m)
-    }
+	if m.Id == 0 {
+		return r.Insert(ctx, m)
+	}
 
-    doesExist, err := r.CheckIfExistsById(ctx, m.Id)
-    if err != nil {
-        return err
-    }
+	doesExist, err := r.CheckIfExistsById(ctx, m.Id)
+	if err != nil {
+		return err
+	}
 
-    if doesExist == false {
-        return r.Insert(ctx, m)
-    }
-    return r.Update(ctx, m)
+	if doesExist == false {
+		return r.Insert(ctx, m)
+	}
+	return r.Update(ctx, m)
 }
