@@ -89,7 +89,7 @@ func runAddUser() {
 		ModifiedTime: time.Now(),
 	}
 
-	err = r.InsertOrUpdate(ctx, m)
+	err = r.InsertOrUpdateById(ctx, m)
 	if err != nil {
 		log.Fatal(err)
 	}

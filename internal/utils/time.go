@@ -11,7 +11,7 @@ import (
 func ConvertPGAdminTimeStringToTime(dateTimeString string) (time.Time, error) {
 	loc, err := time.LoadLocation("America/Toronto")
 	if err != nil {
-	    return time.Now(), err
+		return time.Now(), err
 	}
 
 	// Split our string so it will look like this:
@@ -25,7 +25,7 @@ func ConvertPGAdminTimeStringToTime(dateTimeString string) (time.Time, error) {
 
 	datePart, err := time.Parse("2006-01-02", dateTimeStringSplits[0])
 	if err != nil {
-	    return time.Now(), err
+		return time.Now(), err
 	}
 
 	//
@@ -43,10 +43,10 @@ func ConvertPGAdminTimeStringToTime(dateTimeString string) (time.Time, error) {
 	// read article [0] as to why I chose "15:04:05.000000" format.
 	timePart, err := time.Parse("15:04:05.000000", timeSplits[0])
 	if err != nil {
-	    return time.Now(), err
+		return time.Now(), err
 	}
 
-    // Note; You'll need to see article [1] to see where I got these field.s
+	// Note; You'll need to see article [1] to see where I got these field.s
 	dateTime := time.Date(datePart.Year(), datePart.Month(), datePart.Day(), timePart.Hour(), timePart.Minute(), timePart.Second(), timePart.Nanosecond(), loc)
 
 	return dateTime, nil

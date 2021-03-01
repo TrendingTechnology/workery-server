@@ -24,10 +24,11 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
 
 	query := `
     INSERT INTO users (
-        uuid, tenant_id, email, first_name, last_name, password_hash, state,
-		role, timezone, created_time, modified_time
+        uuid, tenant_id, email, first_name, last_name, password_algorithm, password_hash, state,
+		role, timezone, created_time, modified_time, joined_time, salt, was_email_activated,
+		pr_access_code, pr_expiry_time
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -37,13 +38,14 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordHash, m.State,
-		m.Role, m.Timezone, m.CreatedTime, m.ModifiedTime,
+		m.Uuid, m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm, m.PasswordHash, m.State,
+		m.Role, m.Timezone, m.CreatedTime, m.ModifiedTime, m.JoinedTime, m.Salt, m.WasEmailActivated,
+		m.PrAccessCode, m.PrExpiryTime,
 	)
 	return err
 }
 
-func (r *UserRepo) Update(ctx context.Context, m *models.User) error {
+func (r *UserRepo) UpdateById(ctx context.Context, m *models.User) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -51,9 +53,11 @@ func (r *UserRepo) Update(ctx context.Context, m *models.User) error {
     UPDATE
         users
     SET
-        email = $1, first_name = $2, last_name = $3, password_hash = $4, state = $5, role = $6, timezone = $7, created_time = $8, modified_time = $9
+        tenant_id = $1, email = $2, first_name = $3, last_name = $4, password_algorithm = $5, password_hash = $6, state = $7,
+		role = $8, timezone = $9, created_time = $10, modified_time = $11, joined_time = $12, salt = $13, was_email_activated = $14,
+		pr_access_code = $15, pr_expiry_time = $16
     WHERE
-        id = $10`
+        id = $17`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -62,12 +66,41 @@ func (r *UserRepo) Update(ctx context.Context, m *models.User) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Email, m.FirstName, m.LastName, m.PasswordHash, m.State, m.Role, m.Timezone, m.CreatedTime, m.ModifiedTime,
+		m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm,
+		m.PasswordHash, m.State, m.Role, m.Timezone, m.CreatedTime, m.ModifiedTime,
+		m.JoinedTime, m.Salt, m.WasEmailActivated, m.PrAccessCode, m.PrExpiryTime,
 		m.Id,
 	)
 	return err
 }
 
+func (r *UserRepo) UpdateByEmail(ctx context.Context, m *models.User) error {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	query := `
+    UPDATE
+        users
+    SET
+        tenant_id = $1, email = $2, first_name = $3, last_name = $4, password_algorithm = $5, password_hash = $6, state = $7,
+		role = $8, timezone = $9, created_time = $10, modified_time = $11, joined_time = $12, salt = $13, was_email_activated = $14,
+		pr_access_code = $15, pr_expiry_time = $16
+    WHERE
+        email = $2`
+	stmt, err := r.db.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.ExecContext(
+		ctx,
+		m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm,
+		m.PasswordHash, m.State, m.Role, m.Timezone, m.CreatedTime, m.ModifiedTime,
+		m.JoinedTime, m.Salt, m.WasEmailActivated, m.PrAccessCode, m.PrExpiryTime,
+	)
+	return err
+}
 func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
@@ -76,15 +109,16 @@ func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error)
 
 	query := `
     SELECT
-        id, uuid, tenant_id, email, first_name, last_name, password_hash, state,
-		role, timezone, created_time, modified_time
+        id, uuid, tenant_id, email, first_name, last_name, password_algorithm, password_hash, state,
+		role, timezone, created_time, modified_time, joined_time, salt, was_email_activated, pr_access_code, pr_expiry_time
     FROM
         users
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordHash, &m.State,
-		&m.Role, &m.Timezone, &m.CreatedTime, &m.ModifiedTime,
+		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordAlgorithm, &m.PasswordHash, &m.State,
+		&m.Role, &m.Timezone, &m.CreatedTime, &m.ModifiedTime, &m.JoinedTime, &m.Salt, &m.WasEmailActivated, &m.PrAccessCode,
+		&m.PrExpiryTime,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -105,15 +139,16 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, 
 
 	query := `
     SELECT
-        id, uuid, tenant_id, email, first_name, last_name, password_hash, state,
-		role, timezone, created_time, modified_time
+        id, uuid, tenant_id, email, first_name, last_name, password_algorithm, password_hash, state,
+		role, timezone, created_time, modified_time, joined_time, salt, was_email_activated, pr_access_code, pr_expiry_time
     FROM
         users
     WHERE
         email = $1`
 	err := r.db.QueryRowContext(ctx, query, email).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordHash, &m.State,
-		&m.Role, &m.Timezone, &m.CreatedTime, &m.ModifiedTime,
+		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordAlgorithm, &m.PasswordHash, &m.State,
+		&m.Role, &m.Timezone, &m.CreatedTime, &m.ModifiedTime, &m.JoinedTime, &m.Salt, &m.WasEmailActivated, &m.PrAccessCode,
+		&m.PrExpiryTime,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -176,7 +211,7 @@ func (r *UserRepo) CheckIfExistsByEmail(ctx context.Context, email string) (bool
 	return exists, nil
 }
 
-func (r *UserRepo) InsertOrUpdate(ctx context.Context, m *models.User) error {
+func (r *UserRepo) InsertOrUpdateById(ctx context.Context, m *models.User) error {
 	if m.Id == 0 {
 		return r.Insert(ctx, m)
 	}
@@ -189,5 +224,21 @@ func (r *UserRepo) InsertOrUpdate(ctx context.Context, m *models.User) error {
 	if doesExist == false {
 		return r.Insert(ctx, m)
 	}
-	return r.Update(ctx, m)
+	return r.UpdateById(ctx, m)
+}
+
+func (r *UserRepo) InsertOrUpdateByEmail(ctx context.Context, m *models.User) error {
+	if m.Id == 0 {
+		return r.Insert(ctx, m)
+	}
+
+	doesExist, err := r.CheckIfExistsByEmail(ctx, m.Email)
+	if err != nil {
+		return err
+	}
+
+	if doesExist == false {
+		return r.Insert(ctx, m)
+	}
+	return r.UpdateByEmail(ctx, m)
 }

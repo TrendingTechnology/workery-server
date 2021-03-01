@@ -48,12 +48,18 @@ CREATE TABLE users (
     first_name VARCHAR (50) NULL,
     last_name VARCHAR (50) NULL,
     email VARCHAR (255) UNIQUE NOT NULL,
+    password_algorithm VARCHAR (63) NOT NULL,
     password_hash VARCHAR (511) NOT NULL,
-    state SMALLINT NOT NULL,
-    role SMALLINT NOT NULL,
+    state SMALLINT NOT NULL DEFAULT 0,
+    role SMALLINT NOT NULL DEFAULT 0,
     timezone VARCHAR (63) NOT NULL DEFAULT 'utc',
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    joined_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    salt VARCHAR (127) NOT NULL DEFAULT '',
+    was_email_activated BOOLEAN NOT NULL DEFAULT FALSE,
+    pr_access_code VARCHAR (127) NOT NULL DEFAULT '',
+    pr_expiry_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_user_uuid
