@@ -16,3 +16,8 @@ func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
+
+// Function returns the algorithm used for hashing.
+func HashPasswordAlgorithm() string {
+	return "bcrypt"
+}

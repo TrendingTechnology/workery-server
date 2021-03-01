@@ -5,6 +5,19 @@ import (
 	"time"
 )
 
+// Role
+//---------------------
+// 1 = Executive
+// 2 = Management
+// 3 = Frontline Staff
+// 4 = Associates
+// 5 = Customers
+
+// State
+//---------------------
+// 1 = Active
+// 0 = Inactive
+
 type User struct {
 	Id                uint64    `json:"id"`
 	Uuid              string    `json:"uuid"`

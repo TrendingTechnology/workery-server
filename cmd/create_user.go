@@ -81,6 +81,7 @@ func runAddUser() {
 		FirstName: cuFirstName,
 		LastName: cuLastName,
 		Email: cuEmail,
+		PasswordAlgorithm: utils.HashPasswordAlgorithm(),
 		PasswordHash: passwordHash,
 		State: int8(cuState),
 		Role: int8(cuRole),
