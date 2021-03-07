@@ -178,8 +178,8 @@ CREATE TABLE comments (
     uuid VARCHAR (36) UNIQUE NOT NULL,
     tenant_id BIGINT NOT NULL,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
+    created_by_id BIGINT NULL,
+    last_modified_by_id BIGINT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     text TEXT NOT NULL DEFAULT '',
     state SMALLINT NOT NULL DEFAULT 0,
@@ -188,6 +188,12 @@ CREATE TABLE comments (
 );
 CREATE UNIQUE INDEX idx_comment_uuid
 ON comments (uuid);
+CREATE INDEX idx_comment_tenant_id
+ON comments (tenant_id);
+CREATE INDEX idx_comment_created_by_id
+ON comments (created_by_id);
+CREATE INDEX idx_comment_last_modified_by_id
+ON comments (last_modified_by_id);
 
 CREATE TABLE work_order_service_fees (
     id BIGSERIAL PRIMARY KEY,
