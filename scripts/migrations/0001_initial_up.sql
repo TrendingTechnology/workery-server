@@ -114,11 +114,14 @@ CREATE TABLE skill_sets (
     category VARCHAR (127) NOT NULL DEFAULT '',
     sub_category VARCHAR (127) NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
-    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    state SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_skill_sets_uuid
 ON skill_sets (uuid);
+CREATE INDEX idx_skill_sets_tenant_id
+ON skill_sets (tenant_id);
 
 CREATE TABLE skill_set_insurance_requirements (
     id BIGSERIAL PRIMARY KEY,
