@@ -94,7 +94,7 @@ func saveInsuranceRequirementRowInDb(r *repositories.InsuranceRequirementRepo, c
 	id, _ := strconv.ParseUint(idString, 10, 64)
 	if id != 0 {
 		m := &models.InsuranceRequirement{
-			Id: id,
+			OldId: id,
 			TenantId: uint64(etlirTenantId),
 			Uuid: uuid.NewString(),
 			Text: text,
@@ -102,7 +102,7 @@ func saveInsuranceRequirementRowInDb(r *repositories.InsuranceRequirementRepo, c
 			State: state,
 		}
 		ctx := context.Background()
-		err := r.InsertOrUpdateByText(ctx, m)
+		err := r.Insert(ctx, m)
 		if err != nil {
 			log.Panic(err)
 		}

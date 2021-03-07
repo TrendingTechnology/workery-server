@@ -60,6 +60,7 @@ CREATE TABLE users (
     was_email_activated BOOLEAN NOT NULL DEFAULT FALSE,
     pr_access_code VARCHAR (127) NOT NULL DEFAULT '',
     pr_expiry_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_user_uuid
@@ -69,9 +70,6 @@ ON users (email);
 CREATE INDEX idx_user_tenant_id
 ON users (tenant_id);
 
-CREATE SCHEMA london;
-CREATE SCHEMA bcgw;
-
 CREATE TABLE insurance_requirements (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
@@ -79,12 +77,13 @@ CREATE TABLE insurance_requirements (
     text VARCHAR (31) NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
     state SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_insurance_requirement_uuid
 ON insurance_requirements (uuid);
 CREATE UNIQUE INDEX idx_insurance_requirement_text
-ON insurance_requirements (text);
+ON insurance_requirements (tenant_id, text);
 CREATE INDEX idx_insurance_requirement_tenant_id
 ON insurance_requirements (tenant_id);
 

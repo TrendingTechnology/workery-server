@@ -37,6 +37,7 @@ type User struct {
 	WasEmailActivated bool      `json:"was_email_activated"`
 	PrAccessCode      string    `json:"pr_access_code"`
 	PrExpiryTime      time.Time `json:"pr_expiry_time"`
+    OldId             uint64    `json:"old_id"`
 }
 
 type UserRepository interface {
@@ -44,6 +45,7 @@ type UserRepository interface {
 	UpdateById(ctx context.Context, u *User) error
 	UpdateByEmail(ctx context.Context, u *User) error
 	GetById(ctx context.Context, id uint64) (*User, error)
+	GetByOldId(ctx context.Context, oldId uint64) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	CheckIfExistsById(ctx context.Context, id uint64) (bool, error)
 	CheckIfExistsByEmail(ctx context.Context, email string) (bool, error)

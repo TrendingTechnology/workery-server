@@ -121,7 +121,7 @@ func saveUserRowInDb(r *repositories.UserRepo, col []string) {
 
 	if id != 0 {
 		m := &models.User{
-			Id: id,
+			OldId: id,
 			Uuid: uuid.NewString(),
 			FirstName: firstName,
 			LastName: lastName,
@@ -140,6 +140,7 @@ func saveUserRowInDb(r *repositories.UserRepo, col []string) {
 		ctx := context.Background()
 		err := r.InsertOrUpdateByEmail(ctx, m)
 		if err != nil {
+			log.Println("TenantId", m.TenantId)
 			log.Panic(err)
 		}
 		fmt.Println("Imported ID#", id)

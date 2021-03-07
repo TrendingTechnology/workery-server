@@ -88,7 +88,7 @@ func saveUserGroupRowInDb(r *repositories.UserRepo, col []string) {
 	}
 
     ctx := context.Background()
-	user, err := r.GetById(ctx, userId)
+	user, err := r.GetByOldId(ctx, userId)
 	if err != nil {
 		panic(err)
 	}

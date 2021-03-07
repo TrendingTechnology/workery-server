@@ -24,9 +24,9 @@ func (r *InsuranceRequirementRepo) Insert(ctx context.Context, m *models.Insuran
 
 	query := `
     INSERT INTO insurance_requirements (
-        uuid, tenant_id, text, description, state
+        uuid, tenant_id, text, description, state, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5
+        $1, $2, $3, $4, $5, $6
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -36,7 +36,7 @@ func (r *InsuranceRequirementRepo) Insert(ctx context.Context, m *models.Insuran
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.Text, m.Description, m.State,
+		m.Uuid, m.TenantId, m.Text, m.Description, m.State, m.OldId,
 	)
 	return err
 }
@@ -61,30 +61,6 @@ func (r *InsuranceRequirementRepo) UpdateById(ctx context.Context, m *models.Ins
 	_, err = stmt.ExecContext(
 		ctx,
 		m.TenantId, m.Text, m.Description, m.State, m.Id,
-	)
-	return err
-}
-
-func (r *InsuranceRequirementRepo) UpdateByText(ctx context.Context, m *models.InsuranceRequirement) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	query := `
-    UPDATE
-        insurance_requirements
-    SET
-        tenant_id = $1, text = $2, description = $3, state = $4
-    WHERE
-        text = $2`
-	stmt, err := r.db.PrepareContext(ctx, query)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.ExecContext(
-		ctx,
-		m.TenantId, m.Text, m.Description, m.State,
 	)
 	return err
 }
@@ -116,7 +92,7 @@ func (r *InsuranceRequirementRepo) GetById(ctx context.Context, id uint64) (*mod
 	return m, nil
 }
 
-func (r *InsuranceRequirementRepo) GetByText(ctx context.Context, text string) (*models.InsuranceRequirement, error) {
+func (r *InsuranceRequirementRepo) GetByOld(ctx context.Context, tenantId uint64, oldId uint64) (*models.InsuranceRequirement, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -128,8 +104,8 @@ func (r *InsuranceRequirementRepo) GetByText(ctx context.Context, text string) (
 	FROM
         insurance_requirements
     WHERE
-        text = $1`
-	err := r.db.QueryRowContext(ctx, query, text).Scan(
+        old_id = $1 AND tenant_id = $2`
+	err := r.db.QueryRowContext(ctx, query, oldId, tenantId).Scan(
 		&m.Id, &m.Uuid, &m.TenantId, &m.Text, &m.Description, &m.State,
 	)
 	if err != nil {
@@ -168,32 +144,6 @@ func (r *InsuranceRequirementRepo) CheckIfExistsById(ctx context.Context, id uin
 	return exists, nil
 }
 
-func (r *InsuranceRequirementRepo) CheckIfExistsByText(ctx context.Context, text string) (bool, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	var exists bool
-
-	query := `
-    SELECT
-        1
-    FROM
-        insurance_requirements
-    WHERE
-        text = $1`
-	r.db.Exec(`set search_path='public'`)
-	err := r.db.QueryRowContext(ctx, query, text).Scan(&exists)
-	if err != nil {
-		// CASE 1 OF 2: Cannot find record with that email.
-		if err == sql.ErrNoRows {
-			return false, nil
-		} else { // CASE 2 OF 2: All other errors.
-			return false, err
-		}
-	}
-	return exists, nil
-}
-
 func (r *InsuranceRequirementRepo) InsertOrUpdateById(ctx context.Context, m *models.InsuranceRequirement) error {
 	if m.Id == 0 {
 		return r.Insert(ctx, m)
@@ -208,20 +158,4 @@ func (r *InsuranceRequirementRepo) InsertOrUpdateById(ctx context.Context, m *mo
 		return r.Insert(ctx, m)
 	}
 	return r.UpdateById(ctx, m)
-}
-
-func (r *InsuranceRequirementRepo) InsertOrUpdateByText(ctx context.Context, m *models.InsuranceRequirement) error {
-	if m.Id == 0 {
-		return r.Insert(ctx, m)
-	}
-
-	doesExist, err := r.CheckIfExistsByText(ctx, m.Text)
-	if err != nil {
-		return err
-	}
-
-	if doesExist == false {
-		return r.Insert(ctx, m)
-	}
-	return r.UpdateByText(ctx, m)
 }

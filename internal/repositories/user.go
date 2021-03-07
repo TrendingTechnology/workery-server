@@ -26,9 +26,9 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
     INSERT INTO users (
         uuid, tenant_id, email, first_name, last_name, password_algorithm, password_hash, state,
 		role, timezone, created_time, modified_time, joined_time, salt, was_email_activated,
-		pr_access_code, pr_expiry_time
+		pr_access_code, pr_expiry_time, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -40,7 +40,7 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
 		ctx,
 		m.Uuid, m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm, m.PasswordHash, m.State,
 		m.Role, m.Timezone, m.CreatedTime, m.ModifiedTime, m.JoinedTime, m.Salt, m.WasEmailActivated,
-		m.PrAccessCode, m.PrExpiryTime,
+		m.PrAccessCode, m.PrExpiryTime, m.OldId,
 	)
 	return err
 }
@@ -101,6 +101,7 @@ func (r *UserRepo) UpdateByEmail(ctx context.Context, m *models.User) error {
 	)
 	return err
 }
+
 func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
@@ -116,6 +117,36 @@ func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error)
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
+		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordAlgorithm, &m.PasswordHash, &m.State,
+		&m.Role, &m.Timezone, &m.CreatedTime, &m.ModifiedTime, &m.JoinedTime, &m.Salt, &m.WasEmailActivated, &m.PrAccessCode,
+		&m.PrExpiryTime,
+	)
+	if err != nil {
+		// CASE 1 OF 2: Cannot find record with that email.
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else { // CASE 2 OF 2: All other errors.
+			return nil, err
+		}
+	}
+	return m, nil
+}
+
+func (r *UserRepo) GetByOldId(ctx context.Context, oldId uint64) (*models.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	m := new(models.User)
+
+	query := `
+    SELECT
+        id, uuid, tenant_id, email, first_name, last_name, password_algorithm, password_hash, state,
+		role, timezone, created_time, modified_time, joined_time, salt, was_email_activated, pr_access_code, pr_expiry_time
+    FROM
+        users
+    WHERE
+        old_id = $1`
+	err := r.db.QueryRowContext(ctx, query, oldId).Scan(
 		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordAlgorithm, &m.PasswordHash, &m.State,
 		&m.Role, &m.Timezone, &m.CreatedTime, &m.ModifiedTime, &m.JoinedTime, &m.Salt, &m.WasEmailActivated, &m.PrAccessCode,
 		&m.PrExpiryTime,
