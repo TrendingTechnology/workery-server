@@ -149,10 +149,14 @@ CREATE TABLE tags (
     tenant_id BIGINT NOT NULL,
     text VARCHAR (127) NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
+    state SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_tags_uuid
 ON tags (uuid);
+CREATE INDEX idx_tags_tenant_id
+ON tags (tenant_id);
 
 CREATE TABLE vehicle_types (
     id BIGSERIAL PRIMARY KEY,
@@ -160,6 +164,8 @@ CREATE TABLE vehicle_types (
     tenant_id BIGINT NOT NULL,
     text VARCHAR (127) NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
+    state SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_vehicle_types_uuid
@@ -174,7 +180,8 @@ CREATE TABLE comments (
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     text TEXT NOT NULL DEFAULT '',
-    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    state SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_comment_uuid
@@ -191,7 +198,8 @@ CREATE TABLE work_order_service_fees (
     title VARCHAR (63) NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
     percentage FLOAT NOT NULL DEFAULT 0,
-    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    state SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_work_order_service_fee_uuid
@@ -206,7 +214,8 @@ CREATE TABLE bulletin_board_items (
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     text VARCHAR (63) NOT NULL DEFAULT '',
-    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    state SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_bulletin_board_item_uuid
