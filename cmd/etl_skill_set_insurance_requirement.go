@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"context"
+	"database/sql"
 	"fmt"
 	"encoding/csv"
 	"os"
@@ -48,9 +49,6 @@ func doRunImportSkillSetInsuranceRequirement() {
 	}
 	defer db.Close()
 
-	// Load up our repositories.
-	r := repositories.NewSkillSetInsuranceRequirementRepo(db)
-
 	f, err := os.Open(ssirFilePath)
 	if err != nil {
 		log.Fatal(err)
@@ -70,15 +68,23 @@ func doRunImportSkillSetInsuranceRequirement() {
 			log.Fatal(error)
 		}
 
-		saveSkillSetInsuranceRequirementRowInDb(r, line)
+		saveSkillSetInsuranceRequirementRowInDb(db, line)
 	}
 }
 
-func saveSkillSetInsuranceRequirementRowInDb(r *repositories.SkillSetInsuranceRequirementRepo, col []string) {
+func saveSkillSetInsuranceRequirementRowInDb(db *sql.DB, col []string) {
+	ctx := context.Background()
+
+	// Load up our repositories.
+	ssirr := repositories.NewSkillSetInsuranceRequirementRepo(db)
+	ssr := repositories.NewSkillSetRepo(db)
+	irr := repositories.NewInsuranceRequirementRepo(db)
+
 	// For debugging purposes only.
 	// log.Println(col)
 
 	// Extract the row.
+	tenantId := uint64(ssirTenantId)
 	idString := col[0]
 	skillSetIdString := col[1]
 	insuranceRequirementIdString := col[2]
@@ -87,16 +93,19 @@ func saveSkillSetInsuranceRequirementRowInDb(r *repositories.SkillSetInsuranceRe
 	skillSetId, _ := strconv.ParseUint(skillSetIdString, 10, 64)
 	insuranceRequirementId, _ := strconv.ParseUint(insuranceRequirementIdString, 10, 64)
 
+    // Lookup in the DB to return the NEW ID.
+	skillSet, _ := ssr.GetByOld(ctx, tenantId, skillSetId)
+	insuranceRequirement, _ := irr.GetByOld(ctx, tenantId, insuranceRequirementId)
+
 	if id != 0 {
 		m := &models.SkillSetInsuranceRequirement{
 			OldId: id,
-			TenantId: uint64(ssirTenantId),
+			TenantId: tenantId,
 			Uuid: uuid.NewString(),
-			SkillSetId: skillSetId,
-			InsuranceRequirementId: insuranceRequirementId,
+			SkillSetId: skillSet.Id,
+			InsuranceRequirementId: insuranceRequirement.Id,
 		}
-		ctx := context.Background()
-		err := r.Insert(ctx, m)
+		err := ssirr.Insert(ctx, m)
 		if err != nil {
 			log.Panic(err)
 		}

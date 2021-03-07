@@ -138,6 +138,10 @@ CREATE UNIQUE INDEX idx_skill_set_insurance_requirements_uuid
 ON skill_set_insurance_requirements (uuid);
 CREATE INDEX idx_skill_set_insurance_requirements_tenant_id
 ON skill_set_insurance_requirements (tenant_id);
+CREATE INDEX idx_skill_set_insurance_requirements_skill_set_id
+ON skill_set_insurance_requirements (skill_set_id);
+CREATE INDEX idx_skill_set_insurance_requirements_insurance_requirement_id
+ON skill_set_insurance_requirements (insurance_requirement_id);
 
 CREATE TABLE tags (
     id BIGSERIAL PRIMARY KEY,
