@@ -129,12 +129,15 @@ CREATE TABLE skill_set_insurance_requirements (
     tenant_id BIGINT NOT NULL,
     skill_set_id BIGINT NOT NULL,
     insurance_requirement_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (skill_set_id) REFERENCES skill_sets(id),
     FOREIGN KEY (insurance_requirement_id) REFERENCES insurance_requirements(id)
 );
 CREATE UNIQUE INDEX idx_skill_set_insurance_requirements_uuid
 ON skill_set_insurance_requirements (uuid);
+CREATE INDEX idx_skill_set_insurance_requirements_tenant_id
+ON skill_set_insurance_requirements (tenant_id);
 
 CREATE TABLE tags (
     id BIGSERIAL PRIMARY KEY,
