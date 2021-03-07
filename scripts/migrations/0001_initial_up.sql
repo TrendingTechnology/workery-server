@@ -98,10 +98,14 @@ CREATE TABLE how_hear_about_us_items (
     is_for_staff BOOLEAN NOT NULL DEFAULT FALSE,
     is_for_partner BOOLEAN NOT NULL DEFAULT FALSE,
     is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    state SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_how_hear_about_us_item_uuid
 ON how_hear_about_us_items (uuid);
+CREATE INDEX idx_how_hear_about_us_item_tenant_id
+ON how_hear_about_us_items (tenant_id);
 
 CREATE TABLE skill_sets (
     id BIGSERIAL PRIMARY KEY,
