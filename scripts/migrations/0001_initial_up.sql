@@ -170,6 +170,8 @@ CREATE TABLE vehicle_types (
 );
 CREATE UNIQUE INDEX idx_vehicle_types_uuid
 ON vehicle_types (uuid);
+CREATE INDEX idx_vehicle_types_tenant_id
+ON vehicle_types (tenant_id);
 
 CREATE TABLE comments (
     id BIGSERIAL PRIMARY KEY,

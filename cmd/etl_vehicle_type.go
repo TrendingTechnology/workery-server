@@ -19,28 +19,28 @@ import (
 )
 
 var (
-	insuranceRequirementETLTenantId int
-	insuranceRequirementETLFilePath string
+	vehicleTypeETLTenantId int
+	vehicleTypeETLFilePath string
 )
 
 func init() {
-	insuranceRequirementETLCmd.Flags().IntVarP(&insuranceRequirementETLTenantId, "tenant_id", "t", 0, "Tenant Id that this data belongs to")
-	insuranceRequirementETLCmd.MarkFlagRequired("tenant_id")
-	insuranceRequirementETLCmd.Flags().StringVarP(&insuranceRequirementETLFilePath, "filepath", "f", "", "Path to the workery insurance requirement csv file.")
-	insuranceRequirementETLCmd.MarkFlagRequired("filepath")
-	rootCmd.AddCommand(insuranceRequirementETLCmd)
+	vehicleTypeETLCmd.Flags().IntVarP(&vehicleTypeETLTenantId, "tenant_id", "t", 0, "Tenant Id that this data belongs to")
+	vehicleTypeETLCmd.MarkFlagRequired("tenant_id")
+	vehicleTypeETLCmd.Flags().StringVarP(&vehicleTypeETLFilePath, "filepath", "f", "", "Path to the workery insurance requirement csv file.")
+	vehicleTypeETLCmd.MarkFlagRequired("filepath")
+	rootCmd.AddCommand(vehicleTypeETLCmd)
 }
 
-var insuranceRequirementETLCmd = &cobra.Command{
-	Use:   "etl_insurance_requirement",
-	Short: "Import the insurance_requirement data from old workery",
+var vehicleTypeETLCmd = &cobra.Command{
+	Use:   "etl_vehicle_type",
+	Short: "Import the vehicle_type data from old workery",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		doRunImportInsuranceRequirement()
+		doRunImportVehicleType()
 	},
 }
 
-func doRunImportInsuranceRequirement() {
+func doRunImportVehicleType() {
 	// Load up our database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName)
 	if err != nil {
@@ -49,9 +49,9 @@ func doRunImportInsuranceRequirement() {
 	defer db.Close()
 
 	// Load up our repositories.
-	r := repositories.NewInsuranceRequirementRepo(db)
+	r := repositories.NewVehicleTypeRepo(db)
 
-	f, err := os.Open(insuranceRequirementETLFilePath)
+	f, err := os.Open(vehicleTypeETLFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,11 +70,11 @@ func doRunImportInsuranceRequirement() {
 			log.Fatal(error)
 		}
 
-		saveInsuranceRequirementRowInDb(r, line)
+		saveVehicleTypeRowInDb(r, line)
 	}
 }
 
-func saveInsuranceRequirementRowInDb(r *repositories.InsuranceRequirementRepo, col []string) {
+func saveVehicleTypeRowInDb(r *repositories.VehicleTypeRepo, col []string) {
 	// For debugging purposes only.
 	// log.Println(col)
 
@@ -91,9 +91,9 @@ func saveInsuranceRequirementRowInDb(r *repositories.InsuranceRequirementRepo, c
 
 	id, _ := strconv.ParseUint(idString, 10, 64)
 	if id != 0 {
-		m := &models.InsuranceRequirement{
+		m := &models.VehicleType{
 			OldId: id,
-			TenantId: uint64(insuranceRequirementETLTenantId),
+			TenantId: uint64(vehicleTypeETLTenantId),
 			Uuid: uuid.NewString(),
 			Text: text,
 			Description: description,
