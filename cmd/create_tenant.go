@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	ctSchemaName string
 	ctName string
 	ctState int
 	ctTimezone string
@@ -80,7 +81,8 @@ func init() {
 	// other_telephone,
 	// other_telephone_extension,
 	// other_telephone_type_of
-
+	createTenantCmd.Flags().StringVarP(&ctName, "schema_name", "p", "", "Schema name of the tenant")
+	createTenantCmd.MarkFlagRequired("schema_name")
 	rootCmd.AddCommand(createTenantCmd)
 }
 
@@ -114,6 +116,7 @@ func runCreateTenant() {
 
 	m := &models.Tenant{
 		Uuid: uuid.NewString(),
+		SchemaName: ctSchemaName,
 		Name: ctName,
 		State: int8(ctState),
 		Timezone: ctTimezone,
@@ -142,7 +145,7 @@ func runCreateTenant() {
 		// other_telephone_type_of
 	}
 
-	err = r.InsertOrUpdate(ctx, m)
+	err = r.InsertOrUpdateBySchemaName(ctx, m)
 	if err != nil {
 		log.Fatal(err)
 	}

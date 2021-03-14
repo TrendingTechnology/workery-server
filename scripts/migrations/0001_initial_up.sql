@@ -2,6 +2,7 @@ CREATE TABLE tenants (
     -- base
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
+    schema_name VARCHAR (63) NULL,
     alternate_name VARCHAR (255) NULL,
     description TEXT NOT NULL DEFAULT '',
     name VARCHAR (255) NULL,
@@ -10,6 +11,7 @@ CREATE TABLE tenants (
     timezone VARCHAR (63) NOT NULL DEFAULT 'utc',
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    old_id BIGINT NOT NULL DEFAULT 0,
 
     -- abstract_postal_address.py
     address_country VARCHAR (127) NOT NULL DEFAULT '',

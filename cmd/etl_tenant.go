@@ -173,17 +173,15 @@ func runTenantETL(r *repositories.TenantRepo, oldDb *sql.DB) {
 }
 
 func runTenantInsert(ot *OldTenant, r *repositories.TenantRepo) {
-	log.Println(ot, r, "\n")
-
 	m := &models.Tenant{
-		Id: ot.Id,
+		OldId: ot.Id,
 		Uuid: uuid.NewString(),
 		AlternateName: ot.AlternateName,
 		Description: ot.Description,
 		Name: ot.Name,
 		Url: ot.Url.String,
 		State: 1,
-		Timezone: ot.TimezoneName,
+		Timezone: "America/Toronto",
 		CreatedTime: ot.Created,
 		ModifiedTime: ot.LastModified,
 		AddressCountry: ot.AddressCountry,
@@ -192,9 +190,10 @@ func runTenantInsert(ot *OldTenant, r *repositories.TenantRepo) {
 		PostalCode: ot.PostalCode,
 		StreetAddress: ot.StreetAddress,
 		StreetAddressExtra: ot.StreetAddressExtra,
+		SchemaName: ot.SchemaName,
 	}
 	ctx := context.Background()
-	err := r.InsertOrUpdate(ctx, m)
+	err := r.InsertOrUpdateBySchemaName(ctx, m)
 	if err != nil {
 		log.Panic(err)
 	}

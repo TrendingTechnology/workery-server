@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"bufio"
 	"context"
+	"database/sql"
 	"fmt"
-	"encoding/csv"
 	"os"
 	"log"
-	"io"
-	"strconv"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/google/uuid"
@@ -18,13 +16,7 @@ import (
 	"github.com/over55/workery-server/internal/utils"
 )
 
-var (
-	userFilePath string
-)
-
 func init() {
-	userETLCmd.Flags().StringVarP(&userFilePath, "filepath", "f", "", "Path to the workery user csv file.")
-	userETLCmd.MarkFlagRequired("filepath")
 	rootCmd.AddCommand(userETLCmd)
 }
 
@@ -38,7 +30,7 @@ var userETLCmd = &cobra.Command{
 }
 
 func doRunImportUser() {
-	// Load up our database.
+	// Load up our new database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName)
 	if err != nil {
 	    log.Fatal(err)
@@ -46,103 +38,138 @@ func doRunImportUser() {
 	defer db.Close()
 
 	// Load up our repositories.
-	r := repositories.NewUserRepo(db)
+	tr := repositories.NewTenantRepo(db)
+	ur := repositories.NewUserRepo(db)
 
-	f, err := os.Open(userFilePath)
+	// Load up our old database.
+	oldDBHost := os.Getenv("WORKERY_OLD_DB_HOST")
+	oldDBPort := os.Getenv("WORKERY_OLD_DB_PORT")
+	oldDBUser := os.Getenv("WORKERY_OLD_DB_USER")
+	oldDBPassword := os.Getenv("WORKERY_OLD_DB_PASSWORD")
+	oldDBName := os.Getenv("WORKERY_OLD_DB_NAME")
+	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer oldDb.Close()
+
+    // Begin the operation.
+	runUserETL(tr, ur, oldDb)
+}
+
+type OldUser struct {
+	Id                      uint64    `json:"id"`
+	TenantId                sql.NullInt64    `json:"franchise_id"`
+	// password character varying(128) COLLATE pg_catalog."default" NOT NULL,
+    // last_login timestamp with time zone,
+    // is_superuser boolean NOT NULL,
+    Email string `json:"email"`
+    FirstName string `json:"first_name"`
+    LastName string `json:"last_name"`
+	DateJoined time.Time `json:"date_joined"`
+	IsActive bool `json:"is_active"`
+    // avatar character varying(100) COLLATE pg_catalog."default",
+    LastModified            time.Time `json:"last_modified"`
+    // salt character varying(127) COLLATE pg_catalog."default",
+	WasEmailActivated bool `json:"was_email_activated"`
+    // pr_access_code character varying(127) COLLATE pg_catalog."default" NOT NULL,
+    // pr_expiry_date timestamp with time zone NOT NULL,
+
+	// IsArchived              bool   `json:"is_archived"`
+}
+
+func ListAllUsers(db *sql.DB) ([]*OldUser, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+	SELECT
+	    id, email, first_name, last_name, date_joined, is_active, last_modified, was_email_activated, franchise_id
+	FROM
+	    workery_users
+	`
+	rows, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	var arr []*OldUser
+	defer rows.Close()
+	for rows.Next() {
+		m := new(OldUser)
+		err = rows.Scan(
+			&m.Id,
+			&m.Email,
+			&m.FirstName,
+			&m.LastName,
+			&m.DateJoined,
+			&m.IsActive,
+			&m.LastModified,
+			&m.WasEmailActivated,
+			&m.TenantId,
+		)
+		if err != nil {
+			panic(err)
+		}
+		arr = append(arr, m)
+	}
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+	return arr, err
+}
+
+func runUserETL(tr *repositories.TenantRepo, ur *repositories.UserRepo, oldDb *sql.DB) {
+	users, err := ListAllUsers(oldDb)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, v := range users {
+		runUserInsert(v, tr, ur)
+	}
+}
+
+func runUserInsert(ou *OldUser, tr *repositories.TenantRepo, ur *repositories.UserRepo) {
+	log.Println(ou, ur, "\n")
+
+	var state int8 = 0
+	if ou.IsActive == true {
+		state = 1
+	}
+
+	tenantId := sql.NullInt64{Int64: 1, Valid: true}
+	if ou.TenantId.Valid == true {
+		tenantId = sql.NullInt64{Int64: ou.TenantId.Int64, Valid: true}
+	}
+
+    ctx := context.Background()
+	tenant, err := tr.GetByOldId(ctx, uint64(tenantId.Int64))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// defer the closing of our `f` so that we can parse it later on
-	defer f.Close()
-
-	reader := csv.NewReader(bufio.NewReader(f))
-
-	for {
-		// Read line by line until no more lines left.
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-        } else if error != nil {
-			log.Fatal(error)
-		}
-
-		saveUserRowInDb(r, line)
+	m := &models.User{
+		OldId: ou.Id,
+		Uuid: uuid.NewString(),
+		FirstName: ou.FirstName,
+		LastName: ou.LastName,
+		Email: ou.Email,
+		JoinedTime: ou.DateJoined,
+		State: state,
+		Timezone: "America/Toronto",
+		CreatedTime: ou.DateJoined,
+		ModifiedTime: ou.LastModified,
+		Salt: "",
+		WasEmailActivated: ou.WasEmailActivated,
+		PrAccessCode: "",
+		PrExpiryTime: time.Now(),
+		TenantId: tenant.Id,
 	}
-}
-
-func saveUserRowInDb(r *repositories.UserRepo, col []string) {
-	// For debugging purposes only.
-	// log.Println(col)
-
-	// // Extract the row.
-	idString := col[0]
-	// col[1] // PasswordHash
-	// col[2] // LastLoginTime
-	// col[3] // IsSuperUser
-	email := col[4]
-	firstName := col[5]
-	lastName := col[6]
-	joinedTimeString := col[7]
-	isActiveString := col[8]
-	// col[9] // ???
-	lastModifiedTimeString := col[10]
-	salt := col[11]
-	timezone := "America/Toronto"
-	wasEmailActivatedString := col[12]
-	prAccessCodeString := col[13]
-	prExpiryTimeString := col[14]
-	tenantIdString := col[15]
-
-	joinedTime, _ := utils.ConvertPGAdminTimeStringToTime(joinedTimeString)
-	lastModifiedTime, _ := utils.ConvertPGAdminTimeStringToTime(lastModifiedTimeString)
-	prExpiryTime, _ := utils.ConvertPGAdminTimeStringToTime(prExpiryTimeString)
-
-	var isActive int8
-	if isActiveString == "t" {
-		isActive = 1
-	} else {
-        isActive = 0
-	}
-
-	var wasEmailActivated bool
-	if wasEmailActivatedString == "t" {
-		wasEmailActivated = true
-	} else {
-		wasEmailActivated = false
-	}
-
-	id, _ := strconv.ParseUint(idString, 10, 64)
-
-	tenantId, err := strconv.ParseUint(tenantIdString, 10, 64)
+	err = ur.InsertOrUpdateByEmail(ctx, m)
 	if err != nil {
-		tenantId = 1
+		log.Println("TenantId", m.TenantId)
+		log.Panic(err)
 	}
-
-	if id != 0 {
-		m := &models.User{
-			OldId: id,
-			Uuid: uuid.NewString(),
-			FirstName: firstName,
-			LastName: lastName,
-			Email: email,
-			JoinedTime: joinedTime,
-			State: isActive,
-			Timezone: timezone,
-			CreatedTime: joinedTime,
-			ModifiedTime: lastModifiedTime,
-			Salt: salt,
-			WasEmailActivated: wasEmailActivated,
-			PrAccessCode: prAccessCodeString,
-			PrExpiryTime: prExpiryTime,
-			TenantId: tenantId,
-		}
-		ctx := context.Background()
-		err := r.InsertOrUpdateByEmail(ctx, m)
-		if err != nil {
-			log.Println("TenantId", m.TenantId)
-			log.Panic(err)
-		}
-		fmt.Println("Imported ID#", id)
-	}
+	fmt.Println("Imported ID#", ou.Id)
 }

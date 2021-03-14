@@ -8,6 +8,7 @@ import (
 type Tenant struct {
 	Id                      uint64    `json:"id"`
 	Uuid                    string    `json:"uuid"`
+	SchemaName              string    `json:"schema_name"`
 	AlternateName           string    `json:"alternate_name"`
 	Description             string    `json:"description"`
 	Name                    string    `json:"name"`
@@ -37,14 +38,20 @@ type Tenant struct {
 	OtherTelephone          string    `json:"other_telephone"`
 	OtherTelephoneExtension string    `json:"other_telephone_extension"`
 	OtherTelephoneTypeOf    int8      `json:"other_telephone_type_of"`
+	OldId                   uint64    `json:"old_id"`
 }
 
 type TenantRepository interface {
 	Insert(ctx context.Context, u *Tenant) error
-	Update(ctx context.Context, u *Tenant) error
+	UpdateById(ctx context.Context, u *Tenant) error
+	UpdateBySchemaName(ctx context.Context, u *Tenant) error
 	GetById(ctx context.Context, id uint64) (*Tenant, error)
 	GetByName(ctx context.Context, name string) (*Tenant, error)
+	GetBySchemaName(ctx context.Context, schemaName string) (*Tenant, error)
+	GetByOldId(ctx context.Context, oldId uint64) (*Tenant, error)
 	CheckIfExistsById(ctx context.Context, id uint64) (bool, error)
 	CheckIfExistsByName(ctx context.Context, name string) (bool, error)
-	InsertOrUpdate(ctx context.Context, u *Tenant) error
+	CheckIfExistsBySchemaName(ctx context.Context, schema_name string) (bool, error)
+	InsertOrUpdateById(ctx context.Context, u *Tenant) error
+	InsertOrUpdateBySchemaName(ctx context.Context, u *Tenant) error
 }
