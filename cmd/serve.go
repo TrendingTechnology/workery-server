@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
+	"github.com/rs/cors"
 
 	"github.com/over55/workery-server/internal/controllers"
 	repo "github.com/over55/workery-server/internal/repositories"
@@ -52,12 +53,17 @@ func runServeCmd() {
 
 	c := controllers.NewBaseHandler([]byte(applicationSigningKey), ur, sm)
 
-    router := http.NewServeMux()
-    router.HandleFunc("/", c.AttachMiddleware(c.HandleRequests))
+    mux := http.NewServeMux()
+    mux.HandleFunc("/", c.AttachMiddleware(c.HandleRequests))
+
+	// cors.Default() setup the middleware with default options being
+    // all origins accepted with simple methods (GET, POST). See
+    // documentation via `https://github.com/rs/cors` for more options.
+	handler := cors.AllowAll().Handler(mux)
 
 	srv := &http.Server{
 		Addr: fmt.Sprintf("%s:%s", "localhost", "5000"),
-        Handler: router,
+        Handler: handler,
 	}
 
     done := make(chan os.Signal, 1)
