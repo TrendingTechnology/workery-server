@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"bufio"
 	"context"
+	"database/sql"
 	"fmt"
-	"encoding/csv"
 	"os"
 	"log"
-	"io"
-	"strconv"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/google/uuid"
@@ -18,13 +16,7 @@ import (
 	"github.com/over55/workery-server/internal/utils"
 )
 
-var (
-	tenantFilePath string
-)
-
 func init() {
-	tenantETLCmd.Flags().StringVarP(&tenantFilePath, "filepath", "f", "", "Path to the workery tenant csv file.")
-	tenantETLCmd.MarkFlagRequired("filepath")
 	rootCmd.AddCommand(tenantETLCmd)
 }
 
@@ -38,7 +30,7 @@ var tenantETLCmd = &cobra.Command{
 }
 
 func doRunImportTenant() {
-	// Load up our database.
+	// Load up our new database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName)
 	if err != nil {
 	    log.Fatal(err)
@@ -48,78 +40,163 @@ func doRunImportTenant() {
 	// Load up our repositories.
 	r := repositories.NewTenantRepo(db)
 
-	f, err := os.Open(tenantFilePath)
+	// Load up our old database.
+	oldDBHost := os.Getenv("WORKERY_OLD_DB_HOST")
+	oldDBPort := os.Getenv("WORKERY_OLD_DB_PORT")
+	oldDBUser := os.Getenv("WORKERY_OLD_DB_USER")
+	oldDBPassword := os.Getenv("WORKERY_OLD_DB_PASSWORD")
+	oldDBName := os.Getenv("WORKERY_OLD_DB_NAME")
+	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer oldDb.Close()
 
-	// defer the closing of our `f` so that we can parse it later on
-	defer f.Close()
+    // Begin the operation.
+	runTenantETL(r, oldDb)
+}
 
-	reader := csv.NewReader(bufio.NewReader(f))
+type OldTenant struct {
+	Id                      uint64    `json:"id"`
+	SchemaName              string    `json:"schema_name"`
+	Created                 time.Time `json:"created"`
+	LastModified            time.Time `json:"last_modified"`
+	AlternateName           string    `json:"alternate_name"`
+	Description             string    `json:"description"`
+	Name                    string    `json:"name"`
+	Url                     sql.NullString `json:"url"`
+	AreaServed              sql.NullString    `json:"area_served"`
+	AvailableLanguage       sql.NullString    `json:"available_language"`
+	ContactType             sql.NullString    `json:"contact_type"`
+	Email                   sql.NullString    `json:"email"`
+	FaxNumber               sql.NullString    `json:"fax_number"`
+	Telephone               sql.NullString    `json:"telephone"`
+	TelephoneTypeOf         int8      `json:"telephone_type_of"`
+	TelephoneExtension      sql.NullString    `json:"telephone_extension"`
+	OtherTelephone          sql.NullString    `json:"other_telephone"`
+	OtherTelephoneExtension sql.NullString    `json:"other_telephone_extension"`
+	OtherTelephoneTypeOf    int8      `json:"other_telephone_type_of"`
+	AddressCountry          string    `json:"address_country"`
+	AddressRegion           string    `json:"address_region"`
+	AddressLocality         string    `json:"address_locality"`
+	PostOfficeBoxNumber     string    `json:"post_office_box_number"`
+	PostalCode              string    `json:"postal_code"`
+	StreetAddress           string    `json:"street_address"`
+	StreetAddressExtra      string    `json:"street_address_extra"`
+	Elevation               sql.NullFloat64   `json:"elevation"`
+	Latitude                sql.NullFloat64   `json:"latitude"`
+	Longitude               sql.NullFloat64   `json:"longitude"`
+    TimezoneName            string    `json:"timestamp_name"`
+	IsArchived              bool   `json:"is_archived"`
+}
 
-	for {
-		// Read line by line until no more lines left.
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-        } else if error != nil {
-			log.Fatal(error)
+
+// Function returns a paginated list of all type element items.
+func ListAllTenants(db *sql.DB) ([]*OldTenant, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+	SELECT
+	    id, schema_name, created, last_modified, alternate_name, description,
+		name, url, area_served, available_language, contact_type, email,
+		fax_number, telephone, telephone_type_of, telephone_extension,
+		other_telephone, other_telephone_extension, other_telephone_type_of,
+		address_country, address_region, address_locality, post_office_box_number,
+		postal_code, street_address, street_address_extra, elevation, latitude,
+		longitude, timezone_name, is_archived
+	FROM
+	    workery_franchises
+	`
+	rows, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	var arr []*OldTenant
+	defer rows.Close()
+	for rows.Next() {
+		m := new(OldTenant)
+		err = rows.Scan(
+			&m.Id,
+			&m.SchemaName,
+			&m.Created,
+			&m.LastModified,
+			&m.AlternateName,
+			&m.Description,
+			&m.Name,
+			&m.Url,
+			&m.AreaServed,
+			&m.AvailableLanguage,
+			&m.ContactType,
+			&m.Email,
+			&m.FaxNumber,
+			&m.Telephone,
+			&m.TelephoneTypeOf,
+			&m.TelephoneExtension,
+			&m.OtherTelephone,
+			&m.OtherTelephoneExtension,
+			&m.OtherTelephoneTypeOf,
+			&m.AddressCountry,
+			&m.AddressRegion,
+			&m.AddressLocality,
+			&m.PostOfficeBoxNumber,
+			&m.PostalCode,
+			&m.StreetAddress,
+			&m.StreetAddressExtra,
+			&m.Elevation,
+			&m.Latitude,
+			&m.Longitude,
+		    &m.TimezoneName,
+			&m.IsArchived,
+		)
+		if err != nil {
+			panic(err)
 		}
+		arr = append(arr, m)
+	}
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+	return arr, err
+}
 
-		saveTenantRowInDb(r, line)
+func runTenantETL(r *repositories.TenantRepo, oldDb *sql.DB) {
+	tenants, err := ListAllTenants(oldDb)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, v := range tenants {
+		runTenantInsert(v, r)
 	}
 }
 
-func saveTenantRowInDb(r *repositories.TenantRepo, col []string) {
-	// For debugging purposes only.
-	// log.Println(col)
+func runTenantInsert(ot *OldTenant, r *repositories.TenantRepo) {
+	log.Println(ot, r, "\n")
 
-	// Extract the row.
-	idString := col[0]
-	createdTimeString := col[2]
-	modifiedTimeString := col[3]
-	alternate_name := col[4]
-	description := col[5]
-	name := col[6]
-	url := col[7]
-	timezone := "America/Toronto"
-	// email := col[11]
-	addressCountry := col[20]
-	addressRegion := col[22]
-	addressLocality := col[21]
-	postalCode := col[24]
-	streetAdress := col[25]
-	streetAdressExtra := col[25]
-
-	ct, _ := utils.ConvertPGAdminTimeStringToTime(createdTimeString)
-	mt, _ := utils.ConvertPGAdminTimeStringToTime(modifiedTimeString)
-
-	id, _ := strconv.ParseUint(idString, 10, 64)
-	if id != 0 {
-		m := &models.Tenant{
-			Id: id,
-			Uuid: uuid.NewString(),
-			AlternateName: alternate_name,
-			Description: description,
-			Name: name,
-			Url: url,
-			State: 1,
-			Timezone: timezone,
-			CreatedTime: ct,
-			ModifiedTime: mt,
-			AddressCountry: addressCountry,
-			AddressRegion: addressRegion,
-			AddressLocality: addressLocality,
-			PostalCode: postalCode,
-			StreetAddress: streetAdress,
-			StreetAddressExtra: streetAdressExtra,
-		}
-		ctx := context.Background()
-		err := r.InsertOrUpdate(ctx, m)
-		if err != nil {
-			log.Panic(err)
-		}
-		fmt.Println("Imported ID#", id)
+	m := &models.Tenant{
+		Id: ot.Id,
+		Uuid: uuid.NewString(),
+		AlternateName: ot.AlternateName,
+		Description: ot.Description,
+		Name: ot.Name,
+		Url: ot.Url.String,
+		State: 1,
+		Timezone: ot.TimezoneName,
+		CreatedTime: ot.Created,
+		ModifiedTime: ot.LastModified,
+		AddressCountry: ot.AddressCountry,
+		AddressRegion: ot.AddressRegion,
+		AddressLocality: ot.AddressLocality,
+		PostalCode: ot.PostalCode,
+		StreetAddress: ot.StreetAddress,
+		StreetAddressExtra: ot.StreetAddressExtra,
 	}
+	ctx := context.Background()
+	err := r.InsertOrUpdate(ctx, m)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("Imported ID#", ot.Id)
 }
