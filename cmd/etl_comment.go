@@ -43,7 +43,7 @@ var commentETLCmd = &cobra.Command{
 
 func doRunImportComment() {
 	// Load up our database.
-	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName)
+	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
 	    log.Fatal(err)
 	}

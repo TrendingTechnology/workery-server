@@ -31,7 +31,7 @@ var tenantETLCmd = &cobra.Command{
 
 func doRunImportTenant() {
 	// Load up our new database.
-	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName)
+	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
 	    log.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func doRunImportTenant() {
 	oldDBUser := os.Getenv("WORKERY_OLD_DB_USER")
 	oldDBPassword := os.Getenv("WORKERY_OLD_DB_PASSWORD")
 	oldDBName := os.Getenv("WORKERY_OLD_DB_NAME")
-	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName)
+	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName, "public")
 	if err != nil {
 		log.Fatal(err)
 	}

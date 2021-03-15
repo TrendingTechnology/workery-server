@@ -7,13 +7,14 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName string) (*sql.DB, error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable",
+func ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, databaseSchemaName string) (*sql.DB, error) {
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable search_path=%s",
 		databaseHost,
 		databasePort,
 		databaseUser,
 		databasePassword,
 		databaseName,
+		databaseSchemaName,
 	)
 
 	dbInstance, err := sql.Open("postgres", psqlInfo)
