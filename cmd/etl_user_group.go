@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"bufio"
 	"context"
+	"database/sql"
 	"fmt"
-	"encoding/csv"
 	"os"
 	"log"
-	"io"
-	"strconv"
+	"time"
 
 	"github.com/spf13/cobra"
 	// "github.com/google/uuid"
@@ -18,19 +16,13 @@ import (
 	"github.com/over55/workery-server/internal/utils"
 )
 
-var (
-	userGroupFilePath string
-)
-
 func init() {
-	userGroupETLCmd.Flags().StringVarP(&userGroupFilePath, "filepath", "f", "", "Path to the workery user group csv file.")
-	userGroupETLCmd.MarkFlagRequired("filepath")
 	rootCmd.AddCommand(userGroupETLCmd)
 }
 
 var userGroupETLCmd = &cobra.Command{
 	Use:   "etl_user_group",
-	Short: "Import the user group data from old workery",
+	Short: "Import the user groups from old workery",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		doRunImportUserGroup()
@@ -38,7 +30,7 @@ var userGroupETLCmd = &cobra.Command{
 }
 
 func doRunImportUserGroup() {
-	// Load up our database.
+	// Load up our new database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName)
 	if err != nil {
 	    log.Fatal(err)
@@ -48,55 +40,87 @@ func doRunImportUserGroup() {
 	// Load up our repositories.
 	r := repositories.NewUserRepo(db)
 
-	f, err := os.Open(userGroupFilePath)
+	// Load up our old database.
+	oldDBHost := os.Getenv("WORKERY_OLD_DB_HOST")
+	oldDBPort := os.Getenv("WORKERY_OLD_DB_PORT")
+	oldDBUser := os.Getenv("WORKERY_OLD_DB_USER")
+	oldDBPassword := os.Getenv("WORKERY_OLD_DB_PASSWORD")
+	oldDBName := os.Getenv("WORKERY_OLD_DB_NAME")
+	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer oldDb.Close()
 
-	// defer the closing of our `f` so that we can parse it later on
-	defer f.Close()
-
-	reader := csv.NewReader(bufio.NewReader(f))
-
-	for {
-		// Read line by line until no more lines left.
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-        } else if error != nil {
-			log.Fatal(error)
-		}
-
-		saveUserGroupRowInDb(r, line)
-	}
+    // Begin the operation.
+	runUserGroupETL(r, oldDb)
 }
 
-func saveUserGroupRowInDb(r *repositories.UserRepo, col []string) {
-	// For debugging purposes only.
-	// log.Println(col)
+type OldUserGroup struct {
+	Id                      uint64    `json:"id"`
+	UserId                  uint64    `json:"shareduser_id"`
+	GroupId                 uint64    `json:"group_id"`
+}
 
-	// // Extract the row.
-	// idString := col[0]
-	userIdString := col[1]
-	roleIdString := col[2]
 
-	userId, _ := strconv.ParseUint(userIdString, 10, 64)
+// Function returns a paginated list of all type element items.
+func ListAllUserGroups(db *sql.DB) ([]*OldUserGroup, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	roleId, err := strconv.ParseUint(roleIdString, 10, 64)
+	query := `
+	SELECT
+	    id, shareduser_id, group_id
+	FROM
+	    workery_users_groups
+	`
+	rows, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	var arr []*OldUserGroup
+	defer rows.Close()
+	for rows.Next() {
+		m := new(OldUserGroup)
+		err = rows.Scan(
+			&m.Id,
+			&m.UserId,
+			&m.GroupId,
+		)
+		if err != nil {
+			panic(err)
+		}
+		arr = append(arr, m)
+	}
+	err = rows.Err()
 	if err != nil {
 		panic(err)
 	}
+	return arr, err
+}
 
-    ctx := context.Background()
-	user, err := r.GetByOldId(ctx, userId)
+func runUserGroupETL(r *repositories.UserRepo, oldDb *sql.DB) {
+	userGroups, err := ListAllUserGroups(oldDb)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, v := range userGroups {
+		runUserGroupInsert(v, r)
+	}
+}
+
+func runUserGroupInsert(ot *OldUserGroup, r *repositories.UserRepo) {
+	ctx := context.Background()
+	user, err := r.GetByOldId(ctx, ot.UserId)
 	if err != nil {
 		panic(err)
 	}
 	if user != nil {
-		user.Role = int8(roleId)
+		user.Role = int8(ot.GroupId)
 		r.UpdateById(ctx, user)
-		fmt.Println("Processed UserId #", userIdString)
+		fmt.Println("Processed UserId #", user.Id)
 	} else {
-		fmt.Println("Skipped UserId #", userIdString)
+		fmt.Println("Skipped UserId #", user.Id)
 	}
 }
