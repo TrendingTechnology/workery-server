@@ -20,7 +20,6 @@ import (
 var (
 	etlhhauiTenantSchema string
 	etlhhauiTenantId int
-	etlhhauiFilePath string
 )
 
 func init() {
@@ -28,8 +27,6 @@ func init() {
 	howHearAboutUsItemETLCmd.MarkFlagRequired("schema_name")
 	howHearAboutUsItemETLCmd.Flags().IntVarP(&etlhhauiTenantId, "tenant_id", "t", 0, "Tenant Id that this data belongs to")
 	howHearAboutUsItemETLCmd.MarkFlagRequired("tenant_id")
-	howHearAboutUsItemETLCmd.Flags().StringVarP(&etlhhauiFilePath, "filepath", "f", "", "Path to the workery insurance requirement csv file.")
-	howHearAboutUsItemETLCmd.MarkFlagRequired("filepath")
 	rootCmd.AddCommand(howHearAboutUsItemETLCmd)
 }
 
@@ -79,7 +76,6 @@ func runHowHearAboutUsItemETL(tid uint64, r *repositories.HowHearAboutUsItemRepo
 	}
 }
 
-
 type OldHowHearAboutUsItem struct {
 	Id                uint64    `json:"id"`
 	Uuid              string    `json:"uuid"`
@@ -89,8 +85,8 @@ type OldHowHearAboutUsItem struct {
 	IsForAssociate    bool      `json:"is_for_associate"`
 	IsForCustomer     bool      `json:"is_for_customer"`
 	IsForStaff        bool      `json:"is_for_staff"`
-	IsForPartner      bool        `json:"is_for_partner"`
-	IsArchived        bool     `json:"is_archived"`
+	IsForPartner      bool      `json:"is_for_partner"`
+	IsArchived        bool      `json:"is_archived"`
 }
 
 // Function returns a paginated list of all type element items.
