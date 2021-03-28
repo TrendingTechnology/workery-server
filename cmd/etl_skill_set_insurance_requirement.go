@@ -1,15 +1,12 @@
 package cmd
 
 import (
-	"bufio"
 	"context"
-	"database/sql"
 	"fmt"
-	"encoding/csv"
 	"os"
 	"log"
-	"io"
-	"strconv"
+	"database/sql"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/google/uuid"
@@ -20,21 +17,21 @@ import (
 )
 
 var (
-	ssirTenantId int
-	ssirFilePath string
+	ssirETLSchemaName string
+	ssirETLTenantId int
 )
 
 func init() {
-	ssirETLCmd.Flags().IntVarP(&ssirTenantId, "tenant_id", "t", 0, "Tenant Id that this data belongs to")
+	ssirETLCmd.Flags().StringVarP(&ssirETLSchemaName, "schema_name", "s", "", "The schema name in the postgres.")
+	ssirETLCmd.MarkFlagRequired("schema_name")
+	ssirETLCmd.Flags().IntVarP(&ssirETLTenantId, "tenant_id", "t", 0, "Tenant Id that this data belongs to")
 	ssirETLCmd.MarkFlagRequired("tenant_id")
-	ssirETLCmd.Flags().StringVarP(&ssirFilePath, "filepath", "f", "", "Path to the workery insurance requirement csv file.")
-	ssirETLCmd.MarkFlagRequired("filepath")
 	rootCmd.AddCommand(ssirETLCmd)
 }
 
 var ssirETLCmd = &cobra.Command{
 	Use:   "etl_skill_set_insurance_requirement",
-	Short: "Import the insurance_requirement data from old workery",
+	Short: "Import the insurance requirement and skill set data from old workery",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		doRunImportSkillSetInsuranceRequirement()
@@ -42,73 +39,97 @@ var ssirETLCmd = &cobra.Command{
 }
 
 func doRunImportSkillSetInsuranceRequirement() {
-	// Load up our database.
+	// Load up our NEW database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
 	    log.Fatal(err)
 	}
 	defer db.Close()
 
-	f, err := os.Open(ssirFilePath)
+	// Load up our OLD database.
+	oldDBHost := os.Getenv("WORKERY_OLD_DB_HOST")
+	oldDBPort := os.Getenv("WORKERY_OLD_DB_PORT")
+	oldDBUser := os.Getenv("WORKERY_OLD_DB_USER")
+	oldDBPassword := os.Getenv("WORKERY_OLD_DB_PASSWORD")
+	oldDBName := os.Getenv("WORKERY_OLD_DB_NAME")
+	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName, ssirETLSchemaName)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer oldDb.Close()
 
-	// defer the closing of our `f` so that we can parse it later on
-	defer f.Close()
-
-	reader := csv.NewReader(bufio.NewReader(f))
-
-	for {
-		// Read line by line until no more lines left.
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-        } else if error != nil {
-			log.Fatal(error)
-		}
-
-		saveSkillSetInsuranceRequirementRowInDb(db, line)
-	}
-}
-
-func saveSkillSetInsuranceRequirementRowInDb(db *sql.DB, col []string) {
+    // Load up our background context.
 	ctx := context.Background()
 
 	// Load up our repositories.
-	ssirr := repositories.NewSkillSetInsuranceRequirementRepo(db)
-	ssr := repositories.NewSkillSetRepo(db)
-	irr := repositories.NewInsuranceRequirementRepo(db)
+	ssir := repositories.NewSkillSetInsuranceRequirementRepo(db)
 
-	// For debugging purposes only.
-	// log.Println(col)
+	runSkillSetInsuranceRequirementETL(ctx, uint64(ssirETLTenantId), ssir, oldDb)
+}
 
-	// Extract the row.
-	tenantId := uint64(ssirTenantId)
-	idString := col[0]
-	skillSetIdString := col[1]
-	insuranceRequirementIdString := col[2]
-
-	id, _ := strconv.ParseUint(idString, 10, 64)
-	skillSetId, _ := strconv.ParseUint(skillSetIdString, 10, 64)
-	insuranceRequirementId, _ := strconv.ParseUint(insuranceRequirementIdString, 10, 64)
-
-    // Lookup in the DB to return the NEW ID.
-	skillSet, _ := ssr.GetByOld(ctx, tenantId, skillSetId)
-	insuranceRequirement, _ := irr.GetByOld(ctx, tenantId, insuranceRequirementId)
-
-	if id != 0 {
-		m := &models.SkillSetInsuranceRequirement{
-			OldId: id,
-			TenantId: tenantId,
-			Uuid: uuid.NewString(),
-			SkillSetId: skillSet.Id,
-			InsuranceRequirementId: insuranceRequirement.Id,
-		}
-		err := ssirr.Insert(ctx, m)
-		if err != nil {
-			log.Panic(err)
-		}
-		fmt.Println("Imported ID#", id)
+func runSkillSetInsuranceRequirementETL(ctx context.Context, tenantId uint64, ssir *repositories.SkillSetInsuranceRequirementRepo, oldDb *sql.DB) {
+	ssirs, err := ListAllSkillSetInsuranceRequirements(oldDb)
+	if err != nil {
+		log.Fatal(err)
 	}
+	for _, oss := range ssirs {
+		insertSkillSetInsuranceRequirementETL(ctx, tenantId, ssir, oss)
+	}
+}
+
+type OldSkillSetInsuranceRequirement struct {
+	Id                     uint64 `json:"id"`
+	SkillSetId             uint64  `json:"skill_set_id"`
+	InsuranceRequirementId uint64 `json:"insurance_requirement_id"`
+}
+
+func ListAllSkillSetInsuranceRequirements(db *sql.DB) ([]*OldSkillSetInsuranceRequirement, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+	SELECT
+        id, skillset_id, insurancerequirement_id
+	FROM
+        workery_skill_sets_insurance_requirements
+	`
+	rows, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	var arr []*OldSkillSetInsuranceRequirement
+	defer rows.Close()
+	for rows.Next() {
+		m := new(OldSkillSetInsuranceRequirement)
+		err = rows.Scan(
+			&m.Id,
+			&m.SkillSetId,
+			&m.InsuranceRequirementId,
+		)
+		if err != nil {
+			panic(err)
+		}
+		arr = append(arr, m)
+	}
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+	return arr, err
+}
+
+func insertSkillSetInsuranceRequirementETL(ctx context.Context, tid uint64, ssir *repositories.SkillSetInsuranceRequirementRepo, oss *OldSkillSetInsuranceRequirement) {
+	m := &models.SkillSetInsuranceRequirement{
+		OldId: oss.Id,
+		TenantId: tid,
+		Uuid: uuid.NewString(),
+		SkillSetId: oss.SkillSetId,
+		InsuranceRequirementId: oss.InsuranceRequirementId,
+	}
+	err := ssir.Insert(ctx, m)
+	if err != nil {
+		log.Panic("ssir.Insert | err", err)
+	}
+	fmt.Println("Imported ID#", oss.Id)
 }
