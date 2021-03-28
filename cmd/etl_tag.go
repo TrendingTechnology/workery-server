@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"bufio"
 	"context"
 	"fmt"
-	"encoding/csv"
 	"os"
 	"log"
-	"io"
-	"strconv"
+	"database/sql"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/google/uuid"
@@ -19,15 +17,12 @@ import (
 )
 
 var (
-	tagETLTenantId int
-	tagETLFilePath string
+	tagETLSchemaName string
 )
 
 func init() {
-	tagETLCmd.Flags().IntVarP(&tagETLTenantId, "tenant_id", "t", 0, "Tenant Id that this data belongs to")
-	tagETLCmd.MarkFlagRequired("tenant_id")
-	tagETLCmd.Flags().StringVarP(&tagETLFilePath, "filepath", "f", "", "Path to the workery tag csv file.")
-	tagETLCmd.MarkFlagRequired("filepath")
+	tagETLCmd.Flags().StringVarP(&tagETLSchemaName, "schema_name", "s", "", "The schema name in the postgres.")
+	tagETLCmd.MarkFlagRequired("schema_name")
 	rootCmd.AddCommand(tagETLCmd)
 }
 
@@ -41,69 +36,115 @@ var tagETLCmd = &cobra.Command{
 }
 
 func doRunImportTag() {
-	// Load up our database.
+	// Load up our NEW database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
 	    log.Fatal(err)
 	}
 	defer db.Close()
 
-	// Load up our repositories.
-	r := repositories.NewTagRepo(db)
-
-	f, err := os.Open(tagETLFilePath)
+	// Load up our OLD database.
+	oldDBHost := os.Getenv("WORKERY_OLD_DB_HOST")
+	oldDBPort := os.Getenv("WORKERY_OLD_DB_PORT")
+	oldDBUser := os.Getenv("WORKERY_OLD_DB_USER")
+	oldDBPassword := os.Getenv("WORKERY_OLD_DB_PASSWORD")
+	oldDBName := os.Getenv("WORKERY_OLD_DB_NAME")
+	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName, tagETLSchemaName)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer oldDb.Close()
 
-	// defer the closing of our `f` so that we can parse it later on
-	defer f.Close()
+    // Load up our background context.
+	ctx := context.Background()
 
-	reader := csv.NewReader(bufio.NewReader(f))
+	// Load up our repositories.
+	tr := repositories.NewTenantRepo(db)
+	irr := repositories.NewTagRepo(db)
 
-	for {
-		// Read line by line until no more lines left.
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-        } else if error != nil {
-			log.Fatal(error)
+	// Lookup the tenant.
+	tenant, err := tr.GetBySchemaName(ctx, tagETLSchemaName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if tenant == nil {
+		log.Fatal("Tenant does not exist!")
+	}
+
+	runTagETL(ctx, tenant.Id, irr, oldDb)
+}
+
+type OldUTag struct {
+	Id                uint64    `json:"id"`
+	Text              string    `json:"text"`
+	Description       string    `json:"description"`
+	IsArchived        bool      `json:"is_archived"`
+}
+
+func ListAllTags(db *sql.DB) ([]*OldUTag, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+	SELECT
+	    id, text, description, is_archived
+	FROM
+	    workery_tags
+	`
+	rows, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	var arr []*OldUTag
+	defer rows.Close()
+	for rows.Next() {
+		m := new(OldUTag)
+		err = rows.Scan(
+			&m.Id,
+			&m.Text,
+			&m.Description,
+			&m.IsArchived,
+		)
+		if err != nil {
+			panic(err)
 		}
+		arr = append(arr, m)
+	}
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+	return arr, err
+}
 
-		saveTagRowInDb(r, line)
+func runTagETL(ctx context.Context, tenantId uint64, irr *repositories.TagRepo, oldDb *sql.DB) {
+	tags, err := ListAllTags(oldDb)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, oir := range tags {
+		insertTagETL(ctx, tenantId, irr, oir)
 	}
 }
 
-func saveTagRowInDb(r *repositories.TagRepo, col []string) {
-	// For debugging purposes only.
-	// log.Println(col)
-
-	// Extract the row.
-	idString := col[0]
-	text := col[1]
-	description := col[2]
-	stateString := col[3]
-
+func insertTagETL(ctx context.Context, tid uint64, irr *repositories.TagRepo, oir *OldUTag) {
 	var state int8 = 1
-	if stateString == "t" {
+	if oir.IsArchived == true {
 		state = 0
 	}
 
-	id, _ := strconv.ParseUint(idString, 10, 64)
-	if id != 0 {
-		m := &models.Tag{
-			OldId: id,
-			TenantId: uint64(tagETLTenantId),
-			Uuid: uuid.NewString(),
-			Text: text,
-			Description: description,
-			State: state,
-		}
-		ctx := context.Background()
-		err := r.Insert(ctx, m)
-		if err != nil {
-			log.Panic(err)
-		}
-		fmt.Println("Imported ID#", id)
+	m := &models.Tag{
+		OldId: oir.Id,
+		TenantId: tid,
+		Uuid: uuid.NewString(),
+		Text: oir.Text,
+		Description: oir.Description,
+		State: state,
 	}
+	err := irr.Insert(ctx, m)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("Imported ID#", oir.Id)
 }
