@@ -86,17 +86,6 @@ type OldComment struct {
 	IsArchived        bool          `json:"is_archived"`
 }
 
-//    created_at timestamp with time zone NOT NULL,
-//    created_from inet,
-//    created_from_is_public boolean NOT NULL,
-//    last_modified_at timestamp with time zone NOT NULL,
-//    last_modified_from inet,
-//    last_modified_from_is_public boolean NOT NULL,
-//    text text COLLATE pg_catalog."default" NOT NULL,
-//    is_archived boolean NOT NULL,
-//    created_by_id integer,
-//    last_modified_by_id integer,
-
 func ListAllComments(db *sql.DB) ([]*OldComment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

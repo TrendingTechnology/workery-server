@@ -204,9 +204,11 @@ CREATE TABLE work_order_service_fees (
     uuid VARCHAR (36) UNIQUE NOT NULL,
     tenant_id BIGINT NOT NULL,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
+    created_by_id BIGINT NULL,
+    created_from_ip VARCHAR (50) NOT NULL DEFAULT '',
+    last_modified_by_id BIGINT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    last_modified_from_ip VARCHAR (50) NOT NULL DEFAULT '',
     title VARCHAR (63) NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
     percentage FLOAT NOT NULL DEFAULT 0,
@@ -216,6 +218,8 @@ CREATE TABLE work_order_service_fees (
 );
 CREATE UNIQUE INDEX idx_work_order_service_fee_uuid
 ON work_order_service_fees (uuid);
+CREATE INDEX idx_work_order_service_fee_tenant_id
+ON work_order_service_fees (tenant_id);
 
 CREATE TABLE bulletin_board_items (
     id BIGSERIAL PRIMARY KEY,
@@ -223,8 +227,10 @@ CREATE TABLE bulletin_board_items (
     tenant_id BIGINT NOT NULL,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
+    created_from_ip VARCHAR (50) NOT NULL DEFAULT '',
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    last_modified_by_id BIGINT NOT NULL,
+    last_modified_from_ip VARCHAR (50) NOT NULL DEFAULT '',
     text VARCHAR (63) NOT NULL DEFAULT '',
     state SMALLINT NOT NULL DEFAULT 0,
     old_id BIGINT NOT NULL DEFAULT 0,
@@ -232,6 +238,8 @@ CREATE TABLE bulletin_board_items (
 );
 CREATE UNIQUE INDEX idx_bulletin_board_item_uuid
 ON bulletin_board_items (uuid);
+CREATE UNIQUE INDEX idx_bulletin_board_item_tenant_id
+ON bulletin_board_items (tenant_id);
 
 CREATE TABLE customers (
     -- customer.py
@@ -255,8 +263,10 @@ CREATE TABLE customers (
     deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
+    created_from_ip VARCHAR (50) NOT NULL DEFAULT '',
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    last_modified_by_id BIGINT NOT NULL,
+    last_modified_from_ip VARCHAR (50) NOT NULL DEFAULT '',
     organization_name VARCHAR (255) NOT NULL DEFAULT '',
     organization_type_of SMALLINT NOT NULL DEFAULT 0,
 
