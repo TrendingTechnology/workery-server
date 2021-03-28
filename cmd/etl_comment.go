@@ -1,15 +1,12 @@
 package cmd
 
 import (
-	"bufio"
 	"context"
-	"database/sql"
 	"fmt"
-	"encoding/csv"
 	"os"
 	"log"
-	"io"
-	"strconv"
+	"database/sql"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/google/uuid"
@@ -20,15 +17,12 @@ import (
 )
 
 var (
-	commentETLTenantId int
-	commentETLFilePath string
+	commentETLSchemaName string
 )
 
 func init() {
-	commentETLCmd.Flags().IntVarP(&commentETLTenantId, "tenant_id", "t", 0, "Tenant Id that this data belongs to")
-	commentETLCmd.MarkFlagRequired("tenant_id")
-	commentETLCmd.Flags().StringVarP(&commentETLFilePath, "filepath", "f", "", "Path to the workery comment csv file.")
-	commentETLCmd.MarkFlagRequired("filepath")
+	commentETLCmd.Flags().StringVarP(&commentETLSchemaName, "schema_name", "s", "", "The schema name in the postgres.")
+	commentETLCmd.MarkFlagRequired("schema_name")
 	rootCmd.AddCommand(commentETLCmd)
 }
 
@@ -42,111 +36,140 @@ var commentETLCmd = &cobra.Command{
 }
 
 func doRunImportComment() {
-	// Load up our database.
+	// Load up our NEW database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
 	    log.Fatal(err)
 	}
 	defer db.Close()
 
-	// Load up our repositories.
-	r := repositories.NewCommentRepo(db)
-
-	f, err := os.Open(commentETLFilePath)
+	// Load up our OLD database.
+	oldDBHost := os.Getenv("WORKERY_OLD_DB_HOST")
+	oldDBPort := os.Getenv("WORKERY_OLD_DB_PORT")
+	oldDBUser := os.Getenv("WORKERY_OLD_DB_USER")
+	oldDBPassword := os.Getenv("WORKERY_OLD_DB_PASSWORD")
+	oldDBName := os.Getenv("WORKERY_OLD_DB_NAME")
+	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName, commentETLSchemaName)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer oldDb.Close()
 
-	// defer the closing of our `f` so that we can parse it later on
-	defer f.Close()
+    // Load up our background context.
+	ctx := context.Background()
 
-	reader := csv.NewReader(bufio.NewReader(f))
+	// Load up our repositories.
+	tr := repositories.NewTenantRepo(db)
+	irr := repositories.NewCommentRepo(db)
 
-    // Fixes `extraneous or missing " in quoted-field` error via https://stackoverflow.com/a/51687729
-	reader.LazyQuotes = true
-	// reader.Comma = ';'
+	// Lookup the tenant.
+	tenant, err := tr.GetBySchemaName(ctx, commentETLSchemaName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if tenant == nil {
+		log.Fatal("Tenant does not exist!")
+	}
 
-    var previousLine []string
-    var previousId uint64
-	for {
-		// Read line by line until no more lines left.
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-        } else if error != nil {
-			fmt.Println("\n--------------\nPrevious ID #1", previousId, "\n\npreviousLine:", previousLine, "\n\ncurrentLine" ,line, "\n--------------\n")
-			// log.Panic(error)
-			continue // Skip this loop iteration
+	runCommentETL(ctx, tenant.Id, irr, oldDb)
+}
+
+type OldComment struct {
+	Id                uint64        `json:"id"`
+	CreatedAt         time.Time     `json:"created_time"`
+	CreatedById       sql.NullInt64 `json:"created_by_id,omitempty"`
+	CreatedFrom       sql.NullString        `json:"created_from"`
+	LastModifiedAt    time.Time     `json:"last_modified_time"`
+	LastModifiedById  sql.NullInt64 `json:"last_modified_by_id,omitempty"`
+	LastModifiedFrom  sql.NullString        `json:"last_modified_from"`
+	Text              string        `json:"text"`
+	IsArchived        bool          `json:"is_archived"`
+}
+
+//    created_at timestamp with time zone NOT NULL,
+//    created_from inet,
+//    created_from_is_public boolean NOT NULL,
+//    last_modified_at timestamp with time zone NOT NULL,
+//    last_modified_from inet,
+//    last_modified_from_is_public boolean NOT NULL,
+//    text text COLLATE pg_catalog."default" NOT NULL,
+//    is_archived boolean NOT NULL,
+//    created_by_id integer,
+//    last_modified_by_id integer,
+
+func ListAllComments(db *sql.DB) ([]*OldComment, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+	SELECT
+		id, created_at, created_by_id, created_from, last_modified_at, last_modified_by_id, last_modified_from, text, is_archived
+	FROM
+	    workery_comments
+	`
+	rows, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	var arr []*OldComment
+	defer rows.Close()
+	for rows.Next() {
+		m := new(OldComment)
+		err = rows.Scan(
+			&m.Id,
+			&m.CreatedAt,
+			&m.CreatedById,
+			&m.CreatedFrom,
+			&m.LastModifiedAt,
+			&m.LastModifiedById,
+			&m.LastModifiedFrom,
+			&m.Text,
+			&m.IsArchived,
+		)
+		if err != nil {
+			panic(err)
 		}
+		arr = append(arr, m)
+	}
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+	return arr, err
+}
 
-		previousId = saveCommentRowInDb(r, line)
-		previousLine = line
+func runCommentETL(ctx context.Context, tenantId uint64, irr *repositories.CommentRepo, oldDb *sql.DB) {
+	comments, err := ListAllComments(oldDb)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, oir := range comments {
+		insertCommentETL(ctx, tenantId, irr, oir)
 	}
 }
 
-func saveCommentRowInDb(r *repositories.CommentRepo, col []string) uint64 {
-	// For debugging purposes only.
-	// log.Println(col)
-
-	// Extract the row.
-	idStr := col[0]
-	createdTimeStr := col[1]
-	// created_from := col[2]
-	// created_from_is_public := col[3]
-	lastModifiedTimeStr := col[4]
-	// last_modified_from := col[5]
-	// last_modified_from_is_public := col[6]
-	text := col[7]
-	stateStr := col[8]
-	createdByIdStr := col[9]
-	lastModifiedByIdStr := col[10]
-
-    id, _ := strconv.ParseUint(idStr, 10, 64)
-
-	var cbId sql.NullInt64
-	createdById, err := strconv.ParseInt(createdByIdStr, 10, 64)
-	if err != nil {
-		cbId = sql.NullInt64{Int64: 0, Valid: false}
-	} else {
-		cbId = sql.NullInt64{Int64: createdById, Valid: true}
-	}
-
-	var lmId sql.NullInt64
-	lastModifiedById, err := strconv.ParseInt(lastModifiedByIdStr, 10, 64)
-	if err != nil {
-		lmId = sql.NullInt64{Int64: 0, Valid: true}
-	} else {
-		lmId = sql.NullInt64{Int64: lastModifiedById, Valid: true}
-	}
-
-	createdTime, _ := utils.ConvertPGAdminTimeStringToTime(createdTimeStr)
-	lastModifiedTime, _ := utils.ConvertPGAdminTimeStringToTime(lastModifiedTimeStr)
-
+func insertCommentETL(ctx context.Context, tid uint64, irr *repositories.CommentRepo, oir *OldComment) {
 	var state int8 = 1
-	if stateStr == "t" {
+	if oir.IsArchived == true {
 		state = 0
 	}
-
-	if id != 0 {
-		m := &models.Comment{
-			OldId: id,
-			TenantId: uint64(commentETLTenantId),
-			Uuid: uuid.NewString(),
-			CreatedTime: createdTime,
-			CreatedById: cbId,
-			LastModifiedTime: lastModifiedTime,
-			LastModifiedById: lmId,
-			Text: text,
-			State: state,
-		}
-		ctx := context.Background()
-		err := r.Insert(ctx, m)
-		if err != nil {
-			log.Println(col)
-			log.Panic(err)
-		}
-		// fmt.Println("Imported ID#", id)
+	m := &models.Comment{
+		OldId: oir.Id,
+		TenantId: tid,
+		Uuid: uuid.NewString(),
+		CreatedTime: oir.CreatedAt,
+		CreatedById: oir.CreatedById,
+		CreatedFromIP: oir.CreatedFrom.String,
+		LastModifiedTime: oir.LastModifiedAt,
+		LastModifiedById: oir.LastModifiedById,
+		LastModifiedFromIP: oir.LastModifiedFrom.String,
+		Text: oir.Text,
+		State: state,
 	}
-
-	return id
+	err := irr.Insert(ctx, m)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("Imported ID#", oir.Id)
 }
