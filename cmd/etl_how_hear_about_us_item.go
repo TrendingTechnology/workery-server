@@ -1,14 +1,13 @@
 package cmd
 
 import (
-	"bufio"
 	"context"
 	"fmt"
-	"encoding/csv"
+	// "encoding/csv"
+	"database/sql"
 	"os"
 	"log"
-	"io"
-	"strconv"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/google/uuid"
@@ -19,11 +18,14 @@ import (
 )
 
 var (
+	etlhhauiTenantSchema string
 	etlhhauiTenantId int
 	etlhhauiFilePath string
 )
 
 func init() {
+	howHearAboutUsItemETLCmd.Flags().StringVarP(&etlhhauiTenantSchema, "schema_name", "s", "public", "Schema name of the old workery")
+	howHearAboutUsItemETLCmd.MarkFlagRequired("schema_name")
 	howHearAboutUsItemETLCmd.Flags().IntVarP(&etlhhauiTenantId, "tenant_id", "t", 0, "Tenant Id that this data belongs to")
 	howHearAboutUsItemETLCmd.MarkFlagRequired("tenant_id")
 	howHearAboutUsItemETLCmd.Flags().StringVarP(&etlhhauiFilePath, "filepath", "f", "", "Path to the workery insurance requirement csv file.")
@@ -36,11 +38,11 @@ var howHearAboutUsItemETLCmd = &cobra.Command{
 	Short: "Import the how_hear_about_us_item data from old workery",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		doRunImportHowHearAboutUsItem()
+		doRunImportHowHearAboutUsItem(uint64(etlhhauiTenantId))
 	},
 }
 
-func doRunImportHowHearAboutUsItem() {
+func doRunImportHowHearAboutUsItem(tid uint64) {
 	// Load up our database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
@@ -51,87 +53,106 @@ func doRunImportHowHearAboutUsItem() {
 	// Load up our repositories.
 	r := repositories.NewHowHearAboutUsItemRepo(db)
 
-	f, err := os.Open(etlhhauiFilePath)
+	// Load up our old database.
+	oldDBHost := os.Getenv("WORKERY_OLD_DB_HOST")
+	oldDBPort := os.Getenv("WORKERY_OLD_DB_PORT")
+	oldDBUser := os.Getenv("WORKERY_OLD_DB_USER")
+	oldDBPassword := os.Getenv("WORKERY_OLD_DB_PASSWORD")
+	oldDBName := os.Getenv("WORKERY_OLD_DB_NAME")
+	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName, etlhhauiTenantSchema)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer oldDb.Close()
 
-	// defer the closing of our `f` so that we can parse it later on
-	defer f.Close()
+    // Begin the operation.
+	runHowHearAboutUsItemETL(tid, r, oldDb)
+}
 
-	reader := csv.NewReader(bufio.NewReader(f))
-
-	for {
-		// Read line by line until no more lines left.
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-        } else if error != nil {
-			log.Fatal(error)
-		}
-
-		saveHowHearAboutUsItemRowInDb(r, line)
+func runHowHearAboutUsItemETL(tid uint64, r *repositories.HowHearAboutUsItemRepo, oldDb *sql.DB) {
+	items, err := ListAllHowHearAboutUsItems(oldDb)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, v := range items {
+		runHowHearAboutUsItemInsert(tid, v, r)
 	}
 }
 
-func saveHowHearAboutUsItemRowInDb(r *repositories.HowHearAboutUsItemRepo, col []string) {
-	// For debugging purposes only.
-	// log.Println(col)
 
-	// Extract the row.
-	idString := col[0]
-	text := col[1]
-	IsForAssociateStr := col[2]
-	IsForCustomerStr := col[3]
-	IsForStaffStr := col[4]
-	IsForPartneStrr := col[5]
-	// SortNumbeStrr := col[6]
-	StateStr := col[7]
+type OldHowHearAboutUsItem struct {
+	Id                uint64    `json:"id"`
+	Uuid              string    `json:"uuid"`
+	TenantId          uint64    `json:"tenant_id"`
+	Text              string    `json:"text"`
+	SortNumber        int8      `json:"sort_number"`
+	IsForAssociate    bool      `json:"is_for_associate"`
+	IsForCustomer     bool      `json:"is_for_customer"`
+	IsForStaff        bool      `json:"is_for_staff"`
+	IsForPartner      bool        `json:"is_for_partner"`
+	IsArchived        bool     `json:"is_archived"`
+}
 
-	var IsForAssociate bool = false
-	if IsForAssociateStr == "t" {
-		IsForAssociate = true
+// Function returns a paginated list of all type element items.
+func ListAllHowHearAboutUsItems(oldDb *sql.DB) ([]*OldHowHearAboutUsItem, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+	SELECT
+        id, text, sort_number, is_for_associate, is_for_customer,
+		is_for_staff, is_for_partner, is_archived
+	FROM
+        workery_how_hear_about_us_items
+	`
+	rows, err := oldDb.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
 	}
 
-	var IsForCustomer bool = false
-	if IsForCustomerStr == "t" {
-		IsForCustomer = true
-	}
-
-	var IsForStaff bool = false
-	if IsForStaffStr == "t" {
-		IsForStaff = true
-	}
-
-	var IsForPartner bool = false
-	if IsForPartneStrr == "t" {
-		IsForPartner = true
-	}
-
-	var state int8 = 1
-	if StateStr == "f" {
-		state = 1
-	}
-
-	id, _ := strconv.ParseUint(idString, 10, 64)
-	if id != 0 {
-		m := &models.HowHearAboutUsItem{
-			OldId: id,
-			TenantId: uint64(etlhhauiTenantId),
-			Uuid: uuid.NewString(),
-			Text: text,
-			IsForAssociate: IsForAssociate,
-			IsForCustomer: IsForCustomer,
-			IsForStaff: IsForStaff,
-			IsForPartner: IsForPartner,
-			SortNumber: 1,
-			State: state,
-		}
-		ctx := context.Background()
-		err := r.Insert(ctx, m)
+	var arr []*OldHowHearAboutUsItem
+	defer rows.Close()
+	for rows.Next() {
+		m := new(OldHowHearAboutUsItem)
+		err = rows.Scan(
+			&m.Id, &m.Text, &m.SortNumber, &m.IsForAssociate, &m.IsForCustomer,
+			&m.IsForStaff, &m.IsForPartner, &m.IsArchived,
+		)
 		if err != nil {
-			log.Panic(err)
+			panic(err)
 		}
-		fmt.Println("Imported ID#", id)
+		m.Uuid = uuid.NewString()
+		arr = append(arr, m)
 	}
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+	return arr, err
+}
+
+func runHowHearAboutUsItemInsert(tid uint64, ot *OldHowHearAboutUsItem, r *repositories.HowHearAboutUsItemRepo) {
+	var state int8 = 1
+	if ot.IsArchived == true {
+		state = 0
+	}
+
+	m := &models.HowHearAboutUsItem{
+		OldId: ot.Id,
+		TenantId: tid,
+		Uuid: uuid.NewString(),
+		Text: ot.Text,
+		IsForAssociate: ot.IsForAssociate,
+		IsForCustomer: ot.IsForCustomer,
+		IsForStaff: ot.IsForStaff,
+		IsForPartner: ot.IsForPartner,
+		SortNumber: 1,
+		State: state,
+	}
+	ctx := context.Background()
+	err := r.Insert(ctx, m)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("Imported ID#", ot.Id)
 }
