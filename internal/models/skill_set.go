@@ -10,14 +10,14 @@ import (
 // 0 = Inactive
 
 type SkillSet struct {
-	Id                uint64    `json:"id"`
-	Uuid              string    `json:"uuid"`
-	TenantId          uint64    `json:"tenant_id"`
-	Category          string    `json:"category"`
-	SubCategory       string    `json:"sub_category"`
-	Description       string    `json:"description"`
-	State             int8      `json:"state"`
-    OldId             uint64    `json:"old_id"`
+	Id          uint64 `json:"id"`
+	Uuid        string `json:"uuid"`
+	TenantId    uint64 `json:"tenant_id"`
+	Category    string `json:"category"`
+	SubCategory string `json:"sub_category"`
+	Description string `json:"description"`
+	State       int8   `json:"state"`
+	OldId       uint64 `json:"old_id"`
 }
 
 type SkillSetRepository interface {

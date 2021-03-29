@@ -92,7 +92,7 @@ func (r *WorkOrderServiceFeeRepo) GetById(ctx context.Context, id uint64) (*mode
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&m.Id, &m.Uuid, &m.TenantId, &m.Title, &m.Description, &m.State,
 		&m.Percentage, &m.CreatedTime, &m.CreatedById, &m.CreatedFromIP,
-		&m.LastModifiedTime, &m.LastModifiedById, &m.LastModifiedFromIP, 
+		&m.LastModifiedTime, &m.LastModifiedById, &m.LastModifiedFromIP,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.

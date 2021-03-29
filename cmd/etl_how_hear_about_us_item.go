@@ -5,12 +5,12 @@ import (
 	"fmt"
 	// "encoding/csv"
 	"database/sql"
-	"os"
 	"log"
+	"os"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -19,7 +19,7 @@ import (
 
 var (
 	etlhhauiTenantSchema string
-	etlhhauiTenantId int
+	etlhhauiTenantId     int
 )
 
 func init() {
@@ -43,7 +43,7 @@ func doRunImportHowHearAboutUsItem(tid uint64) {
 	// Load up our database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -62,7 +62,7 @@ func doRunImportHowHearAboutUsItem(tid uint64) {
 	}
 	defer oldDb.Close()
 
-    // Begin the operation.
+	// Begin the operation.
 	runHowHearAboutUsItemETL(tid, r, oldDb)
 }
 
@@ -77,16 +77,16 @@ func runHowHearAboutUsItemETL(tid uint64, r *repositories.HowHearAboutUsItemRepo
 }
 
 type OldHowHearAboutUsItem struct {
-	Id                uint64    `json:"id"`
-	Uuid              string    `json:"uuid"`
-	TenantId          uint64    `json:"tenant_id"`
-	Text              string    `json:"text"`
-	SortNumber        int8      `json:"sort_number"`
-	IsForAssociate    bool      `json:"is_for_associate"`
-	IsForCustomer     bool      `json:"is_for_customer"`
-	IsForStaff        bool      `json:"is_for_staff"`
-	IsForPartner      bool      `json:"is_for_partner"`
-	IsArchived        bool      `json:"is_archived"`
+	Id             uint64 `json:"id"`
+	Uuid           string `json:"uuid"`
+	TenantId       uint64 `json:"tenant_id"`
+	Text           string `json:"text"`
+	SortNumber     int8   `json:"sort_number"`
+	IsForAssociate bool   `json:"is_for_associate"`
+	IsForCustomer  bool   `json:"is_for_customer"`
+	IsForStaff     bool   `json:"is_for_staff"`
+	IsForPartner   bool   `json:"is_for_partner"`
+	IsArchived     bool   `json:"is_archived"`
 }
 
 // Function returns a paginated list of all type element items.
@@ -134,16 +134,16 @@ func runHowHearAboutUsItemInsert(tid uint64, ot *OldHowHearAboutUsItem, r *repos
 	}
 
 	m := &models.HowHearAboutUsItem{
-		OldId: ot.Id,
-		TenantId: tid,
-		Uuid: uuid.NewString(),
-		Text: ot.Text,
+		OldId:          ot.Id,
+		TenantId:       tid,
+		Uuid:           uuid.NewString(),
+		Text:           ot.Text,
 		IsForAssociate: ot.IsForAssociate,
-		IsForCustomer: ot.IsForCustomer,
-		IsForStaff: ot.IsForStaff,
-		IsForPartner: ot.IsForPartner,
-		SortNumber: 1,
-		State: state,
+		IsForCustomer:  ot.IsForCustomer,
+		IsForStaff:     ot.IsForStaff,
+		IsForPartner:   ot.IsForPartner,
+		SortNumber:     1,
+		State:          state,
 	}
 	ctx := context.Background()
 	err := r.Insert(ctx, m)

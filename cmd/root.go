@@ -10,14 +10,13 @@ import (
 )
 
 var (
-	databaseHost string
-	databasePort string
-	databaseUser string
-	databasePassword string
-	databaseName string
+	databaseHost          string
+	databasePort          string
+	databaseUser          string
+	databasePassword      string
+	databaseName          string
 	applicationSigningKey string
 )
-
 
 // Initialize function will be called when every command gets called.
 func init() {
@@ -33,7 +32,7 @@ func init() {
 var rootCmd = &cobra.Command{
 	Use:   "workery-server",
 	Short: "",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do nothing.
 	},

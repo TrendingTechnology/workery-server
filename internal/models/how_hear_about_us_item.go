@@ -10,17 +10,17 @@ import (
 // 0 = Inactive
 
 type HowHearAboutUsItem struct {
-	Id                uint64    `json:"id"`
-	Uuid              string    `json:"uuid"`
-	TenantId          uint64    `json:"tenant_id"`
-	Text              string    `json:"text"`
-	SortNumber        int8      `json:"sort_number"`
-	IsForAssociate    bool      `json:"is_for_associate"`
-	IsForCustomer     bool      `json:"is_for_customer"`
-	IsForStaff        bool      `json:"is_for_staff"`
-	IsForPartner      bool      `json:"is_for_partner"`
-	State             int8      `json:"state"`
-    OldId             uint64    `json:"old_id"`
+	Id             uint64 `json:"id"`
+	Uuid           string `json:"uuid"`
+	TenantId       uint64 `json:"tenant_id"`
+	Text           string `json:"text"`
+	SortNumber     int8   `json:"sort_number"`
+	IsForAssociate bool   `json:"is_for_associate"`
+	IsForCustomer  bool   `json:"is_for_customer"`
+	IsForStaff     bool   `json:"is_for_staff"`
+	IsForPartner   bool   `json:"is_for_partner"`
+	State          int8   `json:"state"`
+	OldId          uint64 `json:"old_id"`
 }
 
 type HowHearAboutUsItemRepository interface {

@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"log"
 	"database/sql"
+	"fmt"
+	"log"
+	"os"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -18,7 +18,7 @@ import (
 
 var (
 	ssirETLSchemaName string
-	ssirETLTenantId int
+	ssirETLTenantId   int
 )
 
 func init() {
@@ -42,7 +42,7 @@ func doRunImportSkillSetInsuranceRequirement() {
 	// Load up our NEW database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -58,7 +58,7 @@ func doRunImportSkillSetInsuranceRequirement() {
 	}
 	defer oldDb.Close()
 
-    // Load up our background context.
+	// Load up our background context.
 	ctx := context.Background()
 
 	// Load up our repositories.
@@ -79,7 +79,7 @@ func runSkillSetInsuranceRequirementETL(ctx context.Context, tenantId uint64, ss
 
 type OldSkillSetInsuranceRequirement struct {
 	Id                     uint64 `json:"id"`
-	SkillSetId             uint64  `json:"skill_set_id"`
+	SkillSetId             uint64 `json:"skill_set_id"`
 	InsuranceRequirementId uint64 `json:"insurance_requirement_id"`
 }
 
@@ -121,10 +121,10 @@ func ListAllSkillSetInsuranceRequirements(db *sql.DB) ([]*OldSkillSetInsuranceRe
 
 func insertSkillSetInsuranceRequirementETL(ctx context.Context, tid uint64, ssir *repositories.SkillSetInsuranceRequirementRepo, oss *OldSkillSetInsuranceRequirement) {
 	m := &models.SkillSetInsuranceRequirement{
-		OldId: oss.Id,
-		TenantId: tid,
-		Uuid: uuid.NewString(),
-		SkillSetId: oss.SkillSetId,
+		OldId:                  oss.Id,
+		TenantId:               tid,
+		Uuid:                   uuid.NewString(),
+		SkillSetId:             oss.SkillSetId,
 		InsuranceRequirementId: oss.InsuranceRequirementId,
 	}
 	err := ssir.Insert(ctx, m)

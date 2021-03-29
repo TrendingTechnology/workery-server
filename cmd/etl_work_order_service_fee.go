@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"log"
 	"database/sql"
+	"fmt"
+	"log"
+	"os"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -39,7 +39,7 @@ func doRunImportWorkOrderServiceFee() {
 	// Load up our NEW database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -55,7 +55,7 @@ func doRunImportWorkOrderServiceFee() {
 	}
 	defer oldDb.Close()
 
-    // Load up our background context.
+	// Load up our background context.
 	ctx := context.Background()
 
 	// Load up our repositories.
@@ -75,17 +75,17 @@ func doRunImportWorkOrderServiceFee() {
 }
 
 type OldUWorkOrderServiceFee struct {
-	Id                uint64    `json:"id"`
-	Title              string    `json:"title"`
-	Description       string    `json:"description"`
-    Percentage        float64   `json:"percentage"`
-	CreatedAt         time.Time     `json:"created_at"`
-	CreatedById       sql.NullInt64         `json:"created_by_id,omitempty"`
+	Id          uint64        `json:"id"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	Percentage  float64       `json:"percentage"`
+	CreatedAt   time.Time     `json:"created_at"`
+	CreatedById sql.NullInt64 `json:"created_by_id,omitempty"`
 	// CreatedFrom       sql.NullString        `json:"created_from"`
-	LastModifiedAt    time.Time             `json:"last_modified_at"`
-	LastModifiedById  sql.NullInt64 `json:"last_modified_by_id,omitempty"`
+	LastModifiedAt   time.Time     `json:"last_modified_at"`
+	LastModifiedById sql.NullInt64 `json:"last_modified_by_id,omitempty"`
 	// LastModifiedFrom  sql.NullString        `json:"last_modified_from"`
-	IsArchived        bool      `json:"is_archived"`
+	IsArchived bool `json:"is_archived"`
 }
 
 func ListAllWorkOrderServiceFees(db *sql.DB) ([]*OldUWorkOrderServiceFee, error) {
@@ -147,17 +147,17 @@ func insertWorkOrderServiceFeeETL(ctx context.Context, tid uint64, irr *reposito
 	}
 
 	m := &models.WorkOrderServiceFee{
-		OldId: oir.Id,
-		TenantId: tid,
-		Uuid: uuid.NewString(),
-		Title: oir.Title,
+		OldId:       oir.Id,
+		TenantId:    tid,
+		Uuid:        uuid.NewString(),
+		Title:       oir.Title,
 		Description: oir.Description,
-		Percentage: oir.Percentage,
+		Percentage:  oir.Percentage,
 		CreatedTime: oir.CreatedAt,
 		// CreatedById: oir.CreatedById,
 		LastModifiedTime: oir.LastModifiedAt,
 		LastModifiedById: oir.LastModifiedById,
-		State: state,
+		State:            state,
 	}
 	err := irr.Insert(ctx, m)
 	if err != nil {

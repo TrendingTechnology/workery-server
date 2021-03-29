@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	repo "github.com/over55/workery-server/internal/repositories"
@@ -15,13 +15,13 @@ import (
 )
 
 var (
-	cuTenantId int
+	cuTenantId  int
 	cuFirstName string
-	cuLastName string
-	cuEmail string
-	cuPassword string
-	cuState int
-	cuRole int
+	cuLastName  string
+	cuEmail     string
+	cuPassword  string
+	cuState     int
+	cuRole      int
 )
 
 func init() {
@@ -57,7 +57,7 @@ func runAddUser() {
 	// Load up our database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -76,18 +76,18 @@ func runAddUser() {
 	}
 
 	m := &models.User{
-		Uuid: uuid.NewString(),
-		TenantId: uint64(cuTenantId),
-		FirstName: cuFirstName,
-		LastName: cuLastName,
-		Email: cuEmail,
+		Uuid:              uuid.NewString(),
+		TenantId:          uint64(cuTenantId),
+		FirstName:         cuFirstName,
+		LastName:          cuLastName,
+		Email:             cuEmail,
 		PasswordAlgorithm: utils.HashPasswordAlgorithm(),
-		PasswordHash: passwordHash,
-		State: int8(cuState),
-		Role: int8(cuRole),
-		Timezone: "utc",
-		CreatedTime: time.Now(),
-		ModifiedTime: time.Now(),
+		PasswordHash:      passwordHash,
+		State:             int8(cuState),
+		Role:              int8(cuRole),
+		Timezone:          "utc",
+		CreatedTime:       time.Now(),
+		ModifiedTime:      time.Now(),
 	}
 
 	err = r.InsertOrUpdateById(ctx, m)

@@ -37,7 +37,7 @@ type User struct {
 	WasEmailActivated bool      `json:"was_email_activated"`
 	PrAccessCode      string    `json:"pr_access_code"`
 	PrExpiryTime      time.Time `json:"pr_expiry_time"`
-    OldId             uint64    `json:"old_id"`
+	OldId             uint64    `json:"old_id"`
 }
 
 type UserRepository interface {

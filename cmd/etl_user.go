@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"os"
 	"log"
+	"os"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -33,7 +33,7 @@ func doRunImportUser() {
 	// Load up our new database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -53,27 +53,27 @@ func doRunImportUser() {
 	}
 	defer oldDb.Close()
 
-    // Begin the operation.
+	// Begin the operation.
 	runUserETL(tr, ur, oldDb)
 }
 
 type OldUser struct {
-	Id                      uint64    `json:"id"`
-	TenantId                sql.NullInt64    `json:"franchise_id"`
+	Id       uint64        `json:"id"`
+	TenantId sql.NullInt64 `json:"franchise_id"`
 	// password character varying(128) COLLATE pg_catalog."default" NOT NULL,
-    // last_login timestamp with time zone,
-    // is_superuser boolean NOT NULL,
-    Email string `json:"email"`
-    FirstName string `json:"first_name"`
-    LastName string `json:"last_name"`
+	// last_login timestamp with time zone,
+	// is_superuser boolean NOT NULL,
+	Email      string    `json:"email"`
+	FirstName  string    `json:"first_name"`
+	LastName   string    `json:"last_name"`
 	DateJoined time.Time `json:"date_joined"`
-	IsActive bool `json:"is_active"`
-    // avatar character varying(100) COLLATE pg_catalog."default",
-    LastModified            time.Time `json:"last_modified"`
-    // salt character varying(127) COLLATE pg_catalog."default",
+	IsActive   bool      `json:"is_active"`
+	// avatar character varying(100) COLLATE pg_catalog."default",
+	LastModified time.Time `json:"last_modified"`
+	// salt character varying(127) COLLATE pg_catalog."default",
 	WasEmailActivated bool `json:"was_email_activated"`
-    // pr_access_code character varying(127) COLLATE pg_catalog."default" NOT NULL,
-    // pr_expiry_date timestamp with time zone NOT NULL,
+	// pr_access_code character varying(127) COLLATE pg_catalog."default" NOT NULL,
+	// pr_expiry_date timestamp with time zone NOT NULL,
 
 	// IsArchived              bool   `json:"is_archived"`
 }
@@ -143,28 +143,28 @@ func runUserInsert(ou *OldUser, tr *repositories.TenantRepo, ur *repositories.Us
 		tenantId = sql.NullInt64{Int64: ou.TenantId.Int64, Valid: true}
 	}
 
-    ctx := context.Background()
+	ctx := context.Background()
 	tenant, err := tr.GetByOldId(ctx, uint64(tenantId.Int64))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	m := &models.User{
-		OldId: ou.Id,
-		Uuid: uuid.NewString(),
-		FirstName: ou.FirstName,
-		LastName: ou.LastName,
-		Email: ou.Email,
-		JoinedTime: ou.DateJoined,
-		State: state,
-		Timezone: "America/Toronto",
-		CreatedTime: ou.DateJoined,
-		ModifiedTime: ou.LastModified,
-		Salt: "",
+		OldId:             ou.Id,
+		Uuid:              uuid.NewString(),
+		FirstName:         ou.FirstName,
+		LastName:          ou.LastName,
+		Email:             ou.Email,
+		JoinedTime:        ou.DateJoined,
+		State:             state,
+		Timezone:          "America/Toronto",
+		CreatedTime:       ou.DateJoined,
+		ModifiedTime:      ou.LastModified,
+		Salt:              "",
 		WasEmailActivated: ou.WasEmailActivated,
-		PrAccessCode: "",
-		PrExpiryTime: time.Now(),
-		TenantId: tenant.Id,
+		PrAccessCode:      "",
+		PrExpiryTime:      time.Now(),
+		TenantId:          tenant.Id,
 	}
 	err = ur.InsertOrUpdateByEmail(ctx, m)
 	if err != nil {

@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
-	"os"
-    "os/signal"
-	"syscall"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/rs/cors"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/controllers"
 	repo "github.com/over55/workery-server/internal/repositories"
@@ -40,7 +40,7 @@ func runServeCmd() {
 	// Load up our database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -53,44 +53,44 @@ func runServeCmd() {
 
 	c := controllers.NewBaseHandler([]byte(applicationSigningKey), ur, sm)
 
-    mux := http.NewServeMux()
-    mux.HandleFunc("/", c.AttachMiddleware(c.HandleRequests))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", c.AttachMiddleware(c.HandleRequests))
 
 	// cors.Default() setup the middleware with default options being
-    // all origins accepted with simple methods (GET, POST). See
-    // documentation via `https://github.com/rs/cors` for more options.
+	// all origins accepted with simple methods (GET, POST). See
+	// documentation via `https://github.com/rs/cors` for more options.
 	handler := cors.AllowAll().Handler(mux)
 
 	srv := &http.Server{
-		Addr: fmt.Sprintf("%s:%s", "localhost", "5000"),
-        Handler: handler,
+		Addr:    fmt.Sprintf("%s:%s", "localhost", "5000"),
+		Handler: handler,
 	}
 
-    done := make(chan os.Signal, 1)
+	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
-    go runMainRuntimeLoop(srv)
+	go runMainRuntimeLoop(srv)
 
 	log.Print("Server Started")
 
 	// Run the main loop blocking code.
 	<-done
 
-    stopMainRuntimeLoop(srv)
+	stopMainRuntimeLoop(srv)
 }
 
 func runMainRuntimeLoop(srv *http.Server) {
-    if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-        log.Fatalf("listen: %s\n", err)
-    }
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("listen: %s\n", err)
+	}
 }
 
 func stopMainRuntimeLoop(srv *http.Server) {
-    log.Printf("Starting graceful shutdown now...")
+	log.Printf("Starting graceful shutdown now...")
 
-    // Execute the graceful shutdown sub-routine which will terminate any
+	// Execute the graceful shutdown sub-routine which will terminate any
 	// active connections and reject any new connections.
-    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer func() {
 		// extra handling here
 		cancel()
@@ -99,6 +99,6 @@ func stopMainRuntimeLoop(srv *http.Server) {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server Shutdown Failed:%+v", err)
 	}
-    log.Printf("Graceful shutdown finished.")
-    log.Print("Server Exited")
+	log.Printf("Graceful shutdown finished.")
+	log.Print("Server Exited")
 }

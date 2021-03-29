@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"log"
 	"database/sql"
+	"fmt"
+	"log"
+	"os"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -18,7 +18,7 @@ import (
 
 var (
 	skillSetETLSchemaName string
-	skillSetETLTenantId int
+	skillSetETLTenantId   int
 )
 
 func init() {
@@ -42,7 +42,7 @@ func doRunImportSkillSet() {
 	// Load up our NEW database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -58,7 +58,7 @@ func doRunImportSkillSet() {
 	}
 	defer oldDb.Close()
 
-    // Load up our background context.
+	// Load up our background context.
 	ctx := context.Background()
 
 	// Load up our repositories.
@@ -78,12 +78,12 @@ func runSkillSetETL(ctx context.Context, tenantId uint64, ssr *repositories.Skil
 }
 
 type OldSkillSet struct {
-	Id                      uint64 `json:"id"`
-	Category          string    `json:"category"`
-	SubCategory       string    `json:"sub_category"`
-	Description       string    `json:"description"`
-	IsArchived        bool      `json:"is_archived"`
-    OldId             uint64    `json:"old_id"`
+	Id          uint64 `json:"id"`
+	Category    string `json:"category"`
+	SubCategory string `json:"sub_category"`
+	Description string `json:"description"`
+	IsArchived  bool   `json:"is_archived"`
+	OldId       uint64 `json:"old_id"`
 }
 
 func ListAllSkillSets(db *sql.DB) ([]*OldSkillSet, error) {
@@ -131,13 +131,13 @@ func insertSkillSetETL(ctx context.Context, tid uint64, ssr *repositories.SkillS
 	}
 
 	m := &models.SkillSet{
-		OldId: oss.Id,
-		TenantId: tid,
-		Uuid: uuid.NewString(),
-		Category: oss.Category,
+		OldId:       oss.Id,
+		TenantId:    tid,
+		Uuid:        uuid.NewString(),
+		Category:    oss.Category,
 		SubCategory: oss.SubCategory,
 		Description: oss.Description,
-		State: state,
+		State:       state,
 	}
 	err := ssr.Insert(ctx, m)
 	if err != nil {

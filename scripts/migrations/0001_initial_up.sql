@@ -308,12 +308,15 @@ CREATE TABLE customers (
     other_telephone_type_of SMALLINT NOT NULL DEFAULT 0,
 
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (how_hear_id) REFERENCES how_hear_about_us_items(id),
     FOREIGN KEY (created_by_id) REFERENCES users(id),
     FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
 );
 CREATE UNIQUE INDEX idx_customer_uuid
 ON customers (uuid);
+CREATE INDEX idx_customer_user_id
+ON customers (user_id);
 
 CREATE TABLE customer_tags (
     id BIGSERIAL PRIMARY KEY,

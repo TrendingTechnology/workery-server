@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	repo "github.com/over55/workery-server/internal/repositories"
@@ -15,21 +15,21 @@ import (
 )
 
 var (
-	ctSchemaName string
-	ctName string
-	ctState int
-	ctTimezone string
-	ctAddressCountry string
-	ctAddressRegion string
-	ctAddressLocality string
+	ctSchemaName          string
+	ctName                string
+	ctState               int
+	ctTimezone            string
+	ctAddressCountry      string
+	ctAddressRegion       string
+	ctAddressLocality     string
 	ctPostOfficeBoxNumber string
-	ctPostalCode string
-	ctStreetAddress string
-	ctStreetAddressExtra string
+	ctPostalCode          string
+	ctStreetAddress       string
+	ctStreetAddressExtra  string
 	// elevation,
 	// latitude,
 	// longitude,
-	ctAreaServed string
+	ctAreaServed        string
 	ctAvailableLanguage string
 	// contact_type,
 	ctEmail string
@@ -101,7 +101,7 @@ func runCreateTenant() {
 	// Load up our database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -115,20 +115,20 @@ func runCreateTenant() {
 	}
 
 	m := &models.Tenant{
-		Uuid: uuid.NewString(),
-		SchemaName: ctSchemaName,
-		Name: ctName,
-		State: int8(ctState),
-		Timezone: ctTimezone,
-		CreatedTime: time.Now(),
-		ModifiedTime: time.Now(),
-		AddressCountry: ctAddressCountry,
-		AddressRegion: ctAddressRegion,
-		AddressLocality: ctAddressLocality,
+		Uuid:                uuid.NewString(),
+		SchemaName:          ctSchemaName,
+		Name:                ctName,
+		State:               int8(ctState),
+		Timezone:            ctTimezone,
+		CreatedTime:         time.Now(),
+		ModifiedTime:        time.Now(),
+		AddressCountry:      ctAddressCountry,
+		AddressRegion:       ctAddressRegion,
+		AddressLocality:     ctAddressLocality,
 		PostOfficeBoxNumber: ctPostOfficeBoxNumber,
-		PostalCode: ctPostalCode,
-		StreetAddress: ctStreetAddress,
-		StreetAddressExtra: ctStreetAddressExtra,
+		PostalCode:          ctPostalCode,
+		StreetAddress:       ctStreetAddress,
+		StreetAddressExtra:  ctStreetAddressExtra,
 		// elevation,
 		// latitude,
 		// longitude,

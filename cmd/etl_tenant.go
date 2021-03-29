@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"os"
 	"log"
+	"os"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -33,7 +33,7 @@ func doRunImportTenant() {
 	// Load up our new database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -52,44 +52,43 @@ func doRunImportTenant() {
 	}
 	defer oldDb.Close()
 
-    // Begin the operation.
+	// Begin the operation.
 	runTenantETL(r, oldDb)
 }
 
 type OldTenant struct {
-	Id                      uint64    `json:"id"`
-	SchemaName              string    `json:"schema_name"`
-	Created                 time.Time `json:"created"`
-	LastModified            time.Time `json:"last_modified"`
-	AlternateName           string    `json:"alternate_name"`
-	Description             string    `json:"description"`
-	Name                    string    `json:"name"`
-	Url                     sql.NullString `json:"url"`
-	AreaServed              sql.NullString    `json:"area_served"`
-	AvailableLanguage       sql.NullString    `json:"available_language"`
-	ContactType             sql.NullString    `json:"contact_type"`
-	Email                   sql.NullString    `json:"email"`
-	FaxNumber               sql.NullString    `json:"fax_number"`
-	Telephone               sql.NullString    `json:"telephone"`
-	TelephoneTypeOf         int8      `json:"telephone_type_of"`
-	TelephoneExtension      sql.NullString    `json:"telephone_extension"`
-	OtherTelephone          sql.NullString    `json:"other_telephone"`
-	OtherTelephoneExtension sql.NullString    `json:"other_telephone_extension"`
-	OtherTelephoneTypeOf    int8      `json:"other_telephone_type_of"`
-	AddressCountry          string    `json:"address_country"`
-	AddressRegion           string    `json:"address_region"`
-	AddressLocality         string    `json:"address_locality"`
-	PostOfficeBoxNumber     string    `json:"post_office_box_number"`
-	PostalCode              string    `json:"postal_code"`
-	StreetAddress           string    `json:"street_address"`
-	StreetAddressExtra      string    `json:"street_address_extra"`
-	Elevation               sql.NullFloat64   `json:"elevation"`
-	Latitude                sql.NullFloat64   `json:"latitude"`
-	Longitude               sql.NullFloat64   `json:"longitude"`
-    TimezoneName            string    `json:"timestamp_name"`
-	IsArchived              bool   `json:"is_archived"`
+	Id                      uint64          `json:"id"`
+	SchemaName              string          `json:"schema_name"`
+	Created                 time.Time       `json:"created"`
+	LastModified            time.Time       `json:"last_modified"`
+	AlternateName           string          `json:"alternate_name"`
+	Description             string          `json:"description"`
+	Name                    string          `json:"name"`
+	Url                     sql.NullString  `json:"url"`
+	AreaServed              sql.NullString  `json:"area_served"`
+	AvailableLanguage       sql.NullString  `json:"available_language"`
+	ContactType             sql.NullString  `json:"contact_type"`
+	Email                   sql.NullString  `json:"email"`
+	FaxNumber               sql.NullString  `json:"fax_number"`
+	Telephone               sql.NullString  `json:"telephone"`
+	TelephoneTypeOf         int8            `json:"telephone_type_of"`
+	TelephoneExtension      sql.NullString  `json:"telephone_extension"`
+	OtherTelephone          sql.NullString  `json:"other_telephone"`
+	OtherTelephoneExtension sql.NullString  `json:"other_telephone_extension"`
+	OtherTelephoneTypeOf    int8            `json:"other_telephone_type_of"`
+	AddressCountry          string          `json:"address_country"`
+	AddressRegion           string          `json:"address_region"`
+	AddressLocality         string          `json:"address_locality"`
+	PostOfficeBoxNumber     string          `json:"post_office_box_number"`
+	PostalCode              string          `json:"postal_code"`
+	StreetAddress           string          `json:"street_address"`
+	StreetAddressExtra      string          `json:"street_address_extra"`
+	Elevation               sql.NullFloat64 `json:"elevation"`
+	Latitude                sql.NullFloat64 `json:"latitude"`
+	Longitude               sql.NullFloat64 `json:"longitude"`
+	TimezoneName            string          `json:"timestamp_name"`
+	IsArchived              bool            `json:"is_archived"`
 }
-
 
 // Function returns a paginated list of all type element items.
 func ListAllTenants(db *sql.DB) ([]*OldTenant, error) {
@@ -147,7 +146,7 @@ func ListAllTenants(db *sql.DB) ([]*OldTenant, error) {
 			&m.Elevation,
 			&m.Latitude,
 			&m.Longitude,
-		    &m.TimezoneName,
+			&m.TimezoneName,
 			&m.IsArchived,
 		)
 		if err != nil {
@@ -174,23 +173,23 @@ func runTenantETL(r *repositories.TenantRepo, oldDb *sql.DB) {
 
 func runTenantInsert(ot *OldTenant, r *repositories.TenantRepo) {
 	m := &models.Tenant{
-		OldId: ot.Id,
-		Uuid: uuid.NewString(),
-		AlternateName: ot.AlternateName,
-		Description: ot.Description,
-		Name: ot.Name,
-		Url: ot.Url.String,
-		State: 1,
-		Timezone: "America/Toronto",
-		CreatedTime: ot.Created,
-		ModifiedTime: ot.LastModified,
-		AddressCountry: ot.AddressCountry,
-		AddressRegion: ot.AddressRegion,
-		AddressLocality: ot.AddressLocality,
-		PostalCode: ot.PostalCode,
-		StreetAddress: ot.StreetAddress,
+		OldId:              ot.Id,
+		Uuid:               uuid.NewString(),
+		AlternateName:      ot.AlternateName,
+		Description:        ot.Description,
+		Name:               ot.Name,
+		Url:                ot.Url.String,
+		State:              1,
+		Timezone:           "America/Toronto",
+		CreatedTime:        ot.Created,
+		ModifiedTime:       ot.LastModified,
+		AddressCountry:     ot.AddressCountry,
+		AddressRegion:      ot.AddressRegion,
+		AddressLocality:    ot.AddressLocality,
+		PostalCode:         ot.PostalCode,
+		StreetAddress:      ot.StreetAddress,
 		StreetAddressExtra: ot.StreetAddressExtra,
-		SchemaName: ot.SchemaName,
+		SchemaName:         ot.SchemaName,
 	}
 	ctx := context.Background()
 	err := r.InsertOrUpdateBySchemaName(ctx, m)

@@ -10,12 +10,12 @@ import (
 // 0 = Inactive
 
 type SkillSetInsuranceRequirement struct {
-	Id                uint64    `json:"id"`
-	Uuid              string    `json:"uuid"`
-	TenantId          uint64    `json:"tenant_id"`
-	SkillSetId             uint64    `json:"skill_set_id"`
+	Id                     uint64 `json:"id"`
+	Uuid                   string `json:"uuid"`
+	TenantId               uint64 `json:"tenant_id"`
+	SkillSetId             uint64 `json:"skill_set_id"`
 	InsuranceRequirementId uint64 `json:"insurance_requirement_id"`
-    OldId                  uint64    `json:"old_id"`
+	OldId                  uint64 `json:"old_id"`
 }
 
 type SkillSetInsuranceRequirementRepository interface {

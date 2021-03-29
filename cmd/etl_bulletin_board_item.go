@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"log"
 	"database/sql"
+	"fmt"
+	"log"
+	"os"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -39,7 +39,7 @@ func doRunImportBulletinBoardItem() {
 	// Load up our NEW database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -55,7 +55,7 @@ func doRunImportBulletinBoardItem() {
 	}
 	defer oldDb.Close()
 
-    // Load up our background context.
+	// Load up our background context.
 	ctx := context.Background()
 
 	// Load up our repositories.
@@ -75,15 +75,15 @@ func doRunImportBulletinBoardItem() {
 }
 
 type OldBulletinBoardItem struct {
-	Id                uint64    `json:"id"`
-	Text              string    `json:"text"`
-	CreatedAt         time.Time     `json:"created_at"`
-	CreatedById       sql.NullInt64         `json:"created_by_id,omitempty"`
-	CreatedFrom       string        `json:"created_from"`
-	LastModifiedAt    time.Time             `json:"last_modified_at"`
-	LastModifiedById  sql.NullInt64 `json:"last_modified_by_id,omitempty"`
-	LastModifiedFrom  string        `json:"last_modified_from"`
-	IsArchived        bool      `json:"is_archived"`
+	Id               uint64        `json:"id"`
+	Text             string        `json:"text"`
+	CreatedAt        time.Time     `json:"created_at"`
+	CreatedById      sql.NullInt64 `json:"created_by_id,omitempty"`
+	CreatedFrom      string        `json:"created_from"`
+	LastModifiedAt   time.Time     `json:"last_modified_at"`
+	LastModifiedById sql.NullInt64 `json:"last_modified_by_id,omitempty"`
+	LastModifiedFrom string        `json:"last_modified_from"`
+	IsArchived       bool          `json:"is_archived"`
 }
 
 func ListAllBulletinBoardItems(db *sql.DB) ([]*OldBulletinBoardItem, error) {
@@ -145,17 +145,17 @@ func insertBulletinBoardItemETL(ctx context.Context, tid uint64, irr *repositori
 	}
 
 	m := &models.BulletinBoardItem{
-		OldId: oir.Id,
-		TenantId: tid,
-		Uuid: uuid.NewString(),
-		Text: oir.Text,
-		CreatedTime: oir.CreatedAt,
-		CreatedById: oir.CreatedById,
-		CreatedFromIP: oir.CreatedFrom,
-		LastModifiedTime: oir.LastModifiedAt,
-		LastModifiedById: oir.LastModifiedById,
+		OldId:              oir.Id,
+		TenantId:           tid,
+		Uuid:               uuid.NewString(),
+		Text:               oir.Text,
+		CreatedTime:        oir.CreatedAt,
+		CreatedById:        oir.CreatedById,
+		CreatedFromIP:      oir.CreatedFrom,
+		LastModifiedTime:   oir.LastModifiedAt,
+		LastModifiedById:   oir.LastModifiedById,
 		LastModifiedFromIP: oir.LastModifiedFrom,
-		State: state,
+		State:              state,
 	}
 	err := irr.Insert(ctx, m)
 	if err != nil {

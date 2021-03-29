@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"log"
 	"database/sql"
+	"fmt"
+	"log"
+	"os"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -39,7 +39,7 @@ func doRunImportVehicleType() {
 	// Load up our NEW database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -55,7 +55,7 @@ func doRunImportVehicleType() {
 	}
 	defer oldDb.Close()
 
-    // Load up our background context.
+	// Load up our background context.
 	ctx := context.Background()
 
 	// Load up our repositories.
@@ -75,10 +75,10 @@ func doRunImportVehicleType() {
 }
 
 type OldUVehicleType struct {
-	Id                uint64    `json:"id"`
-	Text              string    `json:"text"`
-	Description       string    `json:"description"`
-	IsArchived        bool      `json:"is_archived"`
+	Id          uint64 `json:"id"`
+	Text        string `json:"text"`
+	Description string `json:"description"`
+	IsArchived  bool   `json:"is_archived"`
 }
 
 func ListAllVehicleTypes(db *sql.DB) ([]*OldUVehicleType, error) {
@@ -135,12 +135,12 @@ func insertVehicleTypeETL(ctx context.Context, tid uint64, irr *repositories.Veh
 	}
 
 	m := &models.VehicleType{
-		OldId: oir.Id,
-		TenantId: tid,
-		Uuid: uuid.NewString(),
-		Text: oir.Text,
+		OldId:       oir.Id,
+		TenantId:    tid,
+		Uuid:        uuid.NewString(),
+		Text:        oir.Text,
 		Description: oir.Description,
-		State: state,
+		State:       state,
 	}
 	err := irr.Insert(ctx, m)
 	if err != nil {

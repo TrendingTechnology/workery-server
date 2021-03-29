@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"log"
 	"database/sql"
+	"fmt"
+	"log"
+	"os"
 	"time"
 
-	"github.com/spf13/cobra"
 	"github.com/google/uuid"
+	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -39,7 +39,7 @@ func doRunImportComment() {
 	// Load up our NEW database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -55,7 +55,7 @@ func doRunImportComment() {
 	}
 	defer oldDb.Close()
 
-    // Load up our background context.
+	// Load up our background context.
 	ctx := context.Background()
 
 	// Load up our repositories.
@@ -75,15 +75,15 @@ func doRunImportComment() {
 }
 
 type OldComment struct {
-	Id                uint64        `json:"id"`
-	CreatedAt         time.Time     `json:"created_time"`
-	CreatedById       sql.NullInt64 `json:"created_by_id,omitempty"`
-	CreatedFrom       sql.NullString        `json:"created_from"`
-	LastModifiedAt    time.Time     `json:"last_modified_time"`
-	LastModifiedById  sql.NullInt64 `json:"last_modified_by_id,omitempty"`
-	LastModifiedFrom  sql.NullString        `json:"last_modified_from"`
-	Text              string        `json:"text"`
-	IsArchived        bool          `json:"is_archived"`
+	Id               uint64         `json:"id"`
+	CreatedAt        time.Time      `json:"created_time"`
+	CreatedById      sql.NullInt64  `json:"created_by_id,omitempty"`
+	CreatedFrom      sql.NullString `json:"created_from"`
+	LastModifiedAt   time.Time      `json:"last_modified_time"`
+	LastModifiedById sql.NullInt64  `json:"last_modified_by_id,omitempty"`
+	LastModifiedFrom sql.NullString `json:"last_modified_from"`
+	Text             string         `json:"text"`
+	IsArchived       bool           `json:"is_archived"`
 }
 
 func ListAllComments(db *sql.DB) ([]*OldComment, error) {
@@ -144,17 +144,17 @@ func insertCommentETL(ctx context.Context, tid uint64, irr *repositories.Comment
 		state = 0
 	}
 	m := &models.Comment{
-		OldId: oir.Id,
-		TenantId: tid,
-		Uuid: uuid.NewString(),
-		CreatedTime: oir.CreatedAt,
-		CreatedById: oir.CreatedById,
-		CreatedFromIP: oir.CreatedFrom.String,
-		LastModifiedTime: oir.LastModifiedAt,
-		LastModifiedById: oir.LastModifiedById,
+		OldId:              oir.Id,
+		TenantId:           tid,
+		Uuid:               uuid.NewString(),
+		CreatedTime:        oir.CreatedAt,
+		CreatedById:        oir.CreatedById,
+		CreatedFromIP:      oir.CreatedFrom.String,
+		LastModifiedTime:   oir.LastModifiedAt,
+		LastModifiedById:   oir.LastModifiedById,
 		LastModifiedFromIP: oir.LastModifiedFrom.String,
-		Text: oir.Text,
-		State: state,
+		Text:               oir.Text,
+		State:              state,
 	}
 	err := irr.Insert(ctx, m)
 	if err != nil {

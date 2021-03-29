@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"os"
 	"log"
+	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -33,7 +33,7 @@ func doRunImportUserGroup() {
 	// Load up our new database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
-	    log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -52,16 +52,15 @@ func doRunImportUserGroup() {
 	}
 	defer oldDb.Close()
 
-    // Begin the operation.
+	// Begin the operation.
 	runUserGroupETL(r, oldDb)
 }
 
 type OldUserGroup struct {
-	Id                      uint64    `json:"id"`
-	UserId                  uint64    `json:"shareduser_id"`
-	GroupId                 uint64    `json:"group_id"`
+	Id      uint64 `json:"id"`
+	UserId  uint64 `json:"shareduser_id"`
+	GroupId uint64 `json:"group_id"`
 }
-
 
 // Function returns a paginated list of all type element items.
 func ListAllUserGroups(db *sql.DB) ([]*OldUserGroup, error) {
