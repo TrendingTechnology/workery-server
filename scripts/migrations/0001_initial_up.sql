@@ -231,14 +231,14 @@ CREATE TABLE bulletin_board_items (
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     last_modified_by_id BIGINT NOT NULL,
     last_modified_from_ip VARCHAR (50) NOT NULL DEFAULT '',
-    text VARCHAR (63) NOT NULL DEFAULT '',
+    text TEXT NOT NULL DEFAULT '',
     state SMALLINT NOT NULL DEFAULT 0,
     old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 CREATE UNIQUE INDEX idx_bulletin_board_item_uuid
 ON bulletin_board_items (uuid);
-CREATE UNIQUE INDEX idx_bulletin_board_item_tenant_id
+CREATE INDEX idx_bulletin_board_item_tenant_id
 ON bulletin_board_items (tenant_id);
 
 CREATE TABLE customers (
