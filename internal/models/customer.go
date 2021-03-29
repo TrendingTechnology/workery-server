@@ -71,7 +71,6 @@ type Customer struct {
 	ContactType             string `json:"contact_type"`
 	Email                   string `json:"email"`
 	FaxNumber               string `json:"fax_number"`
-	ProductSupported        string `json:"product_supported"`
 	Telephone               string `json:"telephone"`
 	TelephoneTypeOf         int8           `json:"telephone_type_of"`
 	TelephoneExtension      string `json:"telephone_extension"`

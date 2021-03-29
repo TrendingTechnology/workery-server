@@ -7,9 +7,9 @@ import (
 	"log"
 	"os"
 	"time"
-	// "strconv"
+	"strconv"
 
-	// "github.com/google/uuid"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 
 	"github.com/over55/workery-server/internal/models"
@@ -214,38 +214,164 @@ func runCustomerETL(ctx context.Context, tenantId uint64, ur *repositories.UserR
 }
 
 func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, omr *repositories.CustomerRepo, om *OldUCustomer) {
-	// var state int8 = 1
-	// if om.IsArchived == true {
-	// 	state = 0
-	// }
+	var state int8 = 1
+	if om.IsArchived == true {
+		state = 0
+	}
 
+    // Variable used to keep the ID of the user record in our database.
     userId := uint64(om.OwnerId.Int64)
-	var err error
-	var user *models.User
+
+	// CASE 1: User record exists in our database.
 	if om.OwnerId.Valid {
-		log.Println(om.Id)
-		user, err = ur.GetByOldId(ctx, om.Id)
+		// log.Println(om.Id)
+		user, err := ur.GetByOldId(ctx, userId)
 		if err != nil {
-			return
+			log.Fatal("(A)", err)
+		}
+		if user == nil {
+			log.Fatal("(B) User is null")
+		}
+		userId = user.Id
+
+	// CASE 2: Record D.N.E.
+	} else {
+		var email string
+
+		// CASE 2A: Email specified
+		if om.Email.Valid {
+			email = om.Email.String
+
+		// CASE 2B: Email is not specified
+		} else {
+			customerIdStr := strconv.FormatUint(om.Id, 10)
+			email = "customer+"+customerIdStr+"@workery.ca"
+		}
+
+		user, err := ur.GetByEmail(ctx, email)
+		if err != nil {
+			log.Panic("(C)", err)
+		}
+		if user == nil {
+			um := &models.User{
+				Uuid:              uuid.NewString(),
+				FirstName:         om.GivenName.String,
+				LastName:          om.LastName.String,
+				Email:             email,
+				// JoinedTime:        om.DateJoined,
+				State:             state,
+				Timezone:          "America/Toronto",
+				// CreatedTime:       om.DateJoined,
+				// ModifiedTime:      om.LastModified,
+				Salt:              "",
+				WasEmailActivated: false,
+				PrAccessCode:      "",
+				PrExpiryTime:      time.Now(),
+				TenantId:          tid,
+				Role:              5, // Customer
+			}
+			err = ur.InsertOrUpdateByEmail(ctx, um)
+			if err != nil {
+				log.Panic("(D)", err)
+			}
+			user, err = ur.GetByEmail(ctx, email)
+			if err != nil {
+				log.Panic("(E)", err)
+			}
 		}
 		userId = user.Id
 	}
-	fmt.Println("Imported UserID#", userId)
 
-	// m := &models.Customer{
-	// 	OldId:    om.Id,
-	// 	Uuid:     uuid.NewString(),
-	// 	TenantId: tid,
-	// 	UserId:   userId,
-	// 	TypeOf:   om.TypeOf,
-	// 	State:    state,
-	// }
-	//
-	// fmt.Println("Imported UserID#", m.UserId)
-	//
-	// // err := om.Insert(ctx, m)
-	// // if err != nil {
-	// // 	log.Panic(err)
-	// // }
-	// // fmt.Println("Imported ID#", om.Id)
+    var createdById uint64
+	if om.CreatedById.Valid {
+		createdById = uint64(om.CreatedById.Int64)
+		user, err := ur.GetByOldId(ctx, createdById)
+		if err != nil {
+			log.Fatal("(F)", err)
+		}
+		if user == nil {
+			log.Fatal("(G) User is null")
+		}
+	} else {
+		createdById = userId
+	}
+
+	var lastModifiedById uint64
+	if om.LastModifiedById.Valid {
+		lastModifiedById = uint64(om.LastModifiedById.Int64)
+		user, err := ur.GetByOldId(ctx, lastModifiedById)
+		if err != nil {
+			log.Fatal("(F)", err)
+		}
+		if user == nil {
+			log.Fatal("(G) User is null")
+		}
+	} else {
+		lastModifiedById = userId
+	}
+
+	m := &models.Customer{
+		OldId:       om.Id,
+		Uuid:        uuid.NewString(),
+		TenantId:    tid,
+		UserId:      userId,
+		TypeOf:      om.TypeOf,
+		IndexedText: om.IndexedText.String,
+		IsOkToEmail: om.IsOkToEmail,
+		IsOkToText: om.IsOkToText,
+		IsBusiness: om.IsBusiness,
+		IsSenior:   om.IsSenior,
+		IsSupport:  om.IsSupport,
+		JobInfoRead: om.JobInfoRead.String,
+		HowHearId: uint64(om.HowHearId.Int64),
+		HowHearOld: om.HowHearOld,
+		HowHearOther: om.HowHearOther,
+		State: state,
+		DeactivationReason: om.DeactivationReason,
+		DeactivationReasonOther: om.DeactivationReasonOther,
+		CreatedTime: om.Created,
+		CreatedById: createdById,
+		CreatedFromIP: om.CreatedFrom.String,
+		LastModifiedTime: om.LastModified,
+		LastModifiedById: lastModifiedById,
+		LastModifiedFromIP: om.LastModifiedFrom.String,
+		OrganizationName: om.OrganizationName.String,
+		AddressCountry: om.AddressCountry,
+		AddressRegion: om.AddressRegion,
+		AddressLocality: om.AddressLocality,
+		PostOfficeBoxNumber: om.PostOfficeBoxNumber.String,
+		PostalCode: om.PostalCode.String,
+		StreetAddress: om.StreetAddress,
+		StreetAddressExtra: om.StreetAddressExtra.String,
+		GivenName: om.GivenName.String,
+		MiddleName: om.MiddleName.String,
+		LastName: om.LastName.String,
+		Birthdate: om.Birthdate,
+		JoinDate: om.JoinDate,
+		Nationality: om.Nationality.String,
+		Gender: om.Gender.String,
+		TaxId: om.TaxId.String,
+		Elevation: om.Elevation.Float64,
+		Latitude: om.Latitude.Float64,
+		Longitude: om.Longitude.Float64,
+		AreaServed: om.AreaServed.String,
+		AvailableLanguage: om.AvailableLanguage.String,
+		ContactType: om.ContactType.String,
+		Email: om.Email.String,
+		FaxNumber: om.FaxNumber.String,
+		Telephone: om.Telephone.String,
+		TelephoneTypeOf: om.TelephoneTypeOf,
+		TelephoneExtension: om.TelephoneExtension.String,
+		OtherTelephone: om.OtherTelephone.String,
+		OtherTelephoneExtension: om.OtherTelephoneExtension.String,
+		OtherTelephoneTypeOf: om.OtherTelephoneTypeOf,
+	}
+
+	// fmt.Println(m) // For debugging purposes only.
+
+	err := omr.Insert(ctx, m)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("Imported ID#", om.Id)
 }

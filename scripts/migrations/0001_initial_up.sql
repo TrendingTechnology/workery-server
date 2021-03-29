@@ -269,6 +269,7 @@ CREATE TABLE customers (
     last_modified_from_ip VARCHAR (50) NOT NULL DEFAULT '',
     organization_name VARCHAR (255) NOT NULL DEFAULT '',
     organization_type_of SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
 
     -- abstract_postal_address.py
     address_country VARCHAR (127) NOT NULL DEFAULT '',
@@ -283,8 +284,8 @@ CREATE TABLE customers (
     given_name VARCHAR (63) NOT NULL DEFAULT '',
     middle_name VARCHAR (63) NOT NULL DEFAULT '',
     last_name VARCHAR (63) NOT NULL DEFAULT '',
-    birthdate VARCHAR (31) NOT NULL DEFAULT '',
-    join_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    birthdate TIMESTAMP,
+    join_date TIMESTAMP DEFAULT (now() AT TIME ZONE 'utc'),
     nationality VARCHAR (63) NOT NULL DEFAULT '',
     gender VARCHAR (31) NOT NULL DEFAULT '',
     tax_id VARCHAR (127) NOT NULL DEFAULT '',
