@@ -325,12 +325,14 @@ CREATE TABLE customer_tags (
     tenant_id BIGINT NOT NULL,
     customer_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (tag_id) REFERENCES tags(id)
 );
 CREATE UNIQUE INDEX idx_customer_tag_uuid
 ON customer_tags (uuid);
+-- TODO: INDEXES
 
 CREATE TABLE customer_comments (
     id BIGSERIAL PRIMARY KEY,

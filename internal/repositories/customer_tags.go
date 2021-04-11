@@ -8,25 +8,25 @@ import (
 	"github.com/over55/workery-server/internal/models"
 )
 
-type TagRepo struct {
+type CustomerTagRepo struct {
 	db *sql.DB
 }
 
-func NewTagRepo(db *sql.DB) *TagRepo {
-	return &TagRepo{
+func NewCustomerTagRepo(db *sql.DB) *CustomerTagRepo {
+	return &CustomerTagRepo{
 		db: db,
 	}
 }
 
-func (r *TagRepo) Insert(ctx context.Context, m *models.Tag) error {
+func (r *CustomerTagRepo) Insert(ctx context.Context, m *models.CustomerTag) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	query := `
-    INSERT INTO tags (
-        uuid, tenant_id, text, description, state, old_id
+    INSERT INTO customer_tags (
+        uuid, tenant_id, customer_id, tag_id, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6
+        $1, $2, $3, $4, $5
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -36,22 +36,22 @@ func (r *TagRepo) Insert(ctx context.Context, m *models.Tag) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.Text, m.Description, m.State, m.OldId,
+		m.Uuid, m.TenantId, m.CustomerId, m.TagId, m.OldId,
 	)
 	return err
 }
 
-func (r *TagRepo) UpdateById(ctx context.Context, m *models.Tag) error {
+func (r *CustomerTagRepo) UpdateById(ctx context.Context, m *models.CustomerTag) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	query := `
     UPDATE
-        tags
+        customer_tags
     SET
-        tenant_id = $1, text = $2, description = $3, state = $4
+        tenant_id = $1, customer_id = $2, tag_id = $3
     WHERE
-        id = $5`
+        id = $4`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -60,26 +60,26 @@ func (r *TagRepo) UpdateById(ctx context.Context, m *models.Tag) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.TenantId, m.Text, m.Description, m.State, m.Id,
+		m.TenantId, m.CustomerId, m.TagId, m.Id,
 	)
 	return err
 }
 
-func (r *TagRepo) GetById(ctx context.Context, id uint64) (*models.Tag, error) {
+func (r *CustomerTagRepo) GetById(ctx context.Context, id uint64) (*models.CustomerTag, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	m := new(models.Tag)
+	m := new(models.CustomerTag)
 
 	query := `
     SELECT
-        id, uuid, tenant_id, text, description, state
+        id, uuid, tenant_id, customer_id, tag_id
 	FROM
-        tags
+        customer_tags
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.Text, &m.Description, &m.State,
+		&m.Id, &m.Uuid, &m.TenantId, &m.CustomerId, &m.TagId,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -92,33 +92,7 @@ func (r *TagRepo) GetById(ctx context.Context, id uint64) (*models.Tag, error) {
 	return m, nil
 }
 
-func (r *TagRepo) GetIdByOldId(ctx context.Context, tenantId uint64, oldId uint64) (uint64, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	var newId uint64
-
-	query := `
-	SELECT
-		id
-	FROM
-		tags
-	WHERE
-		tenant_id = $1 AND old_id = $2
-	`
-	err := r.db.QueryRowContext(ctx, query, tenantId, oldId).Scan(&newId)
-	if err != nil {
-		// CASE 1 OF 2: Cannot find record with that email.
-		if err == sql.ErrNoRows {
-			return 0, nil
-		} else { // CASE 2 OF 2: All other errors.
-			return 0, err
-		}
-	}
-	return newId, nil
-}
-
-func (r *TagRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, error) {
+func (r *CustomerTagRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -128,7 +102,7 @@ func (r *TagRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, error
     SELECT
         1
     FROM
-        tags
+        customer_tags
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&exists)
@@ -143,7 +117,7 @@ func (r *TagRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, error
 	return exists, nil
 }
 
-func (r *TagRepo) InsertOrUpdateById(ctx context.Context, m *models.Tag) error {
+func (r *CustomerTagRepo) InsertOrUpdateById(ctx context.Context, m *models.CustomerTag) error {
 	if m.Id == 0 {
 		return r.Insert(ctx, m)
 	}

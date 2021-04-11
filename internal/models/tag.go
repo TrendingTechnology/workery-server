@@ -23,7 +23,7 @@ type TagRepository interface {
 	Insert(ctx context.Context, u *Tag) error
 	UpdateById(ctx context.Context, u *Tag) error
 	GetById(ctx context.Context, id uint64) (*Tag, error)
-	GetByOld(ctx context.Context, tenantId uint64, oldId uint64) (*Tag, error)
+	GetIdByOldId(ctx context.Context, tid uint64, oid uint64) (uint64, error)
 	CheckIfExistsById(ctx context.Context, id uint64) (bool, error)
 	InsertOrUpdateById(ctx context.Context, u *Tag) error
 }
