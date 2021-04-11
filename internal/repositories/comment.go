@@ -97,6 +97,35 @@ func (r *CommentRepo) GetById(ctx context.Context, id uint64) (*models.Comment, 
 	return m, nil
 }
 
+func (r *CommentRepo) GetIdByOldId(ctx context.Context, tid uint64, oid uint64) (uint64, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	var newId uint64
+
+	query := `
+    SELECT
+        id
+    FROM
+        comments
+    WHERE
+		tenant_id = $1
+	AND
+	    old_id = $2
+	`
+	err := r.db.QueryRowContext(ctx, query, tid, oid).Scan(&newId)
+	if err != nil {
+		// CASE 1 OF 2: Cannot find record with that email.
+		if err == sql.ErrNoRows {
+			return 0, nil
+		} else { // CASE 2 OF 2: All other errors.
+			return 0, err
+		}
+	}
+	return newId, nil
+}
+
+
 func (r *CommentRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()

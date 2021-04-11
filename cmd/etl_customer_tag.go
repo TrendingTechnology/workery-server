@@ -140,7 +140,7 @@ func runCustomerTagETL(ctx context.Context, tenantId uint64, irr *repositories.C
 }
 
 func insertCustomerTagETL(ctx context.Context, tenantId uint64, oldId uint64, customerId uint64, tagId uint64, irr *repositories.CustomerTagRepo) {
-    fmt.Println("Pre-Imported ID#", oldId)
+    fmt.Println("Pre-Imported Customer Tag ID#", oldId)
 	m := &models.CustomerTag{
 		OldId:       oldId,
 		Uuid:        uuid.NewString(),
@@ -152,5 +152,5 @@ func insertCustomerTagETL(ctx context.Context, tenantId uint64, oldId uint64, cu
 	if err != nil {
 		log.Panic("insertCustomerTagETL | Insert | err:", err)
 	}
-	fmt.Println("Post-Imported ID#", oldId)
+	fmt.Println("Post-Imported Customer Tag ID#", oldId)
 }

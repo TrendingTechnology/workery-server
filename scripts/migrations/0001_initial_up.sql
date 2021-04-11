@@ -322,6 +322,7 @@ ON customers (user_id);
 CREATE TABLE customer_tags (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     tenant_id BIGINT NOT NULL,
     customer_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
@@ -337,15 +338,20 @@ ON customer_tags (uuid);
 CREATE TABLE customer_comments (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     tenant_id BIGINT NOT NULL,
     customer_id BIGINT NOT NULL,
     comment_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (comment_id) REFERENCES comments(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
 CREATE UNIQUE INDEX idx_customer_comment_uuid
 ON customer_comments (uuid);
+CREATE UNIQUE INDEX idx_customer_comment_customer_id_comment_id
+ON customer_comments (tenant_id, customer_id, comment_id);
+-- TODO: INDEXES
 
 -- TODO: avatar_image -> PrivateImageUpload
 

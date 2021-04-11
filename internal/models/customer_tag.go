@@ -13,8 +13,8 @@ type CustomerTag struct {
 	Id          uint64 `json:"id"`
 	Uuid        string `json:"uuid"`
 	TenantId    uint64 `json:"tenant_id"`
-	CustomerId    uint64 `json:"customer_id"`
-	TagId        uint64 `json:"tag_id"`
+	CustomerId  uint64 `json:"customer_id"`
+	TagId       uint64 `json:"tag_id"`
 	OldId       uint64  `json:"old_id"`
 }
 
