@@ -493,6 +493,7 @@ CREATE TABLE associate_tags (
 );
 CREATE UNIQUE INDEX idx_associate_tag_uuid
 ON associate_tags (uuid);
+-- TODO: INDEXES
 
 CREATE TABLE associate_comments (
     id BIGSERIAL PRIMARY KEY,
