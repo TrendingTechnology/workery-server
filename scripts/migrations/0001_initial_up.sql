@@ -478,6 +478,7 @@ CREATE TABLE associate_skill_sets (
 );
 CREATE UNIQUE INDEX idx_associate_skill_set_uuid
 ON associate_skill_sets (uuid);
+-- TODO: INDEXES
 
 CREATE TABLE associate_tags (
     id BIGSERIAL PRIMARY KEY,
