@@ -23,7 +23,7 @@ type InsuranceRequirementRepository interface {
 	Insert(ctx context.Context, u *InsuranceRequirement) error
 	UpdateById(ctx context.Context, u *InsuranceRequirement) error
 	GetById(ctx context.Context, id uint64) (*InsuranceRequirement, error)
-	GetByOld(ctx context.Context, tenantId uint64, oldId uint64) (*InsuranceRequirement, error)
+	GetIdByOldId(ctx context.Context, tid uint64, oid uint64) (uint64, error)
 	CheckIfExistsById(ctx context.Context, id uint64) (bool, error)
 	InsertOrUpdateById(ctx context.Context, u *InsuranceRequirement) error
 }

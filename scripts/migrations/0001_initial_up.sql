@@ -523,6 +523,7 @@ CREATE TABLE associate_insurance_requirements (
 );
 CREATE UNIQUE INDEX idx_associate_insurance_requirement_uuid
 ON associate_insurance_requirements (uuid);
+-- TODO: INDEXES
 
 CREATE TABLE ongoing_work_orders (
     id BIGSERIAL PRIMARY KEY,
