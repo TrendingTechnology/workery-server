@@ -508,6 +508,7 @@ CREATE TABLE associate_comments (
 );
 CREATE UNIQUE INDEX idx_associate_comment_uuid
 ON associate_comments (uuid);
+-- TODO: INDEXES
 
 CREATE TABLE associate_insurance_requirements (
     id BIGSERIAL PRIMARY KEY,
