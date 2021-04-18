@@ -23,7 +23,7 @@ type VehicleTypeRepository interface {
 	Insert(ctx context.Context, u *VehicleType) error
 	UpdateById(ctx context.Context, u *VehicleType) error
 	GetById(ctx context.Context, id uint64) (*VehicleType, error)
-	GetByOld(ctx context.Context, tenantId uint64, oldId uint64) (*VehicleType, error)
+	GetIdByOldId(ctx context.Context, tid uint64, oid uint64) (uint64, error)
 	CheckIfExistsById(ctx context.Context, id uint64) (bool, error)
 	InsertOrUpdateById(ctx context.Context, u *VehicleType) error
 }

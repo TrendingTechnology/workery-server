@@ -456,12 +456,14 @@ CREATE TABLE associate_vehicle_types (
     tenant_id BIGINT NOT NULL,
     associate_id BIGINT NOT NULL,
     vehicle_type_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (associate_id) REFERENCES associates(id),
     FOREIGN KEY (vehicle_type_id) REFERENCES vehicle_types(id)
 );
 CREATE UNIQUE INDEX idx_associate_vehicle_type_uuid
 ON associate_vehicle_types (uuid);
+-- TODO: INDEXES
 
 CREATE TABLE associate_skill_sets (
     id BIGSERIAL PRIMARY KEY,
@@ -469,6 +471,7 @@ CREATE TABLE associate_skill_sets (
     tenant_id BIGINT NOT NULL,
     associate_id BIGINT NOT NULL,
     skill_set_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (associate_id) REFERENCES associates(id),
     FOREIGN KEY (skill_set_id) REFERENCES skill_sets(id)
@@ -482,6 +485,7 @@ CREATE TABLE associate_tags (
     tenant_id BIGINT NOT NULL,
     associate_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (associate_id) REFERENCES associates(id),
     FOREIGN KEY (tag_id) REFERENCES tags(id)
@@ -495,6 +499,7 @@ CREATE TABLE associate_comments (
     tenant_id BIGINT NOT NULL,
     associate_id BIGINT NOT NULL,
     comment_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (associate_id) REFERENCES associates(id),
     FOREIGN KEY (comment_id) REFERENCES comments(id)
@@ -508,6 +513,7 @@ CREATE TABLE associate_insurance_requirements (
     tenant_id BIGINT NOT NULL,
     associate_id BIGINT NOT NULL,
     insurance_requirement_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (associate_id) REFERENCES associates(id),
     FOREIGN KEY (insurance_requirement_id) REFERENCES insurance_requirements(id)
@@ -526,6 +532,7 @@ CREATE TABLE ongoing_work_orders (
     created_by_id BIGINT NOT NULL,
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (associate_id) REFERENCES associates(id),
@@ -593,6 +600,7 @@ CREATE TABLE work_orders (
     created_by_id BIGINT NOT NULL,
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (associate_id) REFERENCES associates(id),
@@ -614,6 +622,7 @@ CREATE TABLE work_order_ongoings (
     created_by_id BIGINT NOT NULL,
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES ongoing_work_orders(id),
     FOREIGN KEY (ongoing_order_id) REFERENCES associates(id),
@@ -636,6 +645,7 @@ CREATE TABLE activity_sheet_items (
     created_by_id BIGINT NOT NULL,
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (ongoing_order_id) REFERENCES ongoing_work_orders(id),
@@ -651,6 +661,7 @@ CREATE TABLE work_order_tags (
     tenant_id BIGINT NOT NULL,
     order_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (tag_id) REFERENCES tags(id)
@@ -664,6 +675,7 @@ CREATE TABLE work_order_skill_sets (
     tenant_id BIGINT NOT NULL,
     order_id BIGINT NOT NULL,
     skill_set_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (skill_set_id) REFERENCES skill_sets(id)
@@ -677,6 +689,7 @@ CREATE TABLE work_order_comments (
     tenant_id BIGINT NOT NULL,
     order_id BIGINT NOT NULL,
     comment_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (comment_id) REFERENCES comments(id)
@@ -790,6 +803,7 @@ CREATE TABLE work_order_invoices (
     created_by_id BIGINT NOT NULL,
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (created_by_id) REFERENCES users(id),
@@ -813,6 +827,7 @@ CREATE TABLE work_order_deposits (
     created_by_id BIGINT NOT NULL,
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (created_by_id) REFERENCES users(id),
@@ -839,6 +854,7 @@ CREATE TABLE task_items (
     created_by_id BIGINT NOT NULL,
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (ongoing_order_id) REFERENCES ongoing_work_orders(id),
@@ -877,6 +893,7 @@ CREATE TABLE customers (
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     organization_name VARCHAR (255) NOT NULL DEFAULT '',
     organization_type_of SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
 
     -- abstract_postal_address.py
     address_country VARCHAR (127) NOT NULL DEFAULT '',
@@ -929,6 +946,7 @@ CREATE TABLE customer_tags (
     tenant_id BIGINT NOT NULL,
     customer_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (tag_id) REFERENCES tags(id)
@@ -942,6 +960,7 @@ CREATE TABLE customer_comments (
     tenant_id BIGINT NOT NULL,
     customer_id BIGINT NOT NULL,
     comment_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (comment_id) REFERENCES comments(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id)
@@ -971,6 +990,7 @@ CREATE TABLE staff (
     created_by_id BIGINT NOT NULL,
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    old_id BIGINT NOT NULL DEFAULT 0,
 
     -- abstract_postal_address.py
     address_country VARCHAR (127) NOT NULL DEFAULT '',
@@ -1031,6 +1051,7 @@ CREATE TABLE staff_tags (
     tenant_id BIGINT NOT NULL,
     staff_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (staff_id) REFERENCES staff(id),
     FOREIGN KEY (tag_id) REFERENCES tags(id)
@@ -1044,6 +1065,7 @@ CREATE TABLE staff_comments (
     tenant_id BIGINT NOT NULL,
     staff_id BIGINT NOT NULL,
     comment_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (staff_id) REFERENCES staff(id),
     FOREIGN KEY (comment_id) REFERENCES comments(id)
@@ -1091,6 +1113,7 @@ CREATE TABLE partners (
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     score FLOAT NOT NULL DEFAULT 0,
     -- away_log_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
 
     -- abstract_postal_address.py
     address_country VARCHAR (127) NOT NULL DEFAULT '',
@@ -1153,6 +1176,7 @@ CREATE TABLE partner_vehicle_types (
     tenant_id BIGINT NOT NULL,
     partner_id BIGINT NOT NULL,
     vehicle_type_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (partner_id) REFERENCES partners(id),
     FOREIGN KEY (vehicle_type_id) REFERENCES vehicle_types(id)
@@ -1166,6 +1190,7 @@ CREATE TABLE partner_skill_sets (
     tenant_id BIGINT NOT NULL,
     partner_id BIGINT NOT NULL,
     skill_set_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (partner_id) REFERENCES partners(id),
     FOREIGN KEY (skill_set_id) REFERENCES skill_sets(id)
@@ -1179,6 +1204,7 @@ CREATE TABLE partner_tags (
     tenant_id BIGINT NOT NULL,
     partner_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (partner_id) REFERENCES partners(id),
     FOREIGN KEY (tag_id) REFERENCES tags(id)
@@ -1192,6 +1218,7 @@ CREATE TABLE partner_comments (
     tenant_id BIGINT NOT NULL,
     partner_id BIGINT NOT NULL,
     comment_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (partner_id) REFERENCES partners(id),
     FOREIGN KEY (comment_id) REFERENCES comments(id)
@@ -1205,6 +1232,7 @@ CREATE TABLE partner_insurance_requirements (
     tenant_id BIGINT NOT NULL,
     partner_id BIGINT NOT NULL,
     insurance_requirement_id BIGINT NOT NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (partner_id) REFERENCES partners(id),
     FOREIGN KEY (insurance_requirement_id) REFERENCES insurance_requirements(id)

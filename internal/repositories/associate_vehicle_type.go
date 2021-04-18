@@ -8,25 +8,25 @@ import (
 	"github.com/over55/workery-server/internal/models"
 )
 
-type VehicleTypeRepo struct {
+type AssociateVehicleTypeRepo struct {
 	db *sql.DB
 }
 
-func NewVehicleTypeRepo(db *sql.DB) *VehicleTypeRepo {
-	return &VehicleTypeRepo{
+func NewAssociateVehicleTypeRepo(db *sql.DB) *AssociateVehicleTypeRepo {
+	return &AssociateVehicleTypeRepo{
 		db: db,
 	}
 }
 
-func (r *VehicleTypeRepo) Insert(ctx context.Context, m *models.VehicleType) error {
+func (r *AssociateVehicleTypeRepo) Insert(ctx context.Context, m *models.AssociateVehicleType) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	query := `
-    INSERT INTO vehicle_types (
-        uuid, tenant_id, text, description, state, old_id
+    INSERT INTO associate_vehicle_types (
+        uuid, tenant_id, associate_id, vehicle_type_id, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6
+        $1, $2, $3, $4, $5
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -36,22 +36,22 @@ func (r *VehicleTypeRepo) Insert(ctx context.Context, m *models.VehicleType) err
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.Text, m.Description, m.State, m.OldId,
+		m.Uuid, m.TenantId, m.AssociateId, m.VehicleTypeId, m.OldId,
 	)
 	return err
 }
 
-func (r *VehicleTypeRepo) UpdateById(ctx context.Context, m *models.VehicleType) error {
+func (r *AssociateVehicleTypeRepo) UpdateById(ctx context.Context, m *models.AssociateVehicleType) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	query := `
     UPDATE
-        vehicle_types
+        associate_vehicle_types
     SET
-        tenant_id = $1, text = $2, description = $3, state = $4
+        tenant_id = $1, associate_id = $2, vehicle_type_id = $3
     WHERE
-        id = $5`
+        id = $4`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -60,26 +60,26 @@ func (r *VehicleTypeRepo) UpdateById(ctx context.Context, m *models.VehicleType)
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.TenantId, m.Text, m.Description, m.State, m.Id,
+		m.TenantId, m.AssociateId, m.VehicleTypeId, m.Id,
 	)
 	return err
 }
 
-func (r *VehicleTypeRepo) GetById(ctx context.Context, id uint64) (*models.VehicleType, error) {
+func (r *AssociateVehicleTypeRepo) GetById(ctx context.Context, id uint64) (*models.AssociateVehicleType, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	m := new(models.VehicleType)
+	m := new(models.AssociateVehicleType)
 
 	query := `
     SELECT
-        id, uuid, tenant_id, text, description, state
+        id, uuid, tenant_id, associate_id, vehicle_type_id
 	FROM
-        vehicle_types
+        associate_vehicle_types
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.Text, &m.Description, &m.State,
+		&m.Id, &m.Uuid, &m.TenantId, &m.AssociateId, &m.VehicleTypeId,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -92,35 +92,34 @@ func (r *VehicleTypeRepo) GetById(ctx context.Context, id uint64) (*models.Vehic
 	return m, nil
 }
 
-func (r *VehicleTypeRepo) GetIdByOldId(ctx context.Context, tid uint64, oid uint64) (uint64, error) {
+func (r *AssociateVehicleTypeRepo) GetByOld(ctx context.Context, tenantId uint64, oldId uint64) (*models.AssociateVehicleType, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	var newId uint64
+	m := new(models.AssociateVehicleType)
 
 	query := `
     SELECT
-        id
-    FROM
-        vehicle_types
+        id, uuid, tenant_id, associate_id, vehicle_type_id
+	FROM
+        associate_vehicle_types
     WHERE
-		tenant_id = $1
-	AND
-	    old_id = $2
-	`
-	err := r.db.QueryRowContext(ctx, query, tid, oid).Scan(&newId)
+        old_id = $1 AND tenant_id = $2`
+	err := r.db.QueryRowContext(ctx, query, oldId, tenantId).Scan(
+		&m.Id, &m.Uuid, &m.TenantId, &m.AssociateId, &m.VehicleTypeId,
+	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
 		if err == sql.ErrNoRows {
-			return 0, nil
+			return nil, nil
 		} else { // CASE 2 OF 2: All other errors.
-			return 0, err
+			return nil, err
 		}
 	}
-	return newId, nil
+	return m, nil
 }
 
-func (r *VehicleTypeRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, error) {
+func (r *AssociateVehicleTypeRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -130,7 +129,7 @@ func (r *VehicleTypeRepo) CheckIfExistsById(ctx context.Context, id uint64) (boo
     SELECT
         1
     FROM
-        vehicle_types
+        associate_vehicle_types
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&exists)
@@ -145,7 +144,7 @@ func (r *VehicleTypeRepo) CheckIfExistsById(ctx context.Context, id uint64) (boo
 	return exists, nil
 }
 
-func (r *VehicleTypeRepo) InsertOrUpdateById(ctx context.Context, m *models.VehicleType) error {
+func (r *AssociateVehicleTypeRepo) InsertOrUpdateById(ctx context.Context, m *models.AssociateVehicleType) error {
 	if m.Id == 0 {
 		return r.Insert(ctx, m)
 	}
