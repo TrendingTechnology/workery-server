@@ -55,7 +55,7 @@ func (r *AssociateRepo) Insert(ctx context.Context, m *models.Associate) error {
 		ctx,
 		m.Uuid, m.TenantId, m.UserId, m.TypeOf, m.OrganizationName, m.OrganizationTypeOf,
 		m.Business, m.IndexedText, m.IsOkToEmail, m.IsOkToText, m.HourlySalaryDesired,
-	    m.LimitSpecial, m.DuesDate, m.CommercialInsuranceExpiryDate,
+		m.LimitSpecial, m.DuesDate, m.CommercialInsuranceExpiryDate,
 		m.AutoInsuranceExpiryDate, m.WsibNumber, m.WsibInsuranceDate, m.PoliceCheck,
 		m.DriversLicenseClass, m.HowHearOld, m.HowHearId, m.HowHearOther, m.State,
 		m.DeactivationReason, m.DeactivationReasonOther, m.CreatedTime, m.CreatedById,

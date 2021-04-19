@@ -1,9 +1,9 @@
 package main
 
 import (
-    "github.com/over55/workery-server/cmd"
+	"github.com/over55/workery-server/cmd"
 )
 
 func main() {
-    cmd.Execute()
+	cmd.Execute()
 }

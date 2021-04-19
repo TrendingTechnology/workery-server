@@ -87,9 +87,9 @@ func runAssociateTagETL(
 }
 
 type OldAssociateTag struct {
-	Id                     uint64 `json:"id"`
-	AssociateId             uint64 `json:"associate_id"`
-	TagId uint64 `json:"vehicletype_id"`
+	Id          uint64 `json:"id"`
+	AssociateId uint64 `json:"associate_id"`
+	TagId       uint64 `json:"vehicletype_id"`
 }
 
 func ListAllAssociateTags(db *sql.DB) ([]*OldAssociateTag, error) {
@@ -147,11 +147,11 @@ func insertAssociateTagETL(
 	}
 
 	m := &models.AssociateTag{
-		OldId:                  oss.Id,
-		TenantId:               tid,
-		Uuid:                   uuid.NewString(),
-		AssociateId:            associateId,
-		TagId:          tagId,
+		OldId:       oss.Id,
+		TenantId:    tid,
+		Uuid:        uuid.NewString(),
+		AssociateId: associateId,
+		TagId:       tagId,
 	}
 	err = aatr.Insert(ctx, m)
 	if err != nil {

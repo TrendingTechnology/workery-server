@@ -618,6 +618,7 @@ CREATE TABLE work_orders (
 );
 CREATE UNIQUE INDEX idx_work_order_uuid
 ON work_orders (uuid);
+-- TODO: INDEXES
 
 CREATE TABLE work_order_ongoings (
     id BIGSERIAL PRIMARY KEY,

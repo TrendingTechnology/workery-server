@@ -77,9 +77,9 @@ func doRunImportCustomerTag() {
 }
 
 type OldUCustomerTag struct {
-	Id          uint64 `json:"id"`
-	CustomerId  uint64 `json:"customer_id"`
-	TagId  uint64 `json:"tag_id"`
+	Id         uint64 `json:"id"`
+	CustomerId uint64 `json:"customer_id"`
+	TagId      uint64 `json:"tag_id"`
 }
 
 func ListAllCustomerTags(db *sql.DB) ([]*OldUCustomerTag, error) {
@@ -140,13 +140,13 @@ func runCustomerTagETL(ctx context.Context, tenantId uint64, irr *repositories.C
 }
 
 func insertCustomerTagETL(ctx context.Context, tenantId uint64, oldId uint64, customerId uint64, tagId uint64, irr *repositories.CustomerTagRepo) {
-    fmt.Println("Pre-Imported Customer Tag ID#", oldId)
+	fmt.Println("Pre-Imported Customer Tag ID#", oldId)
 	m := &models.CustomerTag{
-		OldId:       oldId,
-		Uuid:        uuid.NewString(),
-		TenantId:    tenantId,
-		CustomerId:  customerId,
-		TagId:       tagId,
+		OldId:      oldId,
+		Uuid:       uuid.NewString(),
+		TenantId:   tenantId,
+		CustomerId: customerId,
+		TagId:      tagId,
 	}
 	err := irr.Insert(ctx, m)
 	if err != nil {

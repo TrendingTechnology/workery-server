@@ -77,10 +77,10 @@ func doRunImportCustomerComment() {
 }
 
 type OldUCustomerComment struct {
-	Id          uint64 `json:"id"`
-	CreatedAt   time.Time `json:"created_at"`
-	CustomerId  uint64 `json:"customer_id"`
-	CommentId  uint64 `json:"comment_id"`
+	Id         uint64    `json:"id"`
+	CreatedAt  time.Time `json:"created_at"`
+	CustomerId uint64    `json:"customer_id"`
+	CommentId  uint64    `json:"comment_id"`
 }
 
 func ListAllCustomerComments(db *sql.DB) ([]*OldUCustomerComment, error) {
@@ -142,13 +142,13 @@ func runCustomerCommentETL(ctx context.Context, tenantId uint64, irr *repositori
 }
 
 func insertCustomerCommentETL(ctx context.Context, tenantId uint64, oldId uint64, customerId uint64, commentId uint64, irr *repositories.CustomerCommentRepo) {
-    fmt.Println("Pre-Imported Customer Comment ID#", oldId)
+	fmt.Println("Pre-Imported Customer Comment ID#", oldId)
 	m := &models.CustomerComment{
-		OldId:       oldId,
-		Uuid:        uuid.NewString(),
-		TenantId:    tenantId,
-		CustomerId:  customerId,
-		CommentId:       commentId,
+		OldId:      oldId,
+		Uuid:       uuid.NewString(),
+		TenantId:   tenantId,
+		CustomerId: customerId,
+		CommentId:  commentId,
 	}
 	err := irr.Insert(ctx, m)
 	if err != nil {

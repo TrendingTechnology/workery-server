@@ -12,7 +12,7 @@ import (
 // 1 = Active
 // 0 = Inactive
 
-type OngoingWorkOrder struct {
+type WorkOrder struct {
 	Id                 uint64      `json:"id"`
 	Uuid               string      `json:"uuid"`
 	TenantId           uint64      `json:"tenant_id"`
@@ -28,11 +28,11 @@ type OngoingWorkOrder struct {
 	OldId              uint64      `json:"old_id"`
 }
 
-type OngoingWorkOrderRepository interface {
-	Insert(ctx context.Context, u *OngoingWorkOrder) error
-	UpdateById(ctx context.Context, u *OngoingWorkOrder) error
-	GetById(ctx context.Context, id uint64) (*OngoingWorkOrder, error)
+type WorkOrderRepository interface {
+	Insert(ctx context.Context, u *WorkOrder) error
+	UpdateById(ctx context.Context, u *WorkOrder) error
+	GetById(ctx context.Context, id uint64) (*WorkOrder, error)
 	GetIdByOldId(ctx context.Context, tid uint64, oid uint64) (uint64, error)
 	CheckIfExistsById(ctx context.Context, id uint64) (bool, error)
-	InsertOrUpdateById(ctx context.Context, u *OngoingWorkOrder) error
+	InsertOrUpdateById(ctx context.Context, u *WorkOrder) error
 }

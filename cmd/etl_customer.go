@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -219,8 +219,8 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 		state = 0
 	}
 
-    // Variable used to keep the ID of the user record in our database.
-    userId := uint64(om.OwnerId.Int64)
+	// Variable used to keep the ID of the user record in our database.
+	userId := uint64(om.OwnerId.Int64)
 
 	// CASE 1: User record exists in our database.
 	if om.OwnerId.Valid {
@@ -234,7 +234,7 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 		}
 		userId = user.Id
 
-	// CASE 2: Record D.N.E.
+		// CASE 2: Record D.N.E.
 	} else {
 		var email string
 
@@ -242,10 +242,10 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 		if om.Email.Valid {
 			email = om.Email.String
 
-		// CASE 2B: Email is not specified
+			// CASE 2B: Email is not specified
 		} else {
 			customerIdStr := strconv.FormatUint(om.Id, 10)
-			email = "customer+"+customerIdStr+"@workery.ca"
+			email = "customer+" + customerIdStr + "@workery.ca"
 		}
 
 		user, err := ur.GetByEmail(ctx, email)
@@ -254,13 +254,13 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 		}
 		if user == nil {
 			um := &models.User{
-				Uuid:              uuid.NewString(),
-				FirstName:         om.GivenName.String,
-				LastName:          om.LastName.String,
-				Email:             email,
+				Uuid:      uuid.NewString(),
+				FirstName: om.GivenName.String,
+				LastName:  om.LastName.String,
+				Email:     email,
 				// JoinedTime:        om.DateJoined,
-				State:             state,
-				Timezone:          "America/Toronto",
+				State:    state,
+				Timezone: "America/Toronto",
 				// CreatedTime:       om.DateJoined,
 				// ModifiedTime:      om.LastModified,
 				Salt:              "",
@@ -282,7 +282,7 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 		userId = user.Id
 	}
 
-    var createdById uint64
+	var createdById uint64
 	if om.CreatedById.Valid {
 		createdById = uint64(om.CreatedById.Int64)
 		user, err := ur.GetByOldId(ctx, createdById)
@@ -311,60 +311,60 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 	}
 
 	m := &models.Customer{
-		OldId:       om.Id,
-		Uuid:        uuid.NewString(),
-		TenantId:    tid,
-		UserId:      userId,
-		TypeOf:      om.TypeOf,
-		IndexedText: om.IndexedText.String,
-		IsOkToEmail: om.IsOkToEmail,
-		IsOkToText: om.IsOkToText,
-		IsBusiness: om.IsBusiness,
-		IsSenior:   om.IsSenior,
-		IsSupport:  om.IsSupport,
-		JobInfoRead: om.JobInfoRead.String,
-		HowHearId: uint64(om.HowHearId.Int64),
-		HowHearOld: om.HowHearOld,
-		HowHearOther: om.HowHearOther,
-		State: state,
-		DeactivationReason: om.DeactivationReason,
+		OldId:                   om.Id,
+		Uuid:                    uuid.NewString(),
+		TenantId:                tid,
+		UserId:                  userId,
+		TypeOf:                  om.TypeOf,
+		IndexedText:             om.IndexedText.String,
+		IsOkToEmail:             om.IsOkToEmail,
+		IsOkToText:              om.IsOkToText,
+		IsBusiness:              om.IsBusiness,
+		IsSenior:                om.IsSenior,
+		IsSupport:               om.IsSupport,
+		JobInfoRead:             om.JobInfoRead.String,
+		HowHearId:               uint64(om.HowHearId.Int64),
+		HowHearOld:              om.HowHearOld,
+		HowHearOther:            om.HowHearOther,
+		State:                   state,
+		DeactivationReason:      om.DeactivationReason,
 		DeactivationReasonOther: om.DeactivationReasonOther,
-		CreatedTime: om.Created,
-		CreatedById: createdById,
-		CreatedFromIP: om.CreatedFrom.String,
-		LastModifiedTime: om.LastModified,
-		LastModifiedById: lastModifiedById,
-		LastModifiedFromIP: om.LastModifiedFrom.String,
-		OrganizationName: om.OrganizationName.String,
-		AddressCountry: om.AddressCountry,
-		AddressRegion: om.AddressRegion,
-		AddressLocality: om.AddressLocality,
-		PostOfficeBoxNumber: om.PostOfficeBoxNumber.String,
-		PostalCode: om.PostalCode.String,
-		StreetAddress: om.StreetAddress,
-		StreetAddressExtra: om.StreetAddressExtra.String,
-		GivenName: om.GivenName.String,
-		MiddleName: om.MiddleName.String,
-		LastName: om.LastName.String,
-		Birthdate: om.Birthdate,
-		JoinDate: om.JoinDate,
-		Nationality: om.Nationality.String,
-		Gender: om.Gender.String,
-		TaxId: om.TaxId.String,
-		Elevation: om.Elevation.Float64,
-		Latitude: om.Latitude.Float64,
-		Longitude: om.Longitude.Float64,
-		AreaServed: om.AreaServed.String,
-		AvailableLanguage: om.AvailableLanguage.String,
-		ContactType: om.ContactType.String,
-		Email: om.Email.String,
-		FaxNumber: om.FaxNumber.String,
-		Telephone: om.Telephone.String,
-		TelephoneTypeOf: om.TelephoneTypeOf,
-		TelephoneExtension: om.TelephoneExtension.String,
-		OtherTelephone: om.OtherTelephone.String,
+		CreatedTime:             om.Created,
+		CreatedById:             createdById,
+		CreatedFromIP:           om.CreatedFrom.String,
+		LastModifiedTime:        om.LastModified,
+		LastModifiedById:        lastModifiedById,
+		LastModifiedFromIP:      om.LastModifiedFrom.String,
+		OrganizationName:        om.OrganizationName.String,
+		AddressCountry:          om.AddressCountry,
+		AddressRegion:           om.AddressRegion,
+		AddressLocality:         om.AddressLocality,
+		PostOfficeBoxNumber:     om.PostOfficeBoxNumber.String,
+		PostalCode:              om.PostalCode.String,
+		StreetAddress:           om.StreetAddress,
+		StreetAddressExtra:      om.StreetAddressExtra.String,
+		GivenName:               om.GivenName.String,
+		MiddleName:              om.MiddleName.String,
+		LastName:                om.LastName.String,
+		Birthdate:               om.Birthdate,
+		JoinDate:                om.JoinDate,
+		Nationality:             om.Nationality.String,
+		Gender:                  om.Gender.String,
+		TaxId:                   om.TaxId.String,
+		Elevation:               om.Elevation.Float64,
+		Latitude:                om.Latitude.Float64,
+		Longitude:               om.Longitude.Float64,
+		AreaServed:              om.AreaServed.String,
+		AvailableLanguage:       om.AvailableLanguage.String,
+		ContactType:             om.ContactType.String,
+		Email:                   om.Email.String,
+		FaxNumber:               om.FaxNumber.String,
+		Telephone:               om.Telephone.String,
+		TelephoneTypeOf:         om.TelephoneTypeOf,
+		TelephoneExtension:      om.TelephoneExtension.String,
+		OtherTelephone:          om.OtherTelephone.String,
 		OtherTelephoneExtension: om.OtherTelephoneExtension.String,
-		OtherTelephoneTypeOf: om.OtherTelephoneTypeOf,
+		OtherTelephoneTypeOf:    om.OtherTelephoneTypeOf,
 	}
 
 	// fmt.Println(m) // For debugging purposes only.

@@ -87,8 +87,8 @@ func runAssociateVehicleTypeETL(
 }
 
 type OldAssociateVehicleType struct {
-	Id                     uint64 `json:"id"`
-	AssociateId             uint64 `json:"associate_id"`
+	Id            uint64 `json:"id"`
+	AssociateId   uint64 `json:"associate_id"`
 	VehicleTypeId uint64 `json:"vehicletype_id"`
 }
 
@@ -147,11 +147,11 @@ func insertAssociateVehicleTypeETL(
 	}
 
 	m := &models.AssociateVehicleType{
-		OldId:                  oss.Id,
-		TenantId:               tid,
-		Uuid:                   uuid.NewString(),
-		AssociateId:            associateId,
-		VehicleTypeId:          vehicleTypeId,
+		OldId:         oss.Id,
+		TenantId:      tid,
+		Uuid:          uuid.NewString(),
+		AssociateId:   associateId,
+		VehicleTypeId: vehicleTypeId,
 	}
 	err = avtr.Insert(ctx, m)
 	if err != nil {

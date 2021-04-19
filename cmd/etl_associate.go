@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -127,7 +127,7 @@ type OldUAssociate struct {
 	LastModifiedById         sql.NullInt64   `json:"last_modified_by_id"`
 	OwnerId                  sql.NullInt64   `json:"owner_id"`
 	HowHearOther             string          `json:"how_hear_other"`
-	IsArchived               bool          `json:"is_archived"`
+	IsArchived               bool            `json:"is_archived"`
 	HowHearId                sql.NullInt64   `json:"how_hear_id"`
 	HowHearOld               int8            `json:"how_hear_old"`
 	OrganizationName         sql.NullString  `json:"organization_name"`
@@ -229,8 +229,8 @@ func insertAssociateETL(
 		state = 0
 	}
 
-    // Variable used to keep the ID of the user record in our database.
-    userId := uint64(oldAssociate.OwnerId.Int64)
+	// Variable used to keep the ID of the user record in our database.
+	userId := uint64(oldAssociate.OwnerId.Int64)
 
 	// CASE 1: User record exists in our database.
 	if oldAssociate.OwnerId.Valid {
@@ -244,7 +244,7 @@ func insertAssociateETL(
 		}
 		userId = user.Id
 
-	// CASE 2: Record D.N.E.
+		// CASE 2: Record D.N.E.
 	} else {
 		var email string
 
@@ -252,10 +252,10 @@ func insertAssociateETL(
 		if oldAssociate.Email.Valid {
 			email = oldAssociate.Email.String
 
-		// CASE 2B: Email is not specified
+			// CASE 2B: Email is not specified
 		} else {
 			associateIdStr := strconv.FormatUint(oldAssociate.Id, 10)
-			email = "associate+"+associateIdStr+"@workery.ca"
+			email = "associate+" + associateIdStr + "@workery.ca"
 		}
 
 		user, err := userRepo.GetByEmail(ctx, email)
@@ -264,13 +264,13 @@ func insertAssociateETL(
 		}
 		if user == nil {
 			um := &models.User{
-				Uuid:              uuid.NewString(),
-				FirstName:         oldAssociate.GivenName.String,
-				LastName:          oldAssociate.LastName.String,
-				Email:             email,
+				Uuid:      uuid.NewString(),
+				FirstName: oldAssociate.GivenName.String,
+				LastName:  oldAssociate.LastName.String,
+				Email:     email,
 				// JoinedTime:        oldAssociate.DateJoined,
-				State:             state,
-				Timezone:          "America/Toronto",
+				State:    state,
+				Timezone: "America/Toronto",
 				// CreatedTime:       oldAssociate.DateJoined,
 				// ModifiedTime:      oldAssociate.LastModified,
 				Salt:              "",
@@ -292,7 +292,7 @@ func insertAssociateETL(
 		userId = user.Id
 	}
 
-    var createdById uint64
+	var createdById uint64
 	if oldAssociate.CreatedById.Valid {
 		createdById = uint64(oldAssociate.CreatedById.Int64)
 		user, err := userRepo.GetByOldId(ctx, createdById)
@@ -321,55 +321,55 @@ func insertAssociateETL(
 	}
 
 	associate := &models.Associate{
-		OldId:       oldAssociate.Id,
-		ServiceFeeId: serviceFeeId,
-		Uuid:        uuid.NewString(),
-		TenantId:    tenantId,
-		UserId:      userId,
-		TypeOf:      oldAssociate.TypeOf,
-		IndexedText: oldAssociate.IndexedText.String,
-		IsOkToEmail: oldAssociate.IsOkToEmail,
-		IsOkToText: oldAssociate.IsOkToText,
-		HowHearId: uint64(oldAssociate.HowHearId.Int64),
-		HowHearOld: oldAssociate.HowHearOld,
-		HowHearOther: oldAssociate.HowHearOther,
-		State: state,
-		CreatedTime: oldAssociate.Created,
-		CreatedById: createdById,
-		CreatedFromIP: oldAssociate.CreatedFrom.String,
-		LastModifiedTime: oldAssociate.LastModified,
-		LastModifiedById: lastModifiedById,
-		LastModifiedFromIP: oldAssociate.LastModifiedFrom.String,
-		OrganizationName: oldAssociate.OrganizationName.String,
-		AddressCountry: oldAssociate.AddressCountry,
-		AddressRegion: oldAssociate.AddressRegion,
-		AddressLocality: oldAssociate.AddressLocality,
-		PostOfficeBoxNumber: oldAssociate.PostOfficeBoxNumber.String,
-		PostalCode: oldAssociate.PostalCode.String,
-		StreetAddress: oldAssociate.StreetAddress,
-		StreetAddressExtra: oldAssociate.StreetAddressExtra.String,
-		GivenName: oldAssociate.GivenName.String,
-		MiddleName: oldAssociate.MiddleName.String,
-		LastName: oldAssociate.LastName.String,
-		Birthdate: oldAssociate.Birthdate,
-		JoinDate: oldAssociate.JoinDate,
-		Nationality: oldAssociate.Nationality.String,
-		Gender: oldAssociate.Gender.String,
-		TaxId: oldAssociate.TaxId.String,
-		Elevation: oldAssociate.Elevation.Float64,
-		Latitude: oldAssociate.Latitude.Float64,
-		Longitude: oldAssociate.Longitude.Float64,
-		AreaServed: oldAssociate.AreaServed.String,
-		AvailableLanguage: oldAssociate.AvailableLanguage.String,
-		ContactType: oldAssociate.ContactType.String,
-		Email: oldAssociate.Email.String,
-		FaxNumber: oldAssociate.FaxNumber.String,
-		Telephone: oldAssociate.Telephone.String,
-		TelephoneTypeOf: oldAssociate.TelephoneTypeOf,
-		TelephoneExtension: oldAssociate.TelephoneExtension.String,
-		OtherTelephone: oldAssociate.OtherTelephone.String,
+		OldId:                   oldAssociate.Id,
+		ServiceFeeId:            serviceFeeId,
+		Uuid:                    uuid.NewString(),
+		TenantId:                tenantId,
+		UserId:                  userId,
+		TypeOf:                  oldAssociate.TypeOf,
+		IndexedText:             oldAssociate.IndexedText.String,
+		IsOkToEmail:             oldAssociate.IsOkToEmail,
+		IsOkToText:              oldAssociate.IsOkToText,
+		HowHearId:               uint64(oldAssociate.HowHearId.Int64),
+		HowHearOld:              oldAssociate.HowHearOld,
+		HowHearOther:            oldAssociate.HowHearOther,
+		State:                   state,
+		CreatedTime:             oldAssociate.Created,
+		CreatedById:             createdById,
+		CreatedFromIP:           oldAssociate.CreatedFrom.String,
+		LastModifiedTime:        oldAssociate.LastModified,
+		LastModifiedById:        lastModifiedById,
+		LastModifiedFromIP:      oldAssociate.LastModifiedFrom.String,
+		OrganizationName:        oldAssociate.OrganizationName.String,
+		AddressCountry:          oldAssociate.AddressCountry,
+		AddressRegion:           oldAssociate.AddressRegion,
+		AddressLocality:         oldAssociate.AddressLocality,
+		PostOfficeBoxNumber:     oldAssociate.PostOfficeBoxNumber.String,
+		PostalCode:              oldAssociate.PostalCode.String,
+		StreetAddress:           oldAssociate.StreetAddress,
+		StreetAddressExtra:      oldAssociate.StreetAddressExtra.String,
+		GivenName:               oldAssociate.GivenName.String,
+		MiddleName:              oldAssociate.MiddleName.String,
+		LastName:                oldAssociate.LastName.String,
+		Birthdate:               oldAssociate.Birthdate,
+		JoinDate:                oldAssociate.JoinDate,
+		Nationality:             oldAssociate.Nationality.String,
+		Gender:                  oldAssociate.Gender.String,
+		TaxId:                   oldAssociate.TaxId.String,
+		Elevation:               oldAssociate.Elevation.Float64,
+		Latitude:                oldAssociate.Latitude.Float64,
+		Longitude:               oldAssociate.Longitude.Float64,
+		AreaServed:              oldAssociate.AreaServed.String,
+		AvailableLanguage:       oldAssociate.AvailableLanguage.String,
+		ContactType:             oldAssociate.ContactType.String,
+		Email:                   oldAssociate.Email.String,
+		FaxNumber:               oldAssociate.FaxNumber.String,
+		Telephone:               oldAssociate.Telephone.String,
+		TelephoneTypeOf:         oldAssociate.TelephoneTypeOf,
+		TelephoneExtension:      oldAssociate.TelephoneExtension.String,
+		OtherTelephone:          oldAssociate.OtherTelephone.String,
 		OtherTelephoneExtension: oldAssociate.OtherTelephoneExtension.String,
-		OtherTelephoneTypeOf: oldAssociate.OtherTelephoneTypeOf,
+		OtherTelephoneTypeOf:    oldAssociate.OtherTelephoneTypeOf,
 	}
 
 	err := associateRepo.Insert(ctx, associate)

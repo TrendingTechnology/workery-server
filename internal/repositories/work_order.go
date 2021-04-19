@@ -8,25 +8,27 @@ import (
 	"github.com/over55/workery-server/internal/models"
 )
 
-type CommentRepo struct {
+type WorkOrderRepo struct {
 	db *sql.DB
 }
 
-func NewCommentRepo(db *sql.DB) *CommentRepo {
-	return &CommentRepo{
+func NewWorkOrderRepo(db *sql.DB) *WorkOrderRepo {
+	return &WorkOrderRepo{
 		db: db,
 	}
 }
 
-func (r *CommentRepo) Insert(ctx context.Context, m *models.Comment) error {
+func (r *WorkOrderRepo) Insert(ctx context.Context, m *models.WorkOrder) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	query := `
-    INSERT INTO comments (
-        uuid, tenant_id, created_time, created_by_id, created_from_ip, last_modified_time, last_modified_by_id, last_modified_from_ip, text, state, old_id
+    INSERT INTO work_orders (
+        uuid, tenant_id, customer_id, associate_id, state,
+		created_time, created_by_id, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_from_ip, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -36,24 +38,25 @@ func (r *CommentRepo) Insert(ctx context.Context, m *models.Comment) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.CreatedTime, m.CreatedById, m.CreatedFromIP, m.LastModifiedTime,
-		m.LastModifiedById, m.LastModifiedFromIP, m.Text, m.State, m.OldId,
+		m.Uuid, m.TenantId, m.CustomerId, m.AssociateId, m.State,
+		m.CreatedTime, m.CreatedById, m.CreatedFromIP,
+		m.LastModifiedTime, m.LastModifiedById, m.LastModifiedFromIP, m.OldId,
 	)
 	return err
 }
 
-func (r *CommentRepo) UpdateById(ctx context.Context, m *models.Comment) error {
+func (r *WorkOrderRepo) UpdateById(ctx context.Context, m *models.WorkOrder) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	query := `
     UPDATE
-        comments
+        work_orders
     SET
-        tenant_id = $1, created_time = $2, created_by_id = $3, created_from_ip = $4,
-		last_modified_time = $5, last_modified_by_id = $6, last_modified_from_ip = $7, text = $8, state = $9
+        tenant_id = $1, customer_id = $2, associate_id = $3, state = $4,
+		last_modified_time = $5, last_modified_by_id = $6, last_modified_from_ip = $7
     WHERE
-        id = $10`
+        id = $8`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -62,29 +65,31 @@ func (r *CommentRepo) UpdateById(ctx context.Context, m *models.Comment) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.TenantId, m.CreatedTime, m.CreatedById, m.CreatedFromIP, m.LastModifiedTime,
-		m.LastModifiedById, m.LastModifiedFromIP, m.Text, m.State, m.Id,
+		m.TenantId, m.CustomerId, m.AssociateId, m.State, m.LastModifiedTime,
+		m.LastModifiedById, m.LastModifiedFromIP, m.Id,
 	)
 	return err
 }
 
-func (r *CommentRepo) GetById(ctx context.Context, id uint64) (*models.Comment, error) {
+func (r *WorkOrderRepo) GetById(ctx context.Context, id uint64) (*models.WorkOrder, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	m := new(models.Comment)
+	m := new(models.WorkOrder)
 
 	query := `
     SELECT
-        id, uuid, tenant_id, created_time, created_by_id, created_from_ip, last_modified_by_id,
-		last_modified_time, last_modified_from_ip, text, state
+        id, uuid, tenant_id, customer_id, associate_id, state,
+		created_time, created_by_id, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_from_ip
 	FROM
-        comments
+        work_orders
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.CreatedTime, &m.CreatedById, &m.CreatedFromIP,
-		&m.LastModifiedTime, &m.LastModifiedById, &m.LastModifiedFromIP, &m.Text, &m.State, &m.Id,
+		&m.Id, &m.Uuid, &m.TenantId, &m.CustomerId, &m.AssociateId,
+		&m.State, &m.CreatedTime, &m.CreatedById, &m.CreatedFromIP, &m.LastModifiedTime,
+		&m.LastModifiedById, &m.LastModifiedFromIP,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -97,7 +102,7 @@ func (r *CommentRepo) GetById(ctx context.Context, id uint64) (*models.Comment, 
 	return m, nil
 }
 
-func (r *CommentRepo) GetIdByOldId(ctx context.Context, tid uint64, oid uint64) (uint64, error) {
+func (r *WorkOrderRepo) GetIdByOldId(ctx context.Context, tid uint64, oid uint64) (uint64, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -107,7 +112,7 @@ func (r *CommentRepo) GetIdByOldId(ctx context.Context, tid uint64, oid uint64) 
     SELECT
         id
     FROM
-        comments
+        work_orders
     WHERE
 		tenant_id = $1
 	AND
@@ -125,7 +130,7 @@ func (r *CommentRepo) GetIdByOldId(ctx context.Context, tid uint64, oid uint64) 
 	return newId, nil
 }
 
-func (r *CommentRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, error) {
+func (r *WorkOrderRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -135,7 +140,7 @@ func (r *CommentRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, e
     SELECT
         1
     FROM
-        comments
+        work_orders
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&exists)
@@ -150,7 +155,7 @@ func (r *CommentRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, e
 	return exists, nil
 }
 
-func (r *CommentRepo) InsertOrUpdateById(ctx context.Context, m *models.Comment) error {
+func (r *WorkOrderRepo) InsertOrUpdateById(ctx context.Context, m *models.WorkOrder) error {
 	if m.Id == 0 {
 		return r.Insert(ctx, m)
 	}

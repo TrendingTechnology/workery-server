@@ -14,3 +14,11 @@ The documentation can be found [here](https://github.com/over55/workery-server/w
 
 ## License
 This library is licensed under the **AGPLv3 license**. See [LICENSE](LICENSE) for more information. Copyrighted ©2021 [Over 55 (London) Inc.](https://o55.ca/).
+
+## Developer Notes:
+
+Apply the ``golang`` standard styling via
+
+```bash
+$ go fmt $HOME/go/src/github.com/over55/workery-server/...
+```

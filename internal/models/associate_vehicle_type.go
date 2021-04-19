@@ -10,12 +10,12 @@ import (
 // 0 = Inactive
 
 type AssociateVehicleType struct {
-	Id                     uint64 `json:"id"`
-	Uuid                   string `json:"uuid"`
-	TenantId               uint64 `json:"tenant_id"`
-	AssociateId            uint64 `json:"associate_id"`
+	Id            uint64 `json:"id"`
+	Uuid          string `json:"uuid"`
+	TenantId      uint64 `json:"tenant_id"`
+	AssociateId   uint64 `json:"associate_id"`
 	VehicleTypeId uint64 `json:"vehicle_type_id"`
-	OldId                  uint64 `json:"old_id"`
+	OldId         uint64 `json:"old_id"`
 }
 
 type AssociateVehicleTypeRepository interface {

@@ -10,12 +10,12 @@ import (
 // 0 = Inactive
 
 type AssociateSkillSet struct {
-	Id                     uint64 `json:"id"`
-	Uuid                   string `json:"uuid"`
-	TenantId               uint64 `json:"tenant_id"`
-	AssociateId            uint64 `json:"associate_id"`
-	SkillSetId             uint64 `json:"skill_set_id"`
-	OldId                  uint64 `json:"old_id"`
+	Id          uint64 `json:"id"`
+	Uuid        string `json:"uuid"`
+	TenantId    uint64 `json:"tenant_id"`
+	AssociateId uint64 `json:"associate_id"`
+	SkillSetId  uint64 `json:"skill_set_id"`
+	OldId       uint64 `json:"old_id"`
 }
 
 type AssociateSkillSetRepository interface {

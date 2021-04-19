@@ -10,12 +10,12 @@ import (
 // 0 = Inactive
 
 type AssociateComment struct {
-	Id                     uint64 `json:"id"`
-	Uuid                   string `json:"uuid"`
-	TenantId               uint64 `json:"tenant_id"`
-	AssociateId            uint64 `json:"associate_id"`
-	CommentId              uint64 `json:"comment_id"`
-	OldId                  uint64 `json:"old_id"`
+	Id          uint64 `json:"id"`
+	Uuid        string `json:"uuid"`
+	TenantId    uint64 `json:"tenant_id"`
+	AssociateId uint64 `json:"associate_id"`
+	CommentId   uint64 `json:"comment_id"`
+	OldId       uint64 `json:"old_id"`
 }
 
 type AssociateCommentRepository interface {

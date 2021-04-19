@@ -89,7 +89,7 @@ func runAssociateInsuranceRequirementETL(
 type OldAssociateInsuranceRequirement struct {
 	Id                     uint64 `json:"id"`
 	AssociateId            uint64 `json:"associate_id"`
-	InsuranceRequirementId              uint64 `json:"insurancerequirement_id"`
+	InsuranceRequirementId uint64 `json:"insurancerequirement_id"`
 }
 
 func ListAllAssociateInsuranceRequirements(db *sql.DB) ([]*OldAssociateInsuranceRequirement, error) {
@@ -152,7 +152,7 @@ func insertAssociateInsuranceRequirementETL(
 			TenantId:               tid,
 			Uuid:                   uuid.NewString(),
 			AssociateId:            associateId,
-			InsuranceRequirementId:              commentId,
+			InsuranceRequirementId: commentId,
 		}
 		err = asr.Insert(ctx, m)
 		if err != nil {

@@ -147,11 +147,11 @@ func insertAssociateSkillSetETL(
 	}
 
 	m := &models.AssociateSkillSet{
-		OldId:                  oss.Id,
-		TenantId:               tid,
-		Uuid:                   uuid.NewString(),
-		AssociateId:            associateId,
-		SkillSetId:          skillSetId,
+		OldId:       oss.Id,
+		TenantId:    tid,
+		Uuid:        uuid.NewString(),
+		AssociateId: associateId,
+		SkillSetId:  skillSetId,
 	}
 	err = assr.Insert(ctx, m)
 	if err != nil {
