@@ -530,12 +530,14 @@ CREATE TABLE ongoing_work_orders (
     uuid VARCHAR (36) UNIQUE NOT NULL,
     tenant_id BIGINT NOT NULL,
     customer_id BIGINT NOT NULL,
-    associate_id BIGINT NOT NULL,
+    associate_id BIGINT NULL,
     state SMALLINT NOT NULL DEFAULT 0,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
+    created_by_id BIGINT NULL,
+    created_from_ip VARCHAR (50) NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    last_modified_by_id BIGINT NULL,
+    last_modified_from_ip VARCHAR (50) NULL,
     old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id),
@@ -545,6 +547,7 @@ CREATE TABLE ongoing_work_orders (
 );
 CREATE UNIQUE INDEX idx_ongoing_work_order_uuid
 ON ongoing_work_orders (uuid);
+-- TODO: INDEXES
 
 CREATE TABLE work_orders (
     id BIGSERIAL PRIMARY KEY,

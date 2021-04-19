@@ -10,4 +10,5 @@ require (
 	github.com/rs/cors v1.7.0
 	github.com/spf13/cobra v1.1.3
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	gopkg.in/guregu/null.v4 v4.0.0 // indirect
 )
