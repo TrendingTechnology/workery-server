@@ -88,33 +88,53 @@ func runWorkOrderETL(
 	}
 }
 
+type OldWorkOrder struct {
+	Id               uint64      `json:"id"`
+	AssociateId      null.Int    `json:"associate_id"`
+	CustomerId       uint64      `json:"customer_id"`
+
+	Description      string      `json:"description"`
+    AssignmentDate   null.Time `json:"assignment_date"`
+	IsOngoing        bool      `json:"is_ongoing"`
+	IsHomeSupportService bool      `json:"is_home_support_service"`
+	StartDate time.Time      `json:"start_date"`
+	CompletionDate null.Time      `json:"completion_date"`
+	Hours      float64      `json:"hours"`
+	TypeOf      int8      `json:"type_of"`
+	IndexedText      string      `json:"indexed_text"`
+	ClosingReason      int8      `json:"closing_reason"`
+	ClosingReasonOther null.String     `json:"closing_reason_other"`
+	State              string      `json:"state"`
+	WasJobSatisfactory        bool      `json:"was_job_satisfactory"`
+	WasJobFinishedOnTimeAndOnBudget        bool      `json:"was_job_finished_on_time_and_on_budget"`
+	WasAssociatePunctual        bool      `json:"was_associate_punctual"`
+	WasAssociateProfessional        bool      `json:"was_associate_professional"`
+	WouldCustomerReferOurOrganization        bool      `json:"would_customer_refer_our_organization"`
+	Score      int8      `json:"score"`
+	InvoiceDate         null.Time  `json:"invoice_date"`
+    InvoiceQuoteAmountCurrency      string      `json:"invoice_quote_amount_currency"`
+	InvoiceQuoteAmount      float64      `json:"invoice_quote_amount"`
+	InvoiceLabourAmountCurrency      string      `json:"invoice_labour_amount_currency"`
+	InvoiceLabourAmount      float64      `json:"invoice_labour_amount"`
+	InvoiceMaterialAmountCurrency      string      `json:"invoice_material_amount_currency"`
+	InvoiceMaterialAmount      float64      `json:"invoice_material_amount"`
+	InvoiceTaxAmountCurrency      string      `json:"invoice_tax_amount_currency"`
+	InvoiceTaxAmount      float64      `json:"invoice_tax_amount"`
+	InvoiceTotalAmountCurrency      string      `json:"invoice_total_amount_currency"`
+	InvoiceTotalAmount      float64      `json:"invoice_total_amount"`
+	InvoiceServiceFeeAmountCurrency      string      `json:"invoice_service_fee_amount_currency"`
+	InvoiceServiceFeeAmount      float64      `json:"invoice_service_fee_amount"`
+	InvoiceServiceFeePaymentDate          null.Time   `json:"invoice_service_fee_payment_date"`
+	Created          time.Time   `json:"created"`
+	CreatedById      null.Int    `json:"created_by_id"`
+	CreatedFrom      null.String `json:"created_from"`
+	LastModified     time.Time   `json:"last_modified"`
+	LastModifiedById null.Int    `json:"last_modified_by_id"`
+	LastModifiedFrom null.String `json:"last_modified_from"`
+}
+
+
 // '''
-//     was_job_satisfactory boolean NOT NULL,
-//     was_job_finished_on_time_and_on_budget boolean NOT NULL,
-//     was_associate_punctual boolean NOT NULL,
-//     was_associate_professional boolean NOT NULL,
-//     would_customer_refer_our_organization boolean NOT NULL,
-//     score smallint NOT NULL,
-//     invoice_date date,
-//     invoice_quote_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_quote_amount numeric(10,2) NOT NULL,
-//     invoice_labour_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_labour_amount numeric(10,2) NOT NULL,
-//     invoice_material_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_material_amount numeric(10,2) NOT NULL,
-//     invoice_tax_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_tax_amount numeric(10,2) NOT NULL,
-//     invoice_total_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_total_amount numeric(10,2) NOT NULL,
-//     invoice_service_fee_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_service_fee_amount numeric(10,2) NOT NULL,
-//     invoice_service_fee_payment_date date,
-//     created timestamp with time zone NOT NULL,
-//     created_from inet,
-//     created_from_is_public boolean NOT NULL,
-//     last_modified timestamp with time zone NOT NULL,
-//     last_modified_from inet,
-//     last_modified_from_is_public boolean NOT NULL,
 //     associate_id bigint,
 //     created_by_id integer,
 //     customer_id bigint NOT NULL,
@@ -153,43 +173,18 @@ func runWorkOrderETL(
 //     closing_reason_comment character varying(1024) COLLATE pg_catalog."default",
 // '''
 
-type OldWorkOrder struct {
-	Id               uint64      `json:"id"`
-	AssociateId      null.Int    `json:"associate_id"`
-	CustomerId       uint64      `json:"customer_id"`
-
-	Description      string      `json:"description"`
-    AssignmentDate   null.Time `json:"assignment_date"`
-	IsOngoing        bool      `json:"is_ongoing"`
-	IsHomeSupportService bool      `json:"is_home_support_service"`
-	StartDate time.Time      `json:"start_date"`
-	CompletionDate null.Time      `json:"completion_date"`
-	Hours      string      `json:"hours"`
-	TypeOf      int8      `json:"type_of"`
-	IndexedText      string      `json:"indexed_text"`
-	ClosingReason      int8      `json:"closing_reason"`
-	ClosingReasonOther null.String     `json:"closing_reason_other"`
-	State              string      `json:"state"`
-
-	Created          time.Time   `json:"created"`
-	CreatedById      null.Int    `json:"created_by_id"`
-	CreatedFrom      null.String `json:"created_from"`
-	LastModified     time.Time   `json:"last_modified"`
-	LastModifiedById null.Int    `json:"last_modified_by_id"`
-	LastModifiedFrom null.String `json:"last_modified_from"`
-}
-
-// description text COLLATE pg_catalog."default",
-//  date,
-
 func ListAllWorkOrders(db *sql.DB) ([]*OldWorkOrder, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	query := `
 	SELECT
-        id, associate_id, customer_id, description, assignment_date, is_ongoing, is_home_support_service, start_date, completion_date,
-		hours, type_of, indexed_text, closing_reason, closing_reason_other, state,
+        id, associate_id, customer_id, description, assignment_date, is_ongoing, is_home_support_service, start_date,
+		completion_date, hours, type_of, indexed_text, closing_reason, closing_reason_other, state,
+		was_job_satisfactory, was_job_finished_on_time_and_on_budget, was_associate_punctual, was_associate_professional, would_customer_refer_our_organization,
+		score, invoice_date, invoice_quote_amount_currency, invoice_quote_amount, invoice_labour_amount_currency, invoice_labour_amount,
+		invoice_material_amount_currency, invoice_material_amount, invoice_tax_amount_currency, invoice_tax_amount,
+		invoice_total_amount_currency, invoice_total_amount, invoice_service_fee_amount_currency, invoice_service_fee_amount, invoice_service_fee_payment_date,
 		created, created_by_id, created_from, last_modified, last_modified_by_id, last_modified_from
 	FROM
         workery_work_orders
@@ -207,8 +202,12 @@ func ListAllWorkOrders(db *sql.DB) ([]*OldWorkOrder, error) {
 	for rows.Next() {
 		m := new(OldWorkOrder)
 		err = rows.Scan(
-			&m.Id, &m.AssociateId, &m.CustomerId, &m.Description, &m.AssignmentDate, &m.IsOngoing, &m.IsHomeSupportService, &m.StartDate, &m.CompletionDate,
-			&m.Hours, &m.TypeOf, &m.IndexedText, &m.ClosingReason, &m.ClosingReasonOther, &m.State,
+			&m.Id, &m.AssociateId, &m.CustomerId, &m.Description, &m.AssignmentDate, &m.IsOngoing, &m.IsHomeSupportService, &m.StartDate,
+			&m.CompletionDate, &m.Hours, &m.TypeOf, &m.IndexedText, &m.ClosingReason, &m.ClosingReasonOther, &m.State,
+			&m.WasJobSatisfactory, &m.WasJobFinishedOnTimeAndOnBudget, &m.WasAssociatePunctual, &m.WasAssociateProfessional, &m.WouldCustomerReferOurOrganization,
+			&m.Score, &m.InvoiceDate, &m.InvoiceQuoteAmountCurrency, &m.InvoiceQuoteAmount, &m.InvoiceLabourAmountCurrency, &m.InvoiceLabourAmount,
+			&m.InvoiceMaterialAmountCurrency, &m.InvoiceMaterialAmount, &m.InvoiceTaxAmountCurrency, &m.InvoiceTaxAmount,
+			&m.InvoiceTotalAmountCurrency, &m.InvoiceTotalAmount, &m.InvoiceServiceFeeAmountCurrency, &m.InvoiceServiceFeeAmount, &m.InvoiceServiceFeePaymentDate,
 			&m.Created, &m.CreatedById, &m.CreatedFrom, &m.LastModified, &m.LastModifiedById, &m.LastModifiedFrom,
 		)
 		if err != nil {
