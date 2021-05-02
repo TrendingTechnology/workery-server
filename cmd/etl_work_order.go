@@ -92,7 +92,6 @@ type OldWorkOrder struct {
 	Id               uint64      `json:"id"`
 	AssociateId      null.Int    `json:"associate_id"`
 	CustomerId       uint64      `json:"customer_id"`
-
 	Description      string      `json:"description"`
     AssignmentDate   null.Time `json:"assignment_date"`
 	IsOngoing        bool      `json:"is_ongoing"`
@@ -131,34 +130,30 @@ type OldWorkOrder struct {
 	LastModified     time.Time   `json:"last_modified"`
 	LastModifiedById null.Int    `json:"last_modified_by_id"`
 	LastModifiedFrom null.String `json:"last_modified_from"`
+	InvoiceServiceFeeId                null.Int       `json:"invoice_service_fee_id"`
+	LatestPendingTaskId                null.Int       `json:"latest_pending_task_id"`
+	OngoingWorkOrderId                null.Int       `json:"ongoing_work_order_id"`
+	WasSurveyConducted        bool      `json:"was_survey_conducted"`
+	WasThereFinancialsInputted        bool      `json:"was_there_financials_inputted"`
+	InvoiceActualServiceFeeAmountPaidCurrency      string      `json:"invoice_actual_service_fee_amount_paid_currency"`
+	InvoiceActualServiceFeeAmountPaid      float64      `json:"invoice_actual_service_fee_amount_paid"`
+	InvoiceBalanceOwingAmountCurrency      string      `json:"invoice_balance_owing_amount_currency"`
+	InvoiceBalanceOwingAmount      float64      `json:"invoice_balance_owing_amount"`
+	InvoiceQuotedLabourAmountCurrency      string      `json:"invoice_quoted_labour_amount_currency"`
+	InvoiceQuotedLabourAmount      float64      `json:"invoice_quoted_labour_amount"`
+	InvoiceQuotedMaterialAmountCurrency      string      `json:"invoice_quoted_material_amount_currency"`
+	InvoiceQuotedMaterialAmount      float64      `json:"invoice_quoted_material_amount"`
+	InvoiceTotalQuoteAmountCurrency      string      `json:"invoice_total_quote_amount_currency"`
+	InvoiceTotalQuoteAmount      float64      `json:"invoice_total_quote_amount"`
+	Visits      int8      `json:"visits"`
+	InvoiceIds  null.String       `json:"invoice_ids"`
+	NoSurveyConductedReason      null.Int      `json:"no_survey_conducted_reason"`
+	NoSurveyConductedReasonOther  null.String       `json:"no_survey_conducted_reason_other"`
+	ClonedFromId  null.Int       `json:"cloned_from_id"`
 }
 
 
 // '''
-//     associate_id bigint,
-//     created_by_id integer,
-//     customer_id bigint NOT NULL,
-//     invoice_service_fee_id bigint,
-//     last_modified_by_id integer,
-//     latest_pending_task_id bigint,
-//     ongoing_work_order_id bigint,
-//     was_survey_conducted boolean NOT NULL,
-//     was_there_financials_inputted boolean NOT NULL,
-//     invoice_actual_service_fee_amount_paid numeric(10,2) NOT NULL,
-//     invoice_actual_service_fee_amount_paid_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_balance_owing_amount numeric(10,2) NOT NULL,
-//     invoice_balance_owing_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_quoted_labour_amount numeric(10,2) NOT NULL,
-//     invoice_quoted_labour_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_quoted_material_amount numeric(10,2) NOT NULL,
-//     invoice_quoted_material_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_total_quote_amount numeric(10,2) NOT NULL,
-//     invoice_total_quote_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     visits smallint NOT NULL,
-//     invoice_ids character varying(127) COLLATE pg_catalog."default",
-//     no_survey_conducted_reason smallint,
-//     no_survey_conducted_reason_other character varying(1024) COLLATE pg_catalog."default",
-//     cloned_from_id bigint,
 //     invoice_deposit_amount numeric(10,2) NOT NULL,
 //     invoice_deposit_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
 //     invoice_other_costs_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
@@ -185,7 +180,11 @@ func ListAllWorkOrders(db *sql.DB) ([]*OldWorkOrder, error) {
 		score, invoice_date, invoice_quote_amount_currency, invoice_quote_amount, invoice_labour_amount_currency, invoice_labour_amount,
 		invoice_material_amount_currency, invoice_material_amount, invoice_tax_amount_currency, invoice_tax_amount,
 		invoice_total_amount_currency, invoice_total_amount, invoice_service_fee_amount_currency, invoice_service_fee_amount, invoice_service_fee_payment_date,
-		created, created_by_id, created_from, last_modified, last_modified_by_id, last_modified_from
+		created, created_by_id, created_from, last_modified, last_modified_by_id, last_modified_from, invoice_service_fee_id, latest_pending_task_id, ongoing_work_order_id,
+		was_survey_conducted, was_there_financials_inputted, invoice_actual_service_fee_amount_paid_currency, invoice_actual_service_fee_amount_paid,
+		invoice_balance_owing_amount_currency, invoice_balance_owing_amount, invoice_quoted_labour_amount_currency, invoice_quoted_labour_amount,
+		invoice_quoted_material_amount_currency, invoice_quoted_material_amount, invoice_total_quote_amount_currency, invoice_total_quote_amount, visits, invoice_ids,
+		no_survey_conducted_reason, no_survey_conducted_reason_other, cloned_from_id
 	FROM
         workery_work_orders
 	ORDER BY
@@ -208,7 +207,11 @@ func ListAllWorkOrders(db *sql.DB) ([]*OldWorkOrder, error) {
 			&m.Score, &m.InvoiceDate, &m.InvoiceQuoteAmountCurrency, &m.InvoiceQuoteAmount, &m.InvoiceLabourAmountCurrency, &m.InvoiceLabourAmount,
 			&m.InvoiceMaterialAmountCurrency, &m.InvoiceMaterialAmount, &m.InvoiceTaxAmountCurrency, &m.InvoiceTaxAmount,
 			&m.InvoiceTotalAmountCurrency, &m.InvoiceTotalAmount, &m.InvoiceServiceFeeAmountCurrency, &m.InvoiceServiceFeeAmount, &m.InvoiceServiceFeePaymentDate,
-			&m.Created, &m.CreatedById, &m.CreatedFrom, &m.LastModified, &m.LastModifiedById, &m.LastModifiedFrom,
+			&m.Created, &m.CreatedById, &m.CreatedFrom, &m.LastModified, &m.LastModifiedById, &m.LastModifiedFrom, &m.InvoiceServiceFeeId, &m.LatestPendingTaskId, &m.OngoingWorkOrderId,
+            &m.WasSurveyConducted, &m.WasThereFinancialsInputted, &m.InvoiceActualServiceFeeAmountPaidCurrency, &m.InvoiceActualServiceFeeAmountPaid,
+			&m.InvoiceBalanceOwingAmountCurrency, &m.InvoiceBalanceOwingAmount, &m.InvoiceQuotedLabourAmountCurrency, &m.InvoiceQuotedLabourAmount,
+			&m.InvoiceQuotedMaterialAmountCurrency, &m.InvoiceQuotedMaterialAmount, &m.InvoiceTotalQuoteAmountCurrency, &m.InvoiceTotalQuoteAmount, &m.Visits, &m.InvoiceIds,
+			&m.NoSurveyConductedReason, &m.NoSurveyConductedReasonOther, &m.ClonedFromId,
 		)
 		if err != nil {
 			log.Fatal("ListAllWorkOrders | rows.Scan", err)
