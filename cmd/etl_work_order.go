@@ -150,21 +150,21 @@ type OldWorkOrder struct {
 	NoSurveyConductedReason      null.Int      `json:"no_survey_conducted_reason"`
 	NoSurveyConductedReasonOther  null.String       `json:"no_survey_conducted_reason_other"`
 	ClonedFromId  null.Int       `json:"cloned_from_id"`
+	InvoiceDepositAmountCurrency      string      `json:"invoice_deposit_amount_currency"`
+	InvoiceDepositAmount      float64      `json:"invoice_deposit_amount"`
+	InvoiceOtherCostsAmountCurrency      string      `json:"invoice_other_costs_amount_currency"`
+	InvoiceOtherCostsAmount      float64      `json:"invoice_other_costs_amount"`
+	InvoiceQuotedOtherCostsAmountCurrency      string      `json:"invoice_quoted_other_costs_amount_currency"`
+	InvoiceQuotedOtherCostsAmount      float64      `json:"invoice_quoted_other_costs_amount"`
+	InvoicePaidTo      null.Int       `json:"invoice_paid_to"`
+	InvoiceAmountDueCurrency      string      `json:"invoice_amount_due_currency"`
+	InvoiceAmountDue      float64      `json:"invoice_amount_due"`
+	InvoiceSubTotalAmountCurrency      string      `json:"invoice_sub_total_amount_currency"`
+	InvoiceSubTotalAmount      float64      `json:"invoice_sub_total_amount"`
 }
 
 
 // '''
-//     invoice_deposit_amount numeric(10,2) NOT NULL,
-//     invoice_deposit_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_other_costs_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_quoted_other_costs_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_paid_to smallint,
-//     invoice_amount_due numeric(10,2) NOT NULL,
-//     invoice_amount_due_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_sub_total_amount numeric(10,2) NOT NULL,
-//     invoice_sub_total_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     invoice_other_costs_amount numeric(10,2) NOT NULL,
-//     invoice_quoted_other_costs_amount numeric(10,2) NOT NULL,
 //     closing_reason_comment character varying(1024) COLLATE pg_catalog."default",
 // '''
 
@@ -184,7 +184,9 @@ func ListAllWorkOrders(db *sql.DB) ([]*OldWorkOrder, error) {
 		was_survey_conducted, was_there_financials_inputted, invoice_actual_service_fee_amount_paid_currency, invoice_actual_service_fee_amount_paid,
 		invoice_balance_owing_amount_currency, invoice_balance_owing_amount, invoice_quoted_labour_amount_currency, invoice_quoted_labour_amount,
 		invoice_quoted_material_amount_currency, invoice_quoted_material_amount, invoice_total_quote_amount_currency, invoice_total_quote_amount, visits, invoice_ids,
-		no_survey_conducted_reason, no_survey_conducted_reason_other, cloned_from_id
+		no_survey_conducted_reason, no_survey_conducted_reason_other, cloned_from_id, invoice_deposit_amount_currency, invoice_deposit_amount,
+		invoice_other_costs_amount_currency, invoice_other_costs_amount, invoice_quoted_other_costs_amount_currency, invoice_quoted_other_costs_amount, invoice_paid_to,
+		invoice_amount_due_currency, invoice_amount_due, invoice_sub_total_amount_currency, invoice_sub_total_amount
 	FROM
         workery_work_orders
 	ORDER BY
@@ -211,7 +213,9 @@ func ListAllWorkOrders(db *sql.DB) ([]*OldWorkOrder, error) {
             &m.WasSurveyConducted, &m.WasThereFinancialsInputted, &m.InvoiceActualServiceFeeAmountPaidCurrency, &m.InvoiceActualServiceFeeAmountPaid,
 			&m.InvoiceBalanceOwingAmountCurrency, &m.InvoiceBalanceOwingAmount, &m.InvoiceQuotedLabourAmountCurrency, &m.InvoiceQuotedLabourAmount,
 			&m.InvoiceQuotedMaterialAmountCurrency, &m.InvoiceQuotedMaterialAmount, &m.InvoiceTotalQuoteAmountCurrency, &m.InvoiceTotalQuoteAmount, &m.Visits, &m.InvoiceIds,
-			&m.NoSurveyConductedReason, &m.NoSurveyConductedReasonOther, &m.ClonedFromId,
+			&m.NoSurveyConductedReason, &m.NoSurveyConductedReasonOther, &m.ClonedFromId, &m.InvoiceDepositAmountCurrency, &m.InvoiceDepositAmount,
+			&m.InvoiceOtherCostsAmountCurrency, &m.InvoiceOtherCostsAmount, &m.InvoiceQuotedOtherCostsAmountCurrency, &m.InvoiceQuotedOtherCostsAmount, &m.InvoicePaidTo,
+			&m.InvoiceAmountDueCurrency, &m.InvoiceAmountDue, &m.InvoiceSubTotalAmountCurrency, &m.InvoiceSubTotalAmount,
 		)
 		if err != nil {
 			log.Fatal("ListAllWorkOrders | rows.Scan", err)
