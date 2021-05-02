@@ -84,7 +84,7 @@ func runWorkOrderETL(
 	}
 	for _, oss := range ass {
 		fmt.Println(oss, "\n")
-		// insertWorkOrderETL(ctx, tenantId, asr, ar, cr, oss)
+		insertWorkOrderETL(ctx, tenantId, asr, ar, cr, oss)
 	}
 }
 
@@ -161,11 +161,8 @@ type OldWorkOrder struct {
 	InvoiceAmountDue                          float64     `json:"invoice_amount_due"`
 	InvoiceSubTotalAmountCurrency             string      `json:"invoice_sub_total_amount_currency"`
 	InvoiceSubTotalAmount                     float64     `json:"invoice_sub_total_amount"`
+	ClosingReasonComment                      string      `json:"closing_reason_comment"`
 }
-
-// '''
-//     closing_reason_comment character varying(1024) COLLATE pg_catalog."default",
-// '''
 
 func ListAllWorkOrders(db *sql.DB) ([]*OldWorkOrder, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -185,7 +182,7 @@ func ListAllWorkOrders(db *sql.DB) ([]*OldWorkOrder, error) {
 		invoice_quoted_material_amount_currency, invoice_quoted_material_amount, invoice_total_quote_amount_currency, invoice_total_quote_amount, visits, invoice_ids,
 		no_survey_conducted_reason, no_survey_conducted_reason_other, cloned_from_id, invoice_deposit_amount_currency, invoice_deposit_amount,
 		invoice_other_costs_amount_currency, invoice_other_costs_amount, invoice_quoted_other_costs_amount_currency, invoice_quoted_other_costs_amount, invoice_paid_to,
-		invoice_amount_due_currency, invoice_amount_due, invoice_sub_total_amount_currency, invoice_sub_total_amount
+		invoice_amount_due_currency, invoice_amount_due, invoice_sub_total_amount_currency, invoice_sub_total_amount, closing_reason_comment
 	FROM
         workery_work_orders
 	ORDER BY
@@ -214,7 +211,7 @@ func ListAllWorkOrders(db *sql.DB) ([]*OldWorkOrder, error) {
 			&m.InvoiceQuotedMaterialAmountCurrency, &m.InvoiceQuotedMaterialAmount, &m.InvoiceTotalQuoteAmountCurrency, &m.InvoiceTotalQuoteAmount, &m.Visits, &m.InvoiceIds,
 			&m.NoSurveyConductedReason, &m.NoSurveyConductedReasonOther, &m.ClonedFromId, &m.InvoiceDepositAmountCurrency, &m.InvoiceDepositAmount,
 			&m.InvoiceOtherCostsAmountCurrency, &m.InvoiceOtherCostsAmount, &m.InvoiceQuotedOtherCostsAmountCurrency, &m.InvoiceQuotedOtherCostsAmount, &m.InvoicePaidTo,
-			&m.InvoiceAmountDueCurrency, &m.InvoiceAmountDue, &m.InvoiceSubTotalAmountCurrency, &m.InvoiceSubTotalAmount,
+			&m.InvoiceAmountDueCurrency, &m.InvoiceAmountDue, &m.InvoiceSubTotalAmountCurrency, &m.InvoiceSubTotalAmount, &m.ClosingReasonComment,
 		)
 		if err != nil {
 			log.Fatal("ListAllWorkOrders | rows.Scan", err)
@@ -228,52 +225,60 @@ func ListAllWorkOrders(db *sql.DB) ([]*OldWorkOrder, error) {
 	return arr, err
 }
 
-// func insertWorkOrderETL(
-// 	ctx context.Context,
-// 	tid uint64,
-// 	asr *repositories.WorkOrderRepo,
-// 	ar *repositories.AssociateRepo,
-// 	cr *repositories.CustomerRepo,
-// 	oss *OldWorkOrder,
-// ) {
-// 	var associateId null.Int
-// 	if oss.AssociateId.Valid {
-// 		associateIdInt64 := oss.AssociateId.ValueOrZero()
-// 		associateIdUint64, err := ar.GetIdByOldId(ctx, tid, uint64(associateIdInt64))
-// 		if err != nil {
-// 			log.Panic("ar.GetIdByOldId | err", err)
-// 		}
-//
-// 		// Convert from null supported integer times.
-// 		associateId = null.NewInt(int64(associateIdUint64), associateIdUint64 != 0)
-// 	}
-//
-// 	customerId, err := cr.GetIdByOldId(ctx, tid, oss.CustomerId)
-//
-// 	var state int8 = 1 // Running
-// 	if oss.State == "terminated" {
-// 		state = 2
-// 	}
-//
-// 	m := &models.WorkOrder{
-// 		OldId:              oss.Id,
-// 		TenantId:           tid,
-// 		Uuid:               uuid.NewString(),
-// 		CustomerId:         customerId,
-// 		AssociateId:        associateId,
-// 		State:              state,
-// 		CreatedTime:        oss.CreatedAt,
-// 		CreatedById:        oss.CreatedById,
-// 		CreatedFromIP:      oss.CreatedFrom,
-// 		LastModifiedTime:   oss.LastModifiedAt,
-// 		LastModifiedById:   oss.LastModifiedById,
-// 		LastModifiedFromIP: oss.LastModifiedFrom,
-// 	}
-// 	err = asr.Insert(ctx, m)
-// 	if err != nil {
-// 		log.Print("associateId", associateId)
-// 		log.Print("customerId", customerId)
-// 		log.Panic("asr.Insert | err", err, "\n\n", m, oss)
-// 	}
-// 	fmt.Println("Imported ID#", oss.Id)
-// }
+func insertWorkOrderETL(
+	ctx context.Context,
+	tid uint64,
+	asr *repositories.WorkOrderRepo,
+	ar *repositories.AssociateRepo,
+	cr *repositories.CustomerRepo,
+	oss *OldWorkOrder,
+) {
+	var associateId null.Int
+	if oss.AssociateId.Valid {
+		associateIdInt64 := oss.AssociateId.ValueOrZero()
+		associateIdUint64, err := ar.GetIdByOldId(ctx, tid, uint64(associateIdInt64))
+		if err != nil {
+			log.Panic("ar.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		associateId = null.NewInt(int64(associateIdUint64), associateIdUint64 != 0)
+	}
+
+	customerId, err := cr.GetIdByOldId(ctx, tid, oss.CustomerId)
+	if err != nil {
+		log.Panic("cr.GetIdByOldId | err", err)
+	}
+
+	var state int8 = 1 // Running
+	if oss.State == "terminated" {
+		state = 2
+	}
+
+	// For debugging purposes only.
+	log.Println("associateId -->", associateId)
+	log.Println("customerId  -->", customerId)
+	log.Println("State       -->", state)
+
+	// 	m := &models.WorkOrder{
+	// 		OldId:              oss.Id,
+	// 		TenantId:           tid,
+	// 		Uuid:               uuid.NewString(),
+	// 		CustomerId:         customerId,
+	// 		AssociateId:        associateId,
+	// 		State:              state,
+	// 		CreatedTime:        oss.CreatedAt,
+	// 		CreatedById:        oss.CreatedById,
+	// 		CreatedFromIP:      oss.CreatedFrom,
+	// 		LastModifiedTime:   oss.LastModifiedAt,
+	// 		LastModifiedById:   oss.LastModifiedById,
+	// 		LastModifiedFromIP: oss.LastModifiedFrom,
+	// 	}
+	// 	err = asr.Insert(ctx, m)
+	// 	if err != nil {
+	// 		log.Print("associateId", associateId)
+	// 		log.Print("customerId", customerId)
+	// 		log.Panic("asr.Insert | err", err, "\n\n", m, oss)
+	// 	}
+	// 	fmt.Println("Imported ID#", oss.Id)
+}
