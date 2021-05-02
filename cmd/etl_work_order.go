@@ -8,11 +8,11 @@ import (
 	"os"
 	"time"
 
-	// "github.com/google/uuid"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	null "gopkg.in/guregu/null.v4"
 
-	// "github.com/over55/workery-server/internal/models"
+	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
 	"github.com/over55/workery-server/internal/utils"
 )
@@ -255,25 +255,75 @@ func insertWorkOrderETL(
 		state = 2
 	}
 
+	m := &models.WorkOrder{
+		OldId:                             oss.Id,
+		TenantId:                          tid,
+		Uuid:                              uuid.NewString(),
+		CustomerId:                        customerId,
+		AssociateId:                       associateId,
+		Description:                       oss.Description,
+		AssignmentDate:                    oss.AssignmentDate,
+		IsOngoing:                         oss.IsOngoing,
+		IsHomeSupportService:              oss.IsHomeSupportService,
+		StartDate:                         oss.StartDate,
+		CompletionDate:                    oss.CompletionDate,
+		Hours:                             oss.Hours,
+		TypeOf:                            oss.TypeOf,
+		IndexedText:                       oss.IndexedText,
+		ClosingReason:                     oss.ClosingReason,
+		ClosingReasonOther:                oss.ClosingReasonOther,
+		State:                             state,
+		Currency:                          "CAD",
+		WasJobSatisfactory:                oss.WasJobSatisfactory,
+		WasJobFinishedOnTimeAndOnBudget:   oss.WasJobFinishedOnTimeAndOnBudget,
+		WasAssociatePunctual:              oss.WasAssociatePunctual,
+		WasAssociateProfessional:          oss.WasAssociateProfessional,
+		WouldCustomerReferOurOrganization: oss.WouldCustomerReferOurOrganization,
+		Score:                             oss.Score,
+		InvoiceDate:                       oss.InvoiceDate,
+		InvoiceQuoteAmount:                oss.InvoiceQuoteAmount,
+		InvoiceLabourAmount:               oss.InvoiceLabourAmount,
+		InvoiceMaterialAmount:             oss.InvoiceMaterialAmount,
+		InvoiceTaxAmount:                  oss.InvoiceTaxAmount,
+		InvoiceTotalAmount:                oss.InvoiceTotalAmount,
+		InvoiceServiceFeeAmount:           oss.InvoiceServiceFeeAmount,
+		InvoiceServiceFeePaymentDate:      oss.InvoiceServiceFeePaymentDate,
+		// CreatedTime:        oss.CreatedAt,
+		CreatedById:                       oss.CreatedById,
+		CreatedFromIP:                     oss.CreatedFrom,
+		// LastModifiedTime:   oss.LastModifiedAt,
+		LastModifiedById:                  oss.LastModifiedById,
+		LastModifiedFromIP:                oss.LastModifiedFrom,
+		InvoiceServiceFeeId:               oss.InvoiceServiceFeeId,
+		LatestPendingTaskId:               oss.LatestPendingTaskId,
+		OngoingWorkOrderId:                oss.OngoingWorkOrderId,
+		WasSurveyConducted:                oss.WasSurveyConducted,
+		WasThereFinancialsInputted:        oss.WasThereFinancialsInputted,
+		InvoiceActualServiceFeeAmountPaid: oss.InvoiceActualServiceFeeAmountPaid,
+		InvoiceBalanceOwingAmount:         oss.InvoiceBalanceOwingAmount,
+		InvoiceQuotedLabourAmount:         oss.InvoiceQuotedLabourAmount,
+		InvoiceQuotedMaterialAmount:       oss.InvoiceQuotedMaterialAmount,
+		InvoiceTotalQuoteAmount:           oss.InvoiceTotalQuoteAmount,
+		Visits:                            oss.Visits,
+		InvoiceIds:                        oss.InvoiceIds,
+		NoSurveyConductedReason:           oss.NoSurveyConductedReason,
+		NoSurveyConductedReasonOther:      oss.NoSurveyConductedReasonOther,
+		ClonedFromId:                      oss.ClonedFromId,
+		InvoiceDepositAmount:              oss.InvoiceDepositAmount,
+		InvoiceOtherCostsAmount:           oss.InvoiceOtherCostsAmount,
+		InvoiceQuotedOtherCostsAmount:     oss.InvoiceQuotedOtherCostsAmount,
+		InvoicePaidTo:                     oss.InvoicePaidTo,
+		InvoiceAmountDue:                  oss.InvoiceAmountDue,
+		InvoiceSubTotalAmount:             oss.InvoiceSubTotalAmount,
+		ClosingReasonComment:              oss.ClosingReasonComment,
+	}
+
 	// For debugging purposes only.
 	log.Println("associateId -->", associateId)
 	log.Println("customerId  -->", customerId)
 	log.Println("State       -->", state)
+	log.Println("Model       -->", m)
 
-	// 	m := &models.WorkOrder{
-	// 		OldId:              oss.Id,
-	// 		TenantId:           tid,
-	// 		Uuid:               uuid.NewString(),
-	// 		CustomerId:         customerId,
-	// 		AssociateId:        associateId,
-	// 		State:              state,
-	// 		CreatedTime:        oss.CreatedAt,
-	// 		CreatedById:        oss.CreatedById,
-	// 		CreatedFromIP:      oss.CreatedFrom,
-	// 		LastModifiedTime:   oss.LastModifiedAt,
-	// 		LastModifiedById:   oss.LastModifiedById,
-	// 		LastModifiedFromIP: oss.LastModifiedFrom,
-	// 	}
 	// 	err = asr.Insert(ctx, m)
 	// 	if err != nil {
 	// 		log.Print("associateId", associateId)
