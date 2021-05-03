@@ -7,10 +7,24 @@ import (
 	null "gopkg.in/guregu/null.v4"
 )
 
-// State
+//---------------------
+// state
 //---------------------
 // 1 = Active
 // 0 = Inactive
+
+//---------------------
+// invoice_paid_to
+//---------------------
+// 1 = Paid to associate | WORK_ORDER_PAID_TO.Assocaiate
+// 2 - Paid to organization | WORK_ORDER_PAID_TO.Organization
+
+//---------------------
+// type_of
+//---------------------
+// 1 = Residential Job Type | RESIDENTIAL_JOB_TYPE_OF_ID
+// 2 = Commercial Job Type | COMMERCIAL_JOB_TYPE_OF_ID
+// 3 = Unassigned Job Type | UNASSIGNED_JOB_TYPE_OF_ID
 
 type WorkOrder struct {
 	Id                                uint64      `json:"id"`

@@ -6,10 +6,26 @@ import (
 	"time"
 )
 
-// State
+//---------------------
+// state
 //---------------------
 // 1 = Active
 // 0 = Inactive
+
+//---------------------
+// type_of
+//---------------------
+// 1 = Unknown Customer
+// 2 = Residential Customer
+// 3 = Commercial Customer
+
+//---------------------
+// organization_type_of
+//---------------------
+// 1 = Unknown Organization Type | UNKNOWN_ORGANIZATION_TYPE_OF_ID
+// 2 = Private Organization Type | PRIVATE_ORGANIZATION_TYPE_OF_ID
+// 3 = Non-Profit Organization Type | NON_PROFIT_ORGANIZATION_TYPE_OF_ID
+// 4 = Government Organization | GOVERNMENT_ORGANIZATION_TYPE_OF_ID
 
 type Customer struct {
 	// -- customer.py
