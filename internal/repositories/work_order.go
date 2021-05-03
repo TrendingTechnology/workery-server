@@ -24,11 +24,27 @@ func (r *WorkOrderRepo) Insert(ctx context.Context, m *models.WorkOrder) error {
 
 	query := `
     INSERT INTO work_orders (
-        uuid, tenant_id, customer_id, associate_id, state,
-		created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip, old_id
+        uuid, tenant_id, customer_id, associate_id, description, assignment_date,
+        is_ongoing, is_home_support_service, start_date, completion_date, hours,
+		indexed_text, closing_reason, closing_reason_other, state, currency,
+		was_job_satisfactory, was_job_finished_on_time_and_on_budget, was_associate_punctual,
+		was_associate_professional, would_customer_refer_our_organization, score,
+        invoice_date, invoice_quote_amount, invoice_labour_amount, invoice_material_amount,
+		invoice_tax_amount, invoice_total_amount, invoice_service_fee_amount, invoice_service_fee_payment_date,
+        created_time, created_by_id, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_from_ip, old_id,
+		invoice_service_fee_id, latest_pending_task_id, ongoing_work_order_id,
+		was_survey_conducted, was_there_financials_inputted, invoice_actual_service_fee_amount_paid,
+		invoice_balance_owing_amount, invoice_quoted_labour_amount, invoice_quoted_material_amount,
+		invoice_total_quote_amount, visits, invoice_ids, no_survey_conducted_reason,
+		no_survey_conducted_reason_other, cloned_from_id, invoice_deposit_amount,
+		invoice_other_costs_amount, invoice_quoted_other_costs_amount, invoice_paid_to,
+		invoice_amount_due, invoice_sub_total_amount, closing_reason_comment
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
+		$18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32,
+		$33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47,
+		$48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -38,9 +54,22 @@ func (r *WorkOrderRepo) Insert(ctx context.Context, m *models.WorkOrder) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.CustomerId, m.AssociateId, m.State,
+		m.Uuid, m.TenantId, m.CustomerId, m.AssociateId, m.Description,
+        m.AssignmentDate, m.IsOngoing, m.IsHomeSupportService, m.StartDate, m.CompletionDate, m.Hours,
+		m.IndexedText, m.ClosingReason, m.ClosingReasonOther, m.State, m.Currency,
+		m.WasJobSatisfactory, m.WasJobFinishedOnTimeAndOnBudget, m.WasAssociatePunctual,
+		m.WasAssociateProfessional, m.WouldCustomerReferOurOrganization, m.Score,
+		m.InvoiceDate, m.InvoiceQuoteAmount, m.InvoiceLabourAmount, m.InvoiceMaterialAmount,
+		m.InvoiceTaxAmount, m.InvoiceTotalAmount, m.InvoiceServiceFeeAmount, m.InvoiceServiceFeePaymentDate,
 		m.CreatedTime, m.CreatedById, m.CreatedFromIP,
 		m.LastModifiedTime, m.LastModifiedById, m.LastModifiedFromIP, m.OldId,
+		m.InvoiceServiceFeeId, m.LatestPendingTaskId, m.OngoingWorkOrderId,
+		m.WasSurveyConducted, m.WasThereFinancialsInputted, m.InvoiceActualServiceFeeAmountPaid,
+		m.InvoiceBalanceOwingAmount, m.InvoiceQuotedLabourAmount, m.InvoiceQuotedMaterialAmount,
+		m.InvoiceTotalQuoteAmount, m.Visits, m.InvoiceIds, m.NoSurveyConductedReason,
+		m.NoSurveyConductedReasonOther, m.ClonedFromId, m.InvoiceDepositAmount,
+		m.InvoiceOtherCostsAmount, m.InvoiceQuotedOtherCostsAmount, m.InvoicePaidTo,
+		m.InvoiceAmountDue, m.InvoiceSubTotalAmount, m.ClosingReasonComment,
 	)
 	return err
 }

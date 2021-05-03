@@ -32,7 +32,7 @@ func init() {
 
 var woETLCmd = &cobra.Command{
 	Use:   "etl_work_order",
-	Short: "Import the associate vehicle types from old workery",
+	Short: "Import the work order from old workery",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		doRunImportWorkOrder()
@@ -83,7 +83,6 @@ func runWorkOrderETL(
 		log.Fatal("ListAllWorkOrders", err)
 	}
 	for _, oss := range ass {
-		fmt.Println(oss, "\n")
 		insertWorkOrderETL(ctx, tenantId, asr, ar, cr, oss)
 	}
 }
@@ -318,17 +317,18 @@ func insertWorkOrderETL(
 		ClosingReasonComment:              oss.ClosingReasonComment,
 	}
 
-	// For debugging purposes only.
-	log.Println("associateId -->", associateId)
-	log.Println("customerId  -->", customerId)
-	log.Println("State       -->", state)
-	log.Println("Model       -->", m)
+	// // For debugging purposes only.
+	// log.Println("associateId -->", associateId)
+	// log.Println("customerId  -->", customerId)
+	// log.Println("State       -->", state)
+	// log.Println("Model       -->", m)
 
-	// 	err = asr.Insert(ctx, m)
-	// 	if err != nil {
-	// 		log.Print("associateId", associateId)
-	// 		log.Print("customerId", customerId)
-	// 		log.Panic("asr.Insert | err", err, "\n\n", m, oss)
-	// 	}
-	// 	fmt.Println("Imported ID#", oss.Id)
+	err = asr.Insert(ctx, m)
+	if err != nil {
+		// log.Print("associateId", associateId)
+		// log.Print("customerId", customerId)
+		// log.Panic("asr.Insert | err", err, "\n\n", m, oss)
+		log.Panic("asr.Insert | err", err, "\n\n")
+	}
+	fmt.Println("Imported ID#", oss.Id)
 }

@@ -554,24 +554,26 @@ CREATE TABLE work_orders (
     uuid VARCHAR (36) UNIQUE NOT NULL,
     tenant_id BIGINT NOT NULL,
     customer_id BIGINT NOT NULL,
-    associate_id BIGINT NOT NULL,
+    associate_id BIGINT NULL,
     description TEXT NOT NULL DEFAULT '',
-    assignment_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    assignment_date TIMESTAMP NULL DEFAULT (now() AT TIME ZONE 'utc'),
     is_ongoing BOOLEAN NOT NULL DEFAULT FALSE,
     is_home_support_service BOOLEAN NOT NULL DEFAULT FALSE,
     start_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    completion_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    completion_date TIMESTAMP NULL DEFAULT (now() AT TIME ZONE 'utc'),
     hours FLOAT NOT NULL DEFAULT 0,
     type_of SMALLINT NOT NULL DEFAULT 0,
     indexed_text VARCHAR (2055) NOT NULL DEFAULT '',
     closing_reason SMALLINT NOT NULL DEFAULT 0,
-    closing_reason_other VARCHAR (1024) NOT NULL DEFAULT '',
+    closing_reason_other VARCHAR (1024) NULL,
     closing_reason_comment VARCHAR (1024) NOT NULL DEFAULT '',
-    -- latest_pending_task_id
+    latest_pending_task_id BIGINT NULL,
+    ongoing_work_order_id BIGINT NULL,
     state SMALLINT NOT NULL DEFAULT 0,
+    currency VARCHAR (3) NOT NULL DEFAULT 'CAD',
     was_survey_conducted BOOLEAN NOT NULL DEFAULT FALSE,
-    no_survey_conducted_reason SMALLINT NOT NULL DEFAULT 0,
-    no_survey_conducted_reason_other VARCHAR (1024) NOT NULL DEFAULT '',
+    no_survey_conducted_reason SMALLINT NULL DEFAULT 0,
+    no_survey_conducted_reason_other VARCHAR (1024) NULL DEFAULT '',
     was_job_satisfactory BOOLEAN NOT NULL DEFAULT FALSE,
     was_job_finished_on_time_and_on_budget BOOLEAN NOT NULL DEFAULT FALSE,
     was_associate_punctual BOOLEAN NOT NULL DEFAULT FALSE,
@@ -579,9 +581,9 @@ CREATE TABLE work_orders (
     would_customer_refer_our_organization BOOLEAN NOT NULL DEFAULT FALSE,
     score FLOAT NOT NULL DEFAULT 0,
     was_there_financials_inputted BOOLEAN NOT NULL DEFAULT FALSE,
-    invoice_paid_to SMALLINT NOT NULL DEFAULT 0,
-    invoice_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    invoice_ids VARCHAR (127) NOT NULL DEFAULT '',
+    invoice_paid_to SMALLINT NULL DEFAULT 0,
+    invoice_date TIMESTAMP NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    invoice_ids VARCHAR (127) NULL DEFAULT '',
     invoice_quote_amount FLOAT NOT NULL DEFAULT 0,
     invoice_labour_amount FLOAT NOT NULL DEFAULT 0,
     invoice_material_amount FLOAT NOT NULL DEFAULT 0,
@@ -601,12 +603,14 @@ CREATE TABLE work_orders (
     invoice_service_fee_payment_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     invoice_balance_owing_amount FLOAT NOT NULL DEFAULT 0,
     visits SMALLINT NOT NULL DEFAULT 0,
-    cloned_from_id BIGINT NOT NULL,
-    ongoing_order_id BIGINT NOT NULL,
+    cloned_from_id BIGINT NULL,
+    ongoing_order_id BIGINT NULL,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
+    created_by_id BIGINT NULL,
+    created_from_ip VARCHAR (50) NULL,
+    last_modified_by_id BIGINT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    last_modified_from_ip VARCHAR (50) NULL,
     old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (customer_id) REFERENCES customers(id),
@@ -618,6 +622,20 @@ CREATE TABLE work_orders (
 );
 CREATE UNIQUE INDEX idx_work_order_uuid
 ON work_orders (uuid);
+CREATE INDEX idx_work_order_tenant_id
+ON work_orders (tenant_id);
+CREATE INDEX idx_work_order_customer_id
+ON work_orders (customer_id);
+CREATE INDEX idx_work_order_associate_id
+ON work_orders (associate_id);
+CREATE INDEX idx_work_order_invoice_service_fee_id
+ON work_orders (invoice_service_fee_id);
+CREATE INDEX idx_work_order_created_by_id
+ON work_orders (created_by_id);
+CREATE INDEX idx_work_order_ongoing_order_id
+ON work_orders (ongoing_order_id);
+CREATE INDEX idx_work_order_last_modified_by_id
+ON work_orders (last_modified_by_id);
 -- TODO: INDEXES
 
 CREATE TABLE work_order_ongoings (
