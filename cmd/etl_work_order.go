@@ -67,8 +67,9 @@ func doRunImportWorkOrder() {
 	ar := repositories.NewAssociateRepo(db)
 	cr := repositories.NewCustomerRepo(db)
 	isfr := repositories.NewWorkOrderServiceFeeRepo(db)
+	owor := repositories.NewOngoingWorkOrderRepo(db)
 
-	runWorkOrderETL(ctx, uint64(woETLTenantId), asr, ar, cr, isfr, oldDb)
+	runWorkOrderETL(ctx, uint64(woETLTenantId), asr, ar, cr, isfr, owor, oldDb)
 }
 
 func runWorkOrderETL(
@@ -78,6 +79,7 @@ func runWorkOrderETL(
 	ar *repositories.AssociateRepo,
 	cr *repositories.CustomerRepo,
 	isfr *repositories.WorkOrderServiceFeeRepo,
+	owor *repositories.OngoingWorkOrderRepo,
 	oldDb *sql.DB,
 ) {
 	ass, err := ListAllWorkOrders(oldDb)
@@ -85,7 +87,7 @@ func runWorkOrderETL(
 		log.Fatal("ListAllWorkOrders", err)
 	}
 	for _, oss := range ass {
-		insertWorkOrderETL(ctx, tenantId, asr, ar, cr, isfr, oss)
+		insertWorkOrderETL(ctx, tenantId, asr, ar, cr, isfr, owor, oss)
 	}
 }
 
@@ -233,6 +235,7 @@ func insertWorkOrderETL(
 	ar *repositories.AssociateRepo,
 	cr *repositories.CustomerRepo,
 	isfr *repositories.WorkOrderServiceFeeRepo,
+	owor *repositories.OngoingWorkOrderRepo,
 	oss *OldWorkOrder,
 ) {
 	var associateId null.Int
@@ -268,6 +271,32 @@ func insertWorkOrderETL(
 		// Convert from null supported integer times.
 		invoiceServiceFeeId = null.NewInt(int64(invoiceServiceFeeIdUint64), invoiceServiceFeeIdUint64 != 0)
     }
+
+	var ongoingWorkOrderId null.Int
+	if oss.OngoingWorkOrderId.Valid {
+		ongoingWorkOrderIdInt64 := oss.OngoingWorkOrderId.ValueOrZero()
+		ongoingWorkOrderIdUint64, err := owor.GetIdByOldId(ctx, tid, uint64(ongoingWorkOrderIdInt64))
+		if err != nil {
+			log.Panic("owor.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		ongoingWorkOrderId = null.NewInt(int64(ongoingWorkOrderIdUint64), ongoingWorkOrderIdUint64 != 0)
+    }
+
+	var clonedFromId null.Int
+	if oss.ClonedFromId.Valid {
+		clonedFromIdInt64 := oss.ClonedFromId.ValueOrZero()
+		clonedFromIdUint64, err := asr.GetIdByOldId(ctx, tid, uint64(clonedFromIdInt64))
+		if err != nil {
+			log.Panic("asr.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		clonedFromId = null.NewInt(int64(clonedFromIdUint64), clonedFromIdUint64 != 0)
+    }
+
+	// InvoicePaidTo
 
 	m := &models.WorkOrder{
 		OldId:                             oss.Id,
@@ -310,7 +339,7 @@ func insertWorkOrderETL(
 		LastModifiedFromIP:                oss.LastModifiedFrom,
 		InvoiceServiceFeeId:               invoiceServiceFeeId,
 		LatestPendingTaskId:               oss.LatestPendingTaskId,
-		OngoingWorkOrderId:                oss.OngoingWorkOrderId,
+		OngoingWorkOrderId:                ongoingWorkOrderId,
 		WasSurveyConducted:                oss.WasSurveyConducted,
 		WasThereFinancialsInputted:        oss.WasThereFinancialsInputted,
 		InvoiceActualServiceFeeAmountPaid: oss.InvoiceActualServiceFeeAmountPaid,
@@ -322,7 +351,7 @@ func insertWorkOrderETL(
 		InvoiceIds:                        oss.InvoiceIds,
 		NoSurveyConductedReason:           oss.NoSurveyConductedReason,
 		NoSurveyConductedReasonOther:      oss.NoSurveyConductedReasonOther,
-		ClonedFromId:                      oss.ClonedFromId,
+		ClonedFromId:                      clonedFromId,
 		InvoiceDepositAmount:              oss.InvoiceDepositAmount,
 		InvoiceOtherCostsAmount:           oss.InvoiceOtherCostsAmount,
 		InvoiceQuotedOtherCostsAmount:     oss.InvoiceQuotedOtherCostsAmount,
