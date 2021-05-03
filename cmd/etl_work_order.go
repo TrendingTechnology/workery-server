@@ -66,8 +66,9 @@ func doRunImportWorkOrder() {
 	asr := repositories.NewWorkOrderRepo(db)
 	ar := repositories.NewAssociateRepo(db)
 	cr := repositories.NewCustomerRepo(db)
+	isfr := repositories.NewWorkOrderServiceFeeRepo(db)
 
-	runWorkOrderETL(ctx, uint64(woETLTenantId), asr, ar, cr, oldDb)
+	runWorkOrderETL(ctx, uint64(woETLTenantId), asr, ar, cr, isfr, oldDb)
 }
 
 func runWorkOrderETL(
@@ -76,6 +77,7 @@ func runWorkOrderETL(
 	asr *repositories.WorkOrderRepo,
 	ar *repositories.AssociateRepo,
 	cr *repositories.CustomerRepo,
+	isfr *repositories.WorkOrderServiceFeeRepo,
 	oldDb *sql.DB,
 ) {
 	ass, err := ListAllWorkOrders(oldDb)
@@ -83,7 +85,7 @@ func runWorkOrderETL(
 		log.Fatal("ListAllWorkOrders", err)
 	}
 	for _, oss := range ass {
-		insertWorkOrderETL(ctx, tenantId, asr, ar, cr, oss)
+		insertWorkOrderETL(ctx, tenantId, asr, ar, cr, isfr, oss)
 	}
 }
 
@@ -230,6 +232,7 @@ func insertWorkOrderETL(
 	asr *repositories.WorkOrderRepo,
 	ar *repositories.AssociateRepo,
 	cr *repositories.CustomerRepo,
+	isfr *repositories.WorkOrderServiceFeeRepo,
 	oss *OldWorkOrder,
 ) {
 	var associateId null.Int
@@ -253,6 +256,18 @@ func insertWorkOrderETL(
 	if oss.State == "terminated" {
 		state = 2
 	}
+
+    var invoiceServiceFeeId null.Int
+	if oss.InvoiceServiceFeeId.Valid {
+		invoiceServiceFeeIdInt64 := oss.InvoiceServiceFeeId.ValueOrZero()
+		invoiceServiceFeeIdUint64, err := isfr.GetIdByOldId(ctx, tid, uint64(invoiceServiceFeeIdInt64))
+		if err != nil {
+			log.Panic("isfr.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		invoiceServiceFeeId = null.NewInt(int64(invoiceServiceFeeIdUint64), invoiceServiceFeeIdUint64 != 0)
+    }
 
 	m := &models.WorkOrder{
 		OldId:                             oss.Id,
@@ -293,7 +308,7 @@ func insertWorkOrderETL(
 		LastModifiedTime:                  oss.LastModified,
 		LastModifiedById:                  oss.LastModifiedById,
 		LastModifiedFromIP:                oss.LastModifiedFrom,
-		InvoiceServiceFeeId:               oss.InvoiceServiceFeeId,
+		InvoiceServiceFeeId:               invoiceServiceFeeId,
 		LatestPendingTaskId:               oss.LatestPendingTaskId,
 		OngoingWorkOrderId:                oss.OngoingWorkOrderId,
 		WasSurveyConducted:                oss.WasSurveyConducted,
