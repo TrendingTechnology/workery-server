@@ -698,10 +698,6 @@ ON work_order_tags (uuid);
 CREATE INDEX idx_work_order_tag_tenant_id
 ON work_order_tags (tenant_id);
 
--- ######################### --
--- CONTNUE CODING FROM BELOW --
--- ######################### --
-
 CREATE TABLE work_order_skill_sets (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
@@ -715,6 +711,12 @@ CREATE TABLE work_order_skill_sets (
 );
 CREATE UNIQUE INDEX idx_work_order_skill_set_uuid
 ON work_order_skill_sets (uuid);
+CREATE INDEX idx_work_order_skill_set_tenant_id
+ON work_order_skill_sets (tenant_id);
+
+-- ######################### --
+-- CONTNUE CODING FROM BELOW --
+-- ######################### --
 
 CREATE TABLE work_order_comments (
     id BIGSERIAL PRIMARY KEY,
