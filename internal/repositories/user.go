@@ -162,6 +162,32 @@ func (r *UserRepo) GetByOldId(ctx context.Context, oldId uint64) (*models.User, 
 	return m, nil
 }
 
+func (r *UserRepo) GetIdByOldId(ctx context.Context, tenantId uint64, oldId uint64) (uint64, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	var newId uint64
+
+	query := `
+	SELECT
+		id
+	FROM
+		users
+	WHERE
+		tenant_id = $1 AND old_id = $2
+	`
+	err := r.db.QueryRowContext(ctx, query, tenantId, oldId).Scan(&newId)
+	if err != nil {
+		// CASE 1 OF 2: Cannot find record with that email.
+		if err == sql.ErrNoRows {
+			return 0, nil
+		} else { // CASE 2 OF 2: All other errors.
+			return 0, err
+		}
+	}
+	return newId, nil
+}
+
 func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()

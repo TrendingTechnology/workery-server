@@ -638,48 +638,49 @@ CREATE INDEX idx_work_order_last_modified_by_id
 ON work_orders (last_modified_by_id);
 -- TODO: INDEXES
 
-CREATE TABLE work_order_ongoings (
-    id BIGSERIAL PRIMARY KEY,
-    uuid VARCHAR (36) UNIQUE NOT NULL,
-    tenant_id BIGINT NOT NULL,
-    order_id BIGINT NOT NULL,
-    ongoing_order_id BIGINT NOT NULL,
-    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
-    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    old_id BIGINT NOT NULL DEFAULT 0,
-    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-    FOREIGN KEY (order_id) REFERENCES ongoing_work_orders(id),
-    FOREIGN KEY (ongoing_order_id) REFERENCES associates(id),
-    FOREIGN KEY (created_by_id) REFERENCES users(id),
-    FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
-);
-CREATE UNIQUE INDEX idx_work_order_ongoing_uuid
-ON work_order_ongoings (uuid);
+-- CREATE TABLE work_order_ongoings (
+--     id BIGSERIAL PRIMARY KEY,
+--     uuid VARCHAR (36) UNIQUE NOT NULL,
+--     tenant_id BIGINT NOT NULL,
+--     order_id BIGINT NOT NULL,
+--     ongoing_order_id BIGINT NOT NULL,
+--     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+--     created_by_id BIGINT NOT NULL,
+--     last_modified_by_id BIGINT NOT NULL,
+--     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+--     old_id BIGINT NOT NULL DEFAULT 0,
+--     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+--     FOREIGN KEY (order_id) REFERENCES ongoing_work_orders(id),
+--     FOREIGN KEY (ongoing_order_id) REFERENCES associates(id),
+--     FOREIGN KEY (created_by_id) REFERENCES users(id),
+--     FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
+-- );
+-- CREATE UNIQUE INDEX idx_work_order_ongoing_uuid
+-- ON work_order_ongoings (uuid);
 
 CREATE TABLE activity_sheet_items (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
     tenant_id BIGINT NOT NULL,
-    order_id BIGINT NOT NULL,
-    ongoing_order_id BIGINT NOT NULL,
-    associate_id BIGINT NOT NULL,
-    comment_id BIGINT NOT NULL,
-    state SMALLINT NOT NULL DEFAULT 0,
+    comment TEXT NOT NULL,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
-    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NULL,
+    created_from_ip VARCHAR (50) NULL,
+    associate_id BIGINT NOT NULL,
+    order_id BIGINT NULL,
+    state SMALLINT NOT NULL DEFAULT 0,
+    ongoing_order_id BIGINT NULL,
     old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (created_by_id) REFERENCES users(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (ongoing_order_id) REFERENCES ongoing_work_orders(id),
-    FOREIGN KEY (associate_id) REFERENCES associates(id),
-    FOREIGN KEY (comment_id) REFERENCES comments(id)
+    FOREIGN KEY (associate_id) REFERENCES associates(id)
 );
 CREATE UNIQUE INDEX idx_activity_sheet_item_uuid
 ON activity_sheet_items (uuid);
+CREATE INDEX idx_activity_sheet_item_tenant_id
+ON activity_sheet_items (tenant_id);
 
 CREATE TABLE work_order_tags (
     id BIGSERIAL PRIMARY KEY,
