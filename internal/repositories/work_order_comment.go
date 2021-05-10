@@ -24,9 +24,9 @@ func (r *WorkOrderCommentRepo) Insert(ctx context.Context, m *models.WorkOrderCo
 
 	query := `
     INSERT INTO work_order_comments (
-        uuid, tenant_id, order_id, comment_id, old_id
+        uuid, tenant_id, order_id, comment_id, created_time, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5
+        $1, $2, $3, $4, $5, $6
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -36,7 +36,7 @@ func (r *WorkOrderCommentRepo) Insert(ctx context.Context, m *models.WorkOrderCo
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.OrderId, m.CommentId, m.OldId,
+		m.Uuid, m.TenantId, m.OrderId, m.CommentId, m.CreatedTime, m.OldId,
 	)
 	return err
 }
@@ -73,13 +73,13 @@ func (r *WorkOrderCommentRepo) GetById(ctx context.Context, id uint64) (*models.
 
 	query := `
     SELECT
-        id, uuid, tenant_id, order_id, comment_id
+        id, uuid, tenant_id, order_id, comment_id, created_time
 	FROM
         work_order_comments
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.OrderId, &m.CommentId,
+		&m.Id, &m.Uuid, &m.TenantId, &m.OrderId, &m.CommentId, &m.CreatedTime,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -100,13 +100,13 @@ func (r *WorkOrderCommentRepo) GetByOld(ctx context.Context, tenantId uint64, ol
 
 	query := `
     SELECT
-        id, uuid, tenant_id, order_id, comment_id
+        id, uuid, tenant_id, order_id, comment_id, created_time
 	FROM
         work_order_comments
     WHERE
         old_id = $1 AND tenant_id = $2`
 	err := r.db.QueryRowContext(ctx, query, oldId, tenantId).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.OrderId, &m.CommentId,
+		&m.Id, &m.Uuid, &m.TenantId, &m.OrderId, &m.CommentId, &m.CreatedTime,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.

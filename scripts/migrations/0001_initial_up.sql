@@ -681,6 +681,10 @@ CREATE UNIQUE INDEX idx_activity_sheet_item_uuid
 ON activity_sheet_items (uuid);
 CREATE INDEX idx_activity_sheet_item_tenant_id
 ON activity_sheet_items (tenant_id);
+CREATE INDEX idx_activity_sheet_item_order_id
+ON activity_sheet_items (order_id);
+CREATE INDEX idx_activity_sheet_item_associate_id
+ON activity_sheet_items (associate_id);
 
 CREATE TABLE work_order_tags (
     id BIGSERIAL PRIMARY KEY,
@@ -697,6 +701,10 @@ CREATE UNIQUE INDEX idx_work_order_tag_uuid
 ON work_order_tags (uuid);
 CREATE INDEX idx_work_order_tag_tenant_id
 ON work_order_tags (tenant_id);
+CREATE INDEX idx_work_order_tag_order_id
+ON work_order_tags (order_id);
+CREATE INDEX idx_work_order_tag_tag_id
+ON work_order_tags (tag_id);
 
 CREATE TABLE work_order_skill_sets (
     id BIGSERIAL PRIMARY KEY,
@@ -713,11 +721,16 @@ CREATE UNIQUE INDEX idx_work_order_skill_set_uuid
 ON work_order_skill_sets (uuid);
 CREATE INDEX idx_work_order_skill_set_tenant_id
 ON work_order_skill_sets (tenant_id);
+CREATE INDEX idx_work_order_skill_set_order_id
+ON work_order_skill_sets (order_id);
+CREATE INDEX idx_work_order_skill_set_skill_set_id
+ON work_order_skill_sets (skill_set_id);
 
 CREATE TABLE work_order_comments (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
     tenant_id BIGINT NOT NULL,
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     order_id BIGINT NOT NULL,
     comment_id BIGINT NOT NULL,
     old_id BIGINT NOT NULL DEFAULT 0,
@@ -728,6 +741,10 @@ CREATE TABLE work_order_comments (
 CREATE UNIQUE INDEX idx_work_order_comment_uuid
 ON work_order_comments (uuid);
 CREATE INDEX idx_work_order_comment_tenant_id
+ON work_order_comments (tenant_id);
+CREATE INDEX idx_work_order_comment_order_id
+ON work_order_comments (order_id);
+CREATE INDEX idx_work_order_comment_comment_id
 ON work_order_comments (comment_id);
 
 -- ######################### --

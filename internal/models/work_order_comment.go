@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"time"
 )
 
 // State
@@ -14,7 +15,8 @@ type WorkOrderComment struct {
 	Uuid        string `json:"uuid"`
 	TenantId    uint64 `json:"tenant_id"`
 	OrderId     uint64 `json:"order_id"`
-	CommentId       uint64 `json:"comment_id"`
+	CommentId   uint64 `json:"comment_id"`
+	CreatedTime time.Time   `json:"created_time"`
 	OldId       uint64 `json:"old_id"`
 }
 

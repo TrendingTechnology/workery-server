@@ -93,6 +93,7 @@ func runWorkOrderCommentETL(
 
 type OldWorkOrderComment struct {
 	Id          uint64 `json:"id"`
+	CreatedAt   time.Time   `json:"created_at"`
 	WorkOrderId uint64 `json:"about_id"`
 	CommentId   uint64 `json:"comment_id"`
 }
@@ -103,7 +104,7 @@ func ListAllWorkOrderComments(db *sql.DB) ([]*OldWorkOrderComment, error) {
 
 	query := `
 	SELECT
-        id, about_id, comment_id
+        id, created_at, about_id, comment_id
 	FROM
         workery_work_order_comments
 	`
@@ -118,6 +119,7 @@ func ListAllWorkOrderComments(db *sql.DB) ([]*OldWorkOrderComment, error) {
 		m := new(OldWorkOrderComment)
 		err = rows.Scan(
 			&m.Id,
+			&m.CreatedAt,
 			&m.WorkOrderId,
 			&m.CommentId,
 		)
@@ -164,11 +166,12 @@ func insertWorkOrderCommentETL(
 	//
 
 	m := &models.WorkOrderComment{
-		OldId:       oss.Id,
-		TenantId:    tid,
-		Uuid:        uuid.NewString(),
-		OrderId: orderId,
-		CommentId:       commentId,
+		OldId:     oss.Id,
+		TenantId:  tid,
+		Uuid:      uuid.NewString(),
+		CreatedTime: oss.CreatedAt,
+		OrderId:   orderId,
+		CommentId: commentId,
 	}
 	err = wotp.Insert(ctx, m)
 	if err != nil {
