@@ -865,6 +865,10 @@ CREATE TABLE work_order_invoices (
 );
 CREATE UNIQUE INDEX idx_work_order_invoice_uuid
 ON work_order_invoices (uuid);
+CREATE UNIQUE INDEX idx_work_order_invoice_tenant_id
+ON work_order_invoices (tenant_id);
+CREATE INDEX idx_work_order_invoice_order_id
+ON work_order_invoices (order_id);
 
 CREATE TABLE work_order_deposits (
     id BIGSERIAL PRIMARY KEY,
