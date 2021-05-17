@@ -191,52 +191,52 @@ type OldWorkOrderInvoice struct {
 	Line15Price float64 `json:"line_15_price"`
 	Line15AmountCurrency string `json:"line_15_amount_currency"`
 	Line15Amount float64 `json:"line_15_amount"`
+	InvoiceQuoteDays int8 `json:"invoice_quote_days"`
+	InvoiceAssociateTax null.String `json:"invoice_associate_tax"`
+	InvoiceQuoteDate time.Time `json:"invoice_quote_date"`
+	InvoiceCustomersApproval string `json:"invoice_customers_approval"`
+	Line01Notes null.String `json:"line_01_notes"`
+	Line02Notes null.String `json:"line_02_notes"`
+	TotalLabourCurrency string `json:"total_labour_currency"`
+	TotalLabour float64 `json:"total_labour"`
+	TotalMaterialsCurrency string `json:"total_materials_currency"`
+	TotalMaterials float64 `json:"total_materials"`
+	OtherCostsCurrency string `json:"other_costs_currency"`
+	OtherCosts float64 `json:"other_costs"`
+	AmountDueCurrency string `json:"amount_due_currency"`
+	TaxCurrency string `json:"tax_currency"`
+	Tax float64 `json:"tax"`
+	TotalCurrency string `json:"total_currency"`
+	Total float64 `json:"total"`
+	DepositCurrency string `json:"deposit_currency"`
+	PaymentAmountCurrency string `json:"payment_amount_currency"`
+	PaymentAmount float64 `json:"payment_amount"`
+	PaymentDate time.Time `json:"payment_date"`
+	IsCash bool `json:"is_cash"`
+	IsCheque bool `json:"is_cheque"`
+	IsDebit bool `json:"is_debit"`
+	IsCredit bool `json:"is_credit"`
+	IsOther bool `json:"is_other"`
+	ClientSignature string `json:"client_signature"`
+	AssociateSignDate time.Time `json:"associate_sign_date"`
+	AssociateSignature string `json:"associate_signature"`
+	WorkOrderId   uint64 `json:"work_order_id"`
+	CreatedAt time.Time `json:"created_at"`
+	LastModifiedAt time.Time `json:"last_modified_at"`
+	CreatedById   uint64 `json:"created_by_id"`
+	LastModifiedById   uint64 `json:"last_modified_by_id"`
+	CreatedFrom string `json:"created_from"`
+	CreatedFromIsPublic bool `json:"created_from_is_public"`
+	LastModifiedFrom string `json:"last_modified_from"`
+	LastModifiedFromIsPublic bool `json:"last_modified_from_is_public"`
+	ClientAddress string `json:"client_address"`
+	RevisionVersion int8 `json:"revision_version"`
+	Deposit float64 `json:"deposit"`
+	AmountDue float64 `json:"amount_due"`
+	SubTotal float64 `json:"sub_total"`
+	SubTotalCurrency string `json:"sub_total_currency"`
 }
 
-//     invoice_quote_days smallint,
-//     invoice_associate_tax character varying(18) COLLATE pg_catalog."default",
-//     invoice_quote_date date,
-//     invoice_customers_approval character varying(20) COLLATE pg_catalog."default",
-//     line_01_notes character varying(80) COLLATE pg_catalog."default",
-//     line_02_notes character varying(40) COLLATE pg_catalog."default",
-//     total_labour_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     total_labour numeric(10,2) NOT NULL,
-//     total_materials_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     total_materials numeric(10,2) NOT NULL,
-//     other_costs_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     other_costs numeric(10,2) NOT NULL,
-//     amount_due_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     tax_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     tax numeric(10,2) NOT NULL,
-//     total_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     total numeric(10,2) NOT NULL,
-//     deposit_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     payment_amount_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
-//     payment_amount numeric(10,2) NOT NULL,
-//     payment_date date,
-//     is_cash boolean NOT NULL,
-//     is_cheque boolean NOT NULL,
-//     is_debit boolean NOT NULL,
-//     is_credit boolean NOT NULL,
-//     is_other boolean NOT NULL,
-//     client_signature character varying(47) COLLATE pg_catalog."default",
-//     associate_sign_date date,
-//     associate_signature character varying(29) COLLATE pg_catalog."default",
-//     work_order_id bigint,
-//     created_at timestamp with time zone NOT NULL,
-//     last_modified_at timestamp with time zone NOT NULL,
-//     created_by_id integer,
-//     last_modified_by_id integer,
-//     created_from inet,
-//     created_from_is_public boolean NOT NULL,
-//     last_modified_from inet,
-//     last_modified_from_is_public boolean NOT NULL,
-//     client_address character varying(63) COLLATE pg_catalog."default",
-//     revision_version smallint,
-//     deposit numeric(10,2) NOT NULL,
-//     amount_due numeric(10,2) NOT NULL,
-//     sub_total numeric(10,2) NOT NULL,
-//     sub_total_currency character varying(3) COLLATE pg_catalog."default" NOT NULL,
 
 func ListAllWorkOrderInvoices(db *sql.DB) ([]*OldWorkOrderInvoice, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -260,7 +260,14 @@ func ListAllWorkOrderInvoices(db *sql.DB) ([]*OldWorkOrderInvoice, error) {
 		line_12_qty, line_12_desc, line_12_price_currency, line_12_price, line_12_amount_currency, line_12_amount,
 		line_13_qty, line_13_desc, line_13_price_currency, line_13_price, line_13_amount_currency, line_13_amount,
 		line_14_qty, line_14_desc, line_14_price_currency, line_14_price, line_14_amount_currency, line_14_amount,
-		line_15_qty, line_15_desc, line_15_price_currency, line_15_price, line_15_amount_currency, line_15_amount
+		line_15_qty, line_15_desc, line_15_price_currency, line_15_price, line_15_amount_currency, line_15_amount,
+		invoice_quote_days, invoice_associate_tax, invoice_quote_date, invoice_customers_approval, line_01_notes,
+		line_02_notes, total_labour_currency, total_labour, total_materials_currency, total_materials,
+		other_costs_currency, other_costs, amount_due_currency, tax_currency, tax, total_currency, total,
+		deposit_currency, payment_amount_currency, payment_amount, payment_date, is_cash, is_cheque, is_debit,
+		is_credit, is_other, client_signature, associate_sign_date, associate_signature, work_order_id, created_at,
+		last_modified_at, created_by_id, last_modified_by_id, created_from, created_from_is_public, last_modified_from,
+		last_modified_from_is_public, client_address, revision_version, deposit, amount_due, sub_total, sub_total_currency
 	FROM
         workery_work_order_invoices
 	`
@@ -291,6 +298,14 @@ func ListAllWorkOrderInvoices(db *sql.DB) ([]*OldWorkOrderInvoice, error) {
 			&m.Line13Qty, &m.Line13Desc, &m.Line13PriceCurrency, &m.Line13Price, &m.Line13AmountCurrency, &m.Line13Amount,
 			&m.Line14Qty, &m.Line14Desc, &m.Line14PriceCurrency, &m.Line14Price, &m.Line14AmountCurrency, &m.Line14Amount,
 			&m.Line15Qty, &m.Line15Desc, &m.Line15PriceCurrency, &m.Line15Price, &m.Line15AmountCurrency, &m.Line15Amount,
+			&m.InvoiceQuoteDays, &m.InvoiceAssociateTax, &m.InvoiceQuoteDate, &m.InvoiceCustomersApproval, &m.Line01Notes,
+			&m.Line02Notes, &m.TotalLabourCurrency, &m.TotalLabour, &m.TotalMaterialsCurrency, &m.TotalMaterials,
+			&m.OtherCostsCurrency, &m.OtherCosts, &m.AmountDueCurrency, &m.TaxCurrency, &m.Tax, &m.TotalCurrency, &m.Total,
+			&m.DepositCurrency, &m.PaymentAmountCurrency, &m.PaymentAmount, &m.PaymentDate, &m.IsCash, &m.IsCheque,
+			&m.IsDebit, &m.IsCredit, &m.IsOther, &m.ClientSignature, &m.AssociateSignDate, &m.AssociateSignature,
+			&m.WorkOrderId, &m.CreatedAt, &m.LastModifiedAt, &m.CreatedById, &m.LastModifiedById, &m.CreatedFrom,
+			&m.CreatedFromIsPublic, &m.LastModifiedFrom, &m.LastModifiedFromIsPublic, &m.ClientAddress, &m.RevisionVersion,
+			&m.Deposit, &m.AmountDue, &m.SubTotal, &m.SubTotalCurrency,
 		)
 		if err != nil {
 			panic(err)
