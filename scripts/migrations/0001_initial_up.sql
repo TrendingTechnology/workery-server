@@ -747,12 +747,6 @@ ON work_order_comments (order_id);
 CREATE INDEX idx_work_order_comment_comment_id
 ON work_order_comments (comment_id);
 
--- ######################### --
--- CONTNUE CODING FROM BELOW --
--- ######################### --
-
--- TODO: work_order_activity_sheets
-
 CREATE TABLE work_order_invoices (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
@@ -869,6 +863,14 @@ CREATE UNIQUE INDEX idx_work_order_invoice_tenant_id
 ON work_order_invoices (tenant_id);
 CREATE INDEX idx_work_order_invoice_order_id
 ON work_order_invoices (order_id);
+
+
+-- ######################### --
+-- CONTNUE CODING FROM BELOW --
+-- ######################### --
+
+-- TODO: work_order_activity_sheets
+
 
 CREATE TABLE work_order_deposits (
     id BIGSERIAL PRIMARY KEY,
