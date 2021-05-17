@@ -2,6 +2,9 @@ package models
 
 import (
 	"context"
+	"time"
+
+	null "gopkg.in/guregu/null.v4"
 )
 
 // State
@@ -13,7 +16,7 @@ type WorkOrderInvoice struct {
 	Id          uint64 `json:"id"` // 	OrderId   uint64 `json:"order_id"`
 	Uuid        string `json:"uuid"`
 	TenantId    uint64 `json:"tenant_id"`
-	
+
 	InvoiceId string `json:"invoice_id"`
 	InvoiceDate time.Time `json:"invoice_date"`
 	AssociateName string `json:"associate_name"`

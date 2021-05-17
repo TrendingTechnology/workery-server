@@ -24,9 +24,9 @@ func (r *WorkOrderInvoiceRepo) Insert(ctx context.Context, m *models.WorkOrderIn
 
 	query := `
     INSERT INTO work_order_invoices (
-        uuid, tenant_id, order_id, invoice_id, old_id
+        uuid, tenant_id, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5
+        $1, $2, $3
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -36,7 +36,7 @@ func (r *WorkOrderInvoiceRepo) Insert(ctx context.Context, m *models.WorkOrderIn
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.OrderId, m.InvoiceId, m.OldId,
+		m.Uuid, m.TenantId, m.OldId,
 	)
 	return err
 }
@@ -49,9 +49,9 @@ func (r *WorkOrderInvoiceRepo) UpdateById(ctx context.Context, m *models.WorkOrd
     UPDATE
         work_order_invoices
     SET
-        tenant_id = $1, order_id = $2, invoice_id = $3
+        tenant_id = $1
     WHERE
-        id = $4`
+        id = $2`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (r *WorkOrderInvoiceRepo) UpdateById(ctx context.Context, m *models.WorkOrd
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.TenantId, m.OrderId, m.InvoiceId, m.Id,
+		m.TenantId, m.Id,
 	)
 	return err
 }
@@ -73,13 +73,13 @@ func (r *WorkOrderInvoiceRepo) GetById(ctx context.Context, id uint64) (*models.
 
 	query := `
     SELECT
-        id, uuid, tenant_id, order_id, invoice_id
+        id, uuid, tenant_id
 	FROM
         work_order_invoices
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.OrderId, &m.InvoiceId,
+		&m.Id, &m.Uuid, &m.TenantId,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -100,13 +100,13 @@ func (r *WorkOrderInvoiceRepo) GetByOld(ctx context.Context, tenantId uint64, ol
 
 	query := `
     SELECT
-        id, uuid, tenant_id, order_id, invoice_id
+        id, uuid, tenant_id
 	FROM
         work_order_invoices
     WHERE
         old_id = $1 AND tenant_id = $2`
 	err := r.db.QueryRowContext(ctx, query, oldId, tenantId).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.OrderId, &m.InvoiceId,
+		&m.Id, &m.Uuid, &m.TenantId,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
