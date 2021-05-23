@@ -36,12 +36,28 @@ func (r *WorkOrderInvoiceRepo) Insert(ctx context.Context, m *models.WorkOrderIn
 		line_07_qty, line_07_desc, line_07_price, line_07_amount,
 		line_08_qty, line_08_desc, line_08_price, line_08_amount,
 		line_09_qty, line_09_desc, line_09_price, line_09_amount,
-		line_10_qty, line_10_desc, line_10_price, line_10_amount
+		line_10_qty, line_10_desc, line_10_price, line_10_amount,
+		line_11_qty, line_11_desc, line_11_price, line_11_amount,
+		line_12_qty, line_12_desc, line_12_price, line_12_amount,
+		line_13_qty, line_13_desc, line_13_price, line_13_amount,
+		line_14_qty, line_14_desc, line_14_price, line_14_amount,
+		line_15_qty, line_15_desc, line_15_price, line_15_amount,
+		invoice_quote_days, invoice_associate_tax, invoice_quote_date,
+		invoice_customers_approval, line_01_notes, line_02_notes,
+		total_labour, total_materials, other_costs, tax, total, payment_amount,
+		payment_date, is_cash, is_cheque, is_debit, is_credit, is_other,
+		client_signature, associate_sign_date, associate_signature, created_time,
+		last_modified_time, created_by_id, last_modified_by_id, client_address,
+		revision_version, deposit, amount_due, sub_total, state
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
 		$17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31,
 		$32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45,
-		$46, $47, $48, $49, $50, $51
+		$46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59,
+		$60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73,
+		$74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87,
+		$88, $89, $90, $91, $92, $93, $94, $95, $96, $97, $98, $99, $100, $101,
+		$102
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -64,6 +80,19 @@ func (r *WorkOrderInvoiceRepo) Insert(ctx context.Context, m *models.WorkOrderIn
 		m.Line08Qty, m.Line08Desc, m.Line08Price, m.Line08Amount,
 		m.Line09Qty, m.Line09Desc, m.Line09Price, m.Line09Amount,
 		m.Line10Qty, m.Line10Desc, m.Line10Price, m.Line10Amount,
+		m.Line11Qty, m.Line11Desc, m.Line11Price, m.Line11Amount,
+		m.Line12Qty, m.Line12Desc, m.Line12Price, m.Line12Amount,
+		m.Line13Qty, m.Line13Desc, m.Line13Price, m.Line13Amount,
+		m.Line14Qty, m.Line14Desc, m.Line14Price, m.Line14Amount,
+		m.Line15Qty, m.Line15Desc, m.Line15Price, m.Line15Amount,
+		m.InvoiceQuoteDays, m.InvoiceAssociateTax, m.InvoiceQuoteDate,
+		m.InvoiceCustomersApproval, m.Line01Notes, m.Line02Notes,
+		m.TotalLabour, m.TotalMaterials, m.OtherCosts, m.Tax, m.Total, m.PaymentAmount,
+		m.PaymentDate, m.IsCash, m.IsCheque, m.IsDebit, m.IsCredit, m.IsOther,
+		m.ClientSignature, m.AssociateSignDate, m.AssociateSignature,
+		m.CreatedTime, m.LastModifiedTime, m.CreatedById, m.LastModifiedById,
+		m.ClientAddress, m.RevisionVersion, m.Deposit, m.AmountDue, m.SubTotal,
+		m.State,
 	)
 	return err
 }

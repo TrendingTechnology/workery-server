@@ -107,8 +107,8 @@ type WorkOrderInvoice struct {
 	AssociateSignDate time.Time `json:"associate_sign_date"`
 	AssociateSignature string `json:"associate_signature"`
 	WorkOrderId   uint64 `json:"work_order_id"`
-	CreatedAt time.Time `json:"created_at"`
-	LastModifiedAt time.Time `json:"last_modified_at"`
+	CreatedTime time.Time `json:"created_time"`
+	LastModifiedTime time.Time `json:"last_modified_time"`
 	CreatedById   uint64 `json:"created_by_id"`
 	LastModifiedById   uint64 `json:"last_modified_by_id"`
 	CreatedFrom string `json:"created_from"`
@@ -120,7 +120,8 @@ type WorkOrderInvoice struct {
 	Deposit float64 `json:"deposit"`
 	AmountDue float64 `json:"amount_due"`
 	SubTotal float64 `json:"sub_total"`
-    State       int8 `json:"state"`	 // IsArchived bool `json:"is_archived"`
+
+	State       int8 `json:"state"`	 // IsArchived bool `json:"is_archived"`
 	OldId       uint64 `json:"old_id"`
 }
 

@@ -360,97 +360,102 @@ func insertWorkOrderInvoiceETL(
 		ClientName:          oss.ClientName,          // 9
         ClientTelephone:     oss.ClientTelephone,     // 10
 		ClientEmail:         oss.ClientEmail,         // 11
-
 		Line01Qty:           oss.Line01Qty,           // 12
 		Line01Desc:          oss.Line01Desc,          // 13
 		Line01Price:         oss.Line01Price,         // 14
 		Line01Amount:        oss.Line01Amount,        // 15
-
 		Line02Qty:           oss.Line02Qty,           // 16
 		Line02Desc:          oss.Line02Desc,          // 17
 		Line02Price:         oss.Line02Price,         // 18
         Line02Amount:        oss.Line02Amount,        // 19
-
 		Line03Qty:           oss.Line03Qty,           // 20
 		Line03Desc:          oss.Line03Desc,          // 21
 		Line03Price:         oss.Line03Price,         // 22
         Line03Amount:        oss.Line03Amount,        // 23
-
 		Line04Qty:           oss.Line04Qty,           // 24
 		Line04Desc:          oss.Line04Desc,          // 25
 		Line04Price:         oss.Line04Price,         // 26
         Line04Amount:        oss.Line04Amount,        // 27
-
 		Line05Qty:           oss.Line05Qty,           // 28
 		Line05Desc:          oss.Line05Desc,          // 29
 		Line05Price:         oss.Line05Price,         // 30
         Line05Amount:        oss.Line05Amount,        // 31
-
 		Line06Qty:           oss.Line06Qty,           // 32
 		Line06Desc:          oss.Line06Desc,          // 33
 		Line06Price:         oss.Line06Price,         // 34
         Line06Amount:        oss.Line06Amount,        // 35
-
 		Line07Qty:           oss.Line07Qty,           // 36
 		Line07Desc:          oss.Line07Desc,          // 37
 		Line07Price:         oss.Line07Price,         // 38
         Line07Amount:        oss.Line07Amount,        // 39
-
 		Line08Qty:           oss.Line08Qty,           // 40
 		Line08Desc:          oss.Line08Desc,          // 41
 		Line08Price:         oss.Line08Price,         // 42
         Line08Amount:        oss.Line08Amount,        // 43
-
 		Line09Qty:           oss.Line09Qty,           // 44
 		Line09Desc:          oss.Line09Desc,          // 45
 		Line09Price:         oss.Line09Price,         // 46
         Line09Amount:        oss.Line09Amount,        // 47
-
 		Line10Qty:           oss.Line10Qty,           // 48
 		Line10Desc:          oss.Line10Desc,          // 49
 		Line10Price:         oss.Line10Price,         // 50
         Line10Amount:        oss.Line10Amount,        // 51
-
-		// Line15Qty null.Int `json:"line_15_qty"` // Make `int8`
-		// Line15Desc string `json:"line_15_desc"`
-		// Line15Price float64 `json:"line_15_price"`
-		// Line15Amount float64 `json:"line_15_amount"`
-		// InvoiceQuoteDays int8 `json:"invoice_quote_days"`
-		// InvoiceAssociateTax null.String `json:"invoice_associate_tax"`
-		// InvoiceQuoteDate time.Time `json:"invoice_quote_date"`
-		// InvoiceCustomersApproval string `json:"invoice_customers_approval"`
-		// Line01Notes null.String `json:"line_01_notes"`
-		// Line02Notes null.String `json:"line_02_notes"`
-		// TotalLabour float64 `json:"total_labour"`
-		// TotalMaterials float64 `json:"total_materials"`
-		// OtherCosts float64 `json:"other_costs"`
-		// Tax float64 `json:"tax"`
-		// Total float64 `json:"total"`
-		// PaymentAmount float64 `json:"payment_amount"`
-		// PaymentDate time.Time `json:"payment_date"`
-		// IsCash bool `json:"is_cash"`
-		// IsCheque bool `json:"is_cheque"`
-		// IsDebit bool `json:"is_debit"`
-		// IsCredit bool `json:"is_credit"`
-		// IsOther bool `json:"is_other"`
-		// ClientSignature string `json:"client_signature"`
-		// AssociateSignDate time.Time `json:"associate_sign_date"`
-		// AssociateSignature string `json:"associate_signature"`
-		// WorkOrderId   uint64 `json:"work_order_id"`
-		// CreatedAt time.Time `json:"created_at"`
-		// LastModifiedAt time.Time `json:"last_modified_at"`
-		// CreatedById   uint64 `json:"created_by_id"`
-		// LastModifiedById   uint64 `json:"last_modified_by_id"`
-		// CreatedFrom string `json:"created_from"`
+		Line11Qty:           oss.Line11Qty,           // 52
+		Line11Desc:          oss.Line11Desc,          // 53
+		Line11Price:         oss.Line11Price,         // 54
+        Line11Amount:        oss.Line11Amount,        // 55
+		Line12Qty:           oss.Line12Qty,           // 56
+		Line12Desc:          oss.Line12Desc,          // 57
+		Line12Price:         oss.Line12Price,         // 58
+        Line12Amount:        oss.Line12Amount,        // 59
+		Line13Qty:           oss.Line13Qty,           // 60
+		Line13Desc:          oss.Line13Desc,          // 61
+		Line13Price:         oss.Line13Price,         // 62
+        Line13Amount:        oss.Line13Amount,        // 63
+		Line14Qty:           oss.Line14Qty,           // 64
+		Line14Desc:          oss.Line14Desc,          // 65
+		Line14Price:         oss.Line14Price,         // 66
+        Line14Amount:        oss.Line14Amount,        // 67
+		Line15Qty:           oss.Line15Qty,           // 68
+		Line15Desc:          oss.Line15Desc,          // 69
+		Line15Price:         oss.Line15Price,         // 70
+        Line15Amount:        oss.Line15Amount,        // 71
+		InvoiceQuoteDays:    oss.InvoiceQuoteDays,    // 72
+		InvoiceAssociateTax: oss.InvoiceAssociateTax, // 73
+		InvoiceQuoteDate:    oss.InvoiceQuoteDate,    // 74
+		InvoiceCustomersApproval: oss.InvoiceCustomersApproval, // 75
+        Line01Notes:         oss.Line01Notes,         // 76
+        Line02Notes:         oss.Line02Notes,         // 77
+		TotalLabour:         oss.TotalLabour,         // 78
+		TotalMaterials:      oss.TotalMaterials,      // 79
+		OtherCosts:          oss.OtherCosts,          // 80
+		Tax:                 oss.Tax,                 // 81
+		Total:               oss.Total,               // 82
+		PaymentAmount:       oss.PaymentAmount,       // 83
+		PaymentDate:         oss.PaymentDate,         // 84
+		IsCash:              oss.IsCash,              // 85
+		IsCheque:            oss.IsCheque,            // 86
+		IsDebit:             oss.IsDebit,             // 87
+		IsCredit:            oss.IsCredit,            // 88
+		IsOther:             oss.IsOther,             // 89
+		ClientSignature:     oss.ClientSignature,     // 90
+		AssociateSignDate:   oss.AssociateSignDate,   // 91
+		AssociateSignature:  oss.AssociateSignature,  // 92
+		// WorkOrderId       uint64 `json:"work_order_id"`
+		CreatedTime:         oss.CreatedAt,           // 93
+		LastModifiedTime:    oss.LastModifiedAt,      // 94
+		CreatedById:         oss.CreatedById,         // 95 (TODO:MAP)
+        LastModifiedById:    oss.LastModifiedById,    // 96 (TODO:MAP)
+		// CreatedFrom:         oss.CreatedFrom,
 		// CreatedFromIsPublic bool `json:"created_from_is_public"`
 		// LastModifiedFrom string `json:"last_modified_from"`
 		// LastModifiedFromIsPublic bool `json:"last_modified_from_is_public"`
-		// ClientAddress string `json:"client_address"`
-		// RevisionVersion int8 `json:"revision_version"`
-		// Deposit float64 `json:"deposit"`
-		// AmountDue float64 `json:"amount_due"`
-		// SubTotal float64 `json:"sub_total"`
-	    // State       int8 `json:"state"`	 // IsArchived bool `json:"is_archived"`
+		ClientAddress:       oss.ClientAddress,       // 97
+		RevisionVersion:     oss.RevisionVersion,     // 98
+		Deposit:             oss.Deposit,             // 99
+		AmountDue:           oss.AmountDue,           // 100
+		SubTotal:            oss.SubTotal,            // 101
+	    // State:               oss.State,               // 102 (TODO)
 	}
 
 	fmt.Println("OrderId:", orderId)

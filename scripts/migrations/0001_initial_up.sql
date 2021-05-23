@@ -851,6 +851,7 @@ CREATE TABLE work_order_invoices (
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     old_id BIGINT NOT NULL DEFAULT 0,
+    state SMALLINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (created_by_id) REFERENCES users(id),
