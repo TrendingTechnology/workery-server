@@ -8,11 +8,11 @@ import (
 	"os"
 	"time"
 
-	// "github.com/google/uuid"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	null "gopkg.in/guregu/null.v4"
 
-	// "github.com/over55/workery-server/internal/models"
+	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
 	"github.com/over55/workery-server/internal/utils"
 )
@@ -323,14 +323,14 @@ func insertWorkOrderInvoiceETL(
 	ctx context.Context,
 	tid uint64,
 	wotp *repositories.WorkOrderInvoiceRepo,
-	ar *repositories.WorkOrderRepo,
+	wor *repositories.WorkOrderRepo,
 	oss *OldWorkOrderInvoice,
 ) {
 	//
 	// OrderId
 	//
 
-	orderId, err := ar.GetIdByOldId(ctx, tid, oss.OrderId)
+	orderId, err := wor.GetIdByOldId(ctx, tid, oss.OrderId)
 	if err != nil {
 		log.Panic("ar.GetIdByOldId | err", err)
 	}
@@ -348,16 +348,116 @@ func insertWorkOrderInvoiceETL(
 	// Insert into database.
 	//
 
-	// m := &models.WorkOrderInvoice{
-	// 	OldId:       orderId,
-	// 	TenantId:    tid,
-	// 	Uuid:        uuid.NewString(),
-	// 	OrderId: orderId,
-	// 	// InvoiceId:       invoiceId,
-	// }
-	// err = wotp.Insert(ctx, m)
-	// if err != nil {
-	// 	log.Panic("wotp.Insert | err", err)
-	// }
+	m := &models.WorkOrderInvoice{
+		Uuid:                uuid.NewString(),        // 1
+		TenantId:            tid,                     // 2
+		OldId:               orderId,                 // 3
+		InvoiceId:           oss.InvoiceId,           // 4
+		OrderId:             orderId,                 // 5
+        InvoiceDate:         oss.InvoiceDate,         // 6
+		AssociateName:       oss.AssociateName,       // 7
+		AssociateTelephone:  oss.AssociateTelephone,  // 8
+		ClientName:          oss.ClientName,          // 9
+        ClientTelephone:     oss.ClientTelephone,     // 10
+		ClientEmail:         oss.ClientEmail,         // 11
+
+		Line01Qty:           oss.Line01Qty,           // 12
+		Line01Desc:          oss.Line01Desc,          // 13
+		Line01Price:         oss.Line01Price,         // 14
+		Line01Amount:        oss.Line01Amount,        // 15
+
+		Line02Qty:           oss.Line02Qty,           // 16
+		Line02Desc:          oss.Line02Desc,          // 17
+		Line02Price:         oss.Line02Price,         // 18
+        Line02Amount:        oss.Line02Amount,        // 19
+
+		Line03Qty:           oss.Line03Qty,           // 20
+		Line03Desc:          oss.Line03Desc,          // 21
+		Line03Price:         oss.Line03Price,         // 22
+        Line03Amount:        oss.Line03Amount,        // 23
+
+		Line04Qty:           oss.Line04Qty,           // 24
+		Line04Desc:          oss.Line04Desc,          // 25
+		Line04Price:         oss.Line04Price,         // 26
+        Line04Amount:        oss.Line04Amount,        // 27
+
+		Line05Qty:           oss.Line05Qty,           // 28
+		Line05Desc:          oss.Line05Desc,          // 29
+		Line05Price:         oss.Line05Price,         // 30
+        Line05Amount:        oss.Line05Amount,        // 31
+
+		Line06Qty:           oss.Line06Qty,           // 32
+		Line06Desc:          oss.Line06Desc,          // 33
+		Line06Price:         oss.Line06Price,         // 34
+        Line06Amount:        oss.Line06Amount,        // 35
+
+		Line07Qty:           oss.Line07Qty,           // 36
+		Line07Desc:          oss.Line07Desc,          // 37
+		Line07Price:         oss.Line07Price,         // 38
+        Line07Amount:        oss.Line07Amount,        // 39
+
+		Line08Qty:           oss.Line08Qty,           // 40
+		Line08Desc:          oss.Line08Desc,          // 41
+		Line08Price:         oss.Line08Price,         // 42
+        Line08Amount:        oss.Line08Amount,        // 43
+
+		Line09Qty:           oss.Line09Qty,           // 44
+		Line09Desc:          oss.Line09Desc,          // 45
+		Line09Price:         oss.Line09Price,         // 46
+        Line09Amount:        oss.Line09Amount,        // 47
+
+		Line10Qty:           oss.Line10Qty,           // 48
+		Line10Desc:          oss.Line10Desc,          // 49
+		Line10Price:         oss.Line10Price,         // 50
+        Line10Amount:        oss.Line10Amount,        // 51
+
+		// Line15Qty null.Int `json:"line_15_qty"` // Make `int8`
+		// Line15Desc string `json:"line_15_desc"`
+		// Line15Price float64 `json:"line_15_price"`
+		// Line15Amount float64 `json:"line_15_amount"`
+		// InvoiceQuoteDays int8 `json:"invoice_quote_days"`
+		// InvoiceAssociateTax null.String `json:"invoice_associate_tax"`
+		// InvoiceQuoteDate time.Time `json:"invoice_quote_date"`
+		// InvoiceCustomersApproval string `json:"invoice_customers_approval"`
+		// Line01Notes null.String `json:"line_01_notes"`
+		// Line02Notes null.String `json:"line_02_notes"`
+		// TotalLabour float64 `json:"total_labour"`
+		// TotalMaterials float64 `json:"total_materials"`
+		// OtherCosts float64 `json:"other_costs"`
+		// Tax float64 `json:"tax"`
+		// Total float64 `json:"total"`
+		// PaymentAmount float64 `json:"payment_amount"`
+		// PaymentDate time.Time `json:"payment_date"`
+		// IsCash bool `json:"is_cash"`
+		// IsCheque bool `json:"is_cheque"`
+		// IsDebit bool `json:"is_debit"`
+		// IsCredit bool `json:"is_credit"`
+		// IsOther bool `json:"is_other"`
+		// ClientSignature string `json:"client_signature"`
+		// AssociateSignDate time.Time `json:"associate_sign_date"`
+		// AssociateSignature string `json:"associate_signature"`
+		// WorkOrderId   uint64 `json:"work_order_id"`
+		// CreatedAt time.Time `json:"created_at"`
+		// LastModifiedAt time.Time `json:"last_modified_at"`
+		// CreatedById   uint64 `json:"created_by_id"`
+		// LastModifiedById   uint64 `json:"last_modified_by_id"`
+		// CreatedFrom string `json:"created_from"`
+		// CreatedFromIsPublic bool `json:"created_from_is_public"`
+		// LastModifiedFrom string `json:"last_modified_from"`
+		// LastModifiedFromIsPublic bool `json:"last_modified_from_is_public"`
+		// ClientAddress string `json:"client_address"`
+		// RevisionVersion int8 `json:"revision_version"`
+		// Deposit float64 `json:"deposit"`
+		// AmountDue float64 `json:"amount_due"`
+		// SubTotal float64 `json:"sub_total"`
+	    // State       int8 `json:"state"`	 // IsArchived bool `json:"is_archived"`
+	}
+
+	fmt.Println("OrderId:", orderId)
+
+	err = wotp.Insert(ctx, m)
+	if err != nil {
+		log.Panic("wotp.Insert | err", err)
+	}
 	fmt.Println("Imported ID#", orderId)
 }

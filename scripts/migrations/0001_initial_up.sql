@@ -846,7 +846,6 @@ CREATE TABLE work_order_invoices (
     client_signature VARCHAR (47) NOT NULL DEFAULT '',
     associate_sign_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     associate_signature VARCHAR (29) NOT NULL DEFAULT '',
-    work_order_id BIGINT NOT NULL,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     created_by_id BIGINT NOT NULL,
     last_modified_by_id BIGINT NOT NULL,
