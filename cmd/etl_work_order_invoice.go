@@ -63,6 +63,7 @@ func doRunImportWorkOrderInvoice() {
 	tr := repositories.NewTenantRepo(db)
 	wotp := repositories.NewWorkOrderInvoiceRepo(db)
 	ar := repositories.NewWorkOrderRepo(db)
+	ur := repositories.NewUserRepo(db)
 
 	// Lookup the tenant.
 	tenant, err := tr.GetBySchemaName(ctx, workOrderInvoiceSchemaName)
@@ -70,7 +71,7 @@ func doRunImportWorkOrderInvoice() {
 		log.Fatal(err)
 	}
     if tenant != nil {
-		runWorkOrderInvoiceETL(ctx, uint64(tenant.Id), wotp, ar, oldDb)
+		runWorkOrderInvoiceETL(ctx, uint64(tenant.Id), wotp, ar, ur, oldDb)
 	}
 }
 
@@ -79,6 +80,7 @@ func runWorkOrderInvoiceETL(
 	tenantId uint64,
 	wotp *repositories.WorkOrderInvoiceRepo,
 	ar *repositories.WorkOrderRepo,
+	ur *repositories.UserRepo,
 	// vtr *repositories.InvoiceRepo,
 	oldDb *sql.DB,
 ) {
@@ -87,7 +89,7 @@ func runWorkOrderInvoiceETL(
 		log.Fatal(err)
 	}
 	for _, oss := range aats {
-		insertWorkOrderInvoiceETL(ctx, tenantId, wotp, ar, oss)
+		insertWorkOrderInvoiceETL(ctx, tenantId, wotp, ar, ur, oss)
 	}
 }
 
@@ -108,89 +110,89 @@ type OldWorkOrderInvoice struct {
 	Line01AmountCurrency string `json:"line_01_amount_currency"`
 	Line01Amount float64 `json:"line_01_amount"`
 	Line02Qty null.Int `json:"line_02_qty"` // Make `int8`
-	Line02Desc string `json:"line_02_desc"`
-	Line02PriceCurrency string `json:"line_02_price_currency"`
-	Line02Price float64 `json:"line_02_price"`
-	Line02AmountCurrency string `json:"line_02_amount_currency"`
-	Line02Amount float64 `json:"line_02_amount"`
+	Line02Desc null.String `json:"line_02_desc"`
+	Line02PriceCurrency null.String `json:"line_02_price_currency"`
+	Line02Price null.Float `json:"line_02_price"`
+	Line02AmountCurrency null.String `json:"line_02_amount_currency"`
+	Line02Amount null.Float `json:"line_02_amount"`
 	Line03Qty null.Int `json:"line_03_qty"` // Make `int8`
-	Line03Desc string `json:"line_03_desc"`
-	Line03PriceCurrency string `json:"line_03_price_currency"`
-	Line03Price float64 `json:"line_03_price"`
-	Line03AmountCurrency string `json:"line_03_amount_currency"`
-	Line03Amount float64 `json:"line_03_amount"`
+	Line03Desc null.String `json:"line_03_desc"`
+	Line03PriceCurrency null.String `json:"line_03_price_currency"`
+	Line03Price null.Float `json:"line_03_price"`
+	Line03AmountCurrency null.String `json:"line_03_amount_currency"`
+	Line03Amount null.Float `json:"line_03_amount"`
 	Line04Qty null.Int `json:"line_04_qty"` // Make `int8`
-	Line04Desc string `json:"line_04_desc"`
-	Line04PriceCurrency string `json:"line_04_price_currency"`
-	Line04Price float64 `json:"line_04_price"`
-	Line04AmountCurrency string `json:"line_04_amount_currency"`
-	Line04Amount float64 `json:"line_04_amount"`
+	Line04Desc null.String `json:"line_04_desc"`
+	Line04PriceCurrency null.String `json:"line_04_price_currency"`
+	Line04Price null.Float `json:"line_04_price"`
+	Line04AmountCurrency null.String `json:"line_04_amount_currency"`
+	Line04Amount null.Float `json:"line_04_amount"`
 	Line05Qty null.Int `json:"line_05_qty"` // Make `int8`
-	Line05Desc string `json:"line_05_desc"`
-	Line05PriceCurrency string `json:"line_05_price_currency"`
-	Line05Price float64 `json:"line_05_price"`
-	Line05AmountCurrency string `json:"line_05_amount_currency"`
-	Line05Amount float64 `json:"line_05_amount"`
+	Line05Desc null.String `json:"line_05_desc"`
+	Line05PriceCurrency null.String `json:"line_05_price_currency"`
+	Line05Price null.Float `json:"line_05_price"`
+	Line05AmountCurrency null.String `json:"line_05_amount_currency"`
+	Line05Amount null.Float `json:"line_05_amount"`
 	Line06Qty null.Int `json:"line_06_qty"` // Make `int8`
-	Line06Desc string `json:"line_06_desc"`
-	Line06PriceCurrency string `json:"line_06_price_currency"`
-	Line06Price float64 `json:"line_06_price"`
-	Line06AmountCurrency string `json:"line_06_amount_currency"`
-	Line06Amount float64 `json:"line_06_amount"`
+	Line06Desc null.String `json:"line_06_desc"`
+	Line06PriceCurrency null.String `json:"line_06_price_currency"`
+	Line06Price null.Float `json:"line_06_price"`
+	Line06AmountCurrency null.String `json:"line_06_amount_currency"`
+	Line06Amount null.Float `json:"line_06_amount"`
 	Line07Qty null.Int `json:"line_07_qty"` // Make `int8`
-	Line07Desc string `json:"line_07_desc"`
-	Line07PriceCurrency string `json:"line_07_price_currency"`
-	Line07Price float64 `json:"line_07_price"`
-	Line07AmountCurrency string `json:"line_07_amount_currency"`
-	Line07Amount float64 `json:"line_07_amount"`
+	Line07Desc null.String `json:"line_07_desc"`
+	Line07PriceCurrency null.String `json:"line_07_price_currency"`
+	Line07Price null.Float `json:"line_07_price"`
+	Line07AmountCurrency null.String `json:"line_07_amount_currency"`
+	Line07Amount null.Float `json:"line_07_amount"`
 	Line08Qty null.Int `json:"line_08_qty"` // Make `int8`
-	Line08Desc string `json:"line_08_desc"`
-	Line08PriceCurrency string `json:"line_08_price_currency"`
-	Line08Price float64 `json:"line_08_price"`
-	Line08AmountCurrency string `json:"line_08_amount_currency"`
-	Line08Amount float64 `json:"line_08_amount"`
+	Line08Desc null.String `json:"line_08_desc"`
+	Line08PriceCurrency null.String `json:"line_08_price_currency"`
+	Line08Price null.Float `json:"line_08_price"`
+	Line08AmountCurrency null.String `json:"line_08_amount_currency"`
+	Line08Amount null.Float `json:"line_08_amount"`
 	Line09Qty null.Int `json:"line_09_qty"` // Make `int8`
-	Line09Desc string `json:"line_09_desc"`
-	Line09PriceCurrency string `json:"line_09_price_currency"`
-	Line09Price float64 `json:"line_09_price"`
-	Line09AmountCurrency string `json:"line_09_amount_currency"`
-	Line09Amount float64 `json:"line_09_amount"`
+	Line09Desc null.String `json:"line_09_desc"`
+	Line09PriceCurrency null.String `json:"line_09_price_currency"`
+	Line09Price null.Float `json:"line_09_price"`
+	Line09AmountCurrency null.String `json:"line_09_amount_currency"`
+	Line09Amount null.Float `json:"line_09_amount"`
 	Line10Qty null.Int `json:"line_10_qty"` // Make `int8`
-	Line10Desc string `json:"line_10_desc"`
-	Line10PriceCurrency string `json:"line_10_price_currency"`
-	Line10Price float64 `json:"line_10_price"`
-	Line10AmountCurrency string `json:"line_10_amount_currency"`
-	Line10Amount float64 `json:"line_10_amount"`
+	Line10Desc null.String `json:"line_10_desc"`
+	Line10PriceCurrency null.String `json:"line_10_price_currency"`
+	Line10Price null.Float `json:"line_10_price"`
+	Line10AmountCurrency null.String `json:"line_10_amount_currency"`
+	Line10Amount null.Float `json:"line_10_amount"`
 	Line11Qty null.Int `json:"line_11_qty"` // Make `int8`
-	Line11Desc string `json:"line_11_desc"`
-	Line11PriceCurrency string `json:"line_11_price_currency"`
-	Line11Price float64 `json:"line_11_price"`
-	Line11AmountCurrency string `json:"line_11_amount_currency"`
-	Line11Amount float64 `json:"line_11_amount"`
+	Line11Desc null.String `json:"line_11_desc"`
+	Line11PriceCurrency null.String `json:"line_11_price_currency"`
+	Line11Price null.Float `json:"line_11_price"`
+	Line11AmountCurrency null.String `json:"line_11_amount_currency"`
+	Line11Amount null.Float `json:"line_11_amount"`
 	Line12Qty null.Int `json:"line_12_qty"` // Make `int8`
-	Line12Desc string `json:"line_12_desc"`
-	Line12PriceCurrency string `json:"line_12_price_currency"`
-	Line12Price float64 `json:"line_12_price"`
-	Line12AmountCurrency string `json:"line_12_amount_currency"`
-	Line12Amount float64 `json:"line_12_amount"`
+	Line12Desc null.String `json:"line_12_desc"`
+	Line12PriceCurrency null.String `json:"line_12_price_currency"`
+	Line12Price null.Float `json:"line_12_price"`
+	Line12AmountCurrency null.String `json:"line_12_amount_currency"`
+	Line12Amount null.Float `json:"line_12_amount"`
 	Line13Qty null.Int `json:"line_13_qty"` // Make `int8`
-	Line13Desc string `json:"line_13_desc"`
-	Line13PriceCurrency string `json:"line_13_price_currency"`
-	Line13Price float64 `json:"line_13_price"`
-	Line13AmountCurrency string `json:"line_13_amount_currency"`
-	Line13Amount float64 `json:"line_13_amount"`
+	Line13Desc null.String `json:"line_13_desc"`
+	Line13PriceCurrency null.String `json:"line_13_price_currency"`
+	Line13Price null.Float `json:"line_13_price"`
+	Line13AmountCurrency null.String `json:"line_13_amount_currency"`
+	Line13Amount null.Float `json:"line_13_amount"`
 	Line14Qty null.Int `json:"line_14_qty"` // Make `int8`
-	Line14Desc string `json:"line_14_desc"`
-	Line14PriceCurrency string `json:"line_14_price_currency"`
-	Line14Price float64 `json:"line_14_price"`
-	Line14AmountCurrency string `json:"line_14_amount_currency"`
-	Line14Amount float64 `json:"line_14_amount"`
+	Line14Desc null.String `json:"line_14_desc"`
+	Line14PriceCurrency null.String `json:"line_14_price_currency"`
+	Line14Price null.Float `json:"line_14_price"`
+	Line14AmountCurrency null.String `json:"line_14_amount_currency"`
+	Line14Amount null.Float `json:"line_14_amount"`
 	Line15Qty null.Int `json:"line_15_qty"` // Make `int8`
-	Line15Desc string `json:"line_15_desc"`
-	Line15PriceCurrency string `json:"line_15_price_currency"`
-	Line15Price float64 `json:"line_15_price"`
-	Line15AmountCurrency string `json:"line_15_amount_currency"`
-	Line15Amount float64 `json:"line_15_amount"`
+	Line15Desc null.String `json:"line_15_desc"`
+	Line15PriceCurrency null.String `json:"line_15_price_currency"`
+	Line15Price null.Float `json:"line_15_price"`
+	Line15AmountCurrency null.String `json:"line_15_amount_currency"`
+	Line15Amount null.Float `json:"line_15_amount"`
 	InvoiceQuoteDays int8 `json:"invoice_quote_days"`
 	InvoiceAssociateTax null.String `json:"invoice_associate_tax"`
 	InvoiceQuoteDate time.Time `json:"invoice_quote_date"`
@@ -324,6 +326,7 @@ func insertWorkOrderInvoiceETL(
 	tid uint64,
 	wotp *repositories.WorkOrderInvoiceRepo,
 	wor *repositories.WorkOrderRepo,
+	ur *repositories.UserRepo,
 	oss *OldWorkOrderInvoice,
 ) {
 	//
@@ -331,6 +334,15 @@ func insertWorkOrderInvoiceETL(
 	//
 
 	orderId, err := wor.GetIdByOldId(ctx, tid, oss.OrderId)
+	if err != nil {
+		log.Panic("ar.GetIdByOldId | err", err)
+	}
+
+	//
+	// UserId
+	//
+
+	userId, err := wor.GetIdByOldId(ctx, tid, oss.CreatedById)
 	if err != nil {
 		log.Panic("ar.GetIdByOldId | err", err)
 	}
@@ -420,13 +432,13 @@ func insertWorkOrderInvoiceETL(
 		Line15Desc:          oss.Line15Desc,          // 69
 		Line15Price:         oss.Line15Price,         // 70
         Line15Amount:        oss.Line15Amount,        // 71
-		InvoiceQuoteDays:    oss.InvoiceQuoteDays,    // 72
-		InvoiceAssociateTax: oss.InvoiceAssociateTax, // 73
-		InvoiceQuoteDate:    oss.InvoiceQuoteDate,    // 74
+		InvoiceQuoteDays:    oss.InvoiceQuoteDays,              // 72
+		InvoiceAssociateTax: oss.InvoiceAssociateTax,           // 73
+		InvoiceQuoteDate:    oss.InvoiceQuoteDate,              // 74
 		InvoiceCustomersApproval: oss.InvoiceCustomersApproval, // 75
-        Line01Notes:         oss.Line01Notes,         // 76
-        Line02Notes:         oss.Line02Notes,         // 77
-		TotalLabour:         oss.TotalLabour,         // 78
+        Line01Notes:         oss.Line01Notes,                   // 76
+        Line02Notes:         oss.Line02Notes,                   // 77
+		TotalLabour:         oss.TotalLabour,                   // 78
 		TotalMaterials:      oss.TotalMaterials,      // 79
 		OtherCosts:          oss.OtherCosts,          // 80
 		Tax:                 oss.Tax,                 // 81
@@ -444,8 +456,8 @@ func insertWorkOrderInvoiceETL(
 		// WorkOrderId       uint64 `json:"work_order_id"`
 		CreatedTime:         oss.CreatedAt,           // 93
 		LastModifiedTime:    oss.LastModifiedAt,      // 94
-		CreatedById:         oss.CreatedById,         // 95 (TODO:MAP)
-        LastModifiedById:    oss.LastModifiedById,    // 96 (TODO:MAP)
+		CreatedById:         userId,                  // 95
+        LastModifiedById:    userId,                  // 96
 		// CreatedFrom:         oss.CreatedFrom,
 		// CreatedFromIsPublic bool `json:"created_from_is_public"`
 		// LastModifiedFrom string `json:"last_modified_from"`
