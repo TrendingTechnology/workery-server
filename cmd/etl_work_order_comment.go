@@ -69,7 +69,7 @@ func doRunImportWorkOrderComment() {
 	if err != nil {
 		log.Fatal(err)
 	}
-    if tenant != nil {
+	if tenant != nil {
 		runWorkOrderCommentETL(ctx, uint64(tenant.Id), wotp, ar, vtr, oldDb)
 	}
 }
@@ -92,10 +92,10 @@ func runWorkOrderCommentETL(
 }
 
 type OldWorkOrderComment struct {
-	Id          uint64 `json:"id"`
-	CreatedAt   time.Time   `json:"created_at"`
-	WorkOrderId uint64 `json:"about_id"`
-	CommentId   uint64 `json:"comment_id"`
+	Id          uint64    `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	WorkOrderId uint64    `json:"about_id"`
+	CommentId   uint64    `json:"comment_id"`
 }
 
 func ListAllWorkOrderComments(db *sql.DB) ([]*OldWorkOrderComment, error) {
@@ -166,12 +166,12 @@ func insertWorkOrderCommentETL(
 	//
 
 	m := &models.WorkOrderComment{
-		OldId:     oss.Id,
-		TenantId:  tid,
-		Uuid:      uuid.NewString(),
+		OldId:       oss.Id,
+		TenantId:    tid,
+		Uuid:        uuid.NewString(),
 		CreatedTime: oss.CreatedAt,
-		OrderId:   orderId,
-		CommentId: commentId,
+		OrderId:     orderId,
+		CommentId:   commentId,
 	}
 	err = wotp.Insert(ctx, m)
 	if err != nil {

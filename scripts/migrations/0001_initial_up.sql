@@ -864,14 +864,6 @@ ON work_order_invoices (tenant_id);
 CREATE INDEX idx_work_order_invoice_order_id
 ON work_order_invoices (order_id);
 
-
--- ######################### --
--- CONTNUE CODING FROM BELOW --
--- ######################### --
-
--- TODO: work_order_activity_sheets
-
-
 CREATE TABLE work_order_deposits (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
@@ -880,13 +872,16 @@ CREATE TABLE work_order_deposits (
     paid_at TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     deposit_method SMALLINT NOT NULL DEFAULT 0,
     paid_to SMALLINT NOT NULL DEFAULT 0,
+    currency VARCHAR (3) NOT NULL DEFAULT 'CAD',
     amount FLOAT NOT NULL DEFAULT 0,
     paid_for SMALLINT NOT NULL DEFAULT 0,
-    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
+    created_by_id BIGINT NULL,
+    created_from_ip VARCHAR (50) NULL DEFAULT '',
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    last_modified_by_id BIGINT NULL,
+    last_modified_from_ip VARCHAR (50) NULL DEFAULT '',
+    state SMALLINT NOT NULL DEFAULT 0,
     old_id BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
@@ -895,6 +890,16 @@ CREATE TABLE work_order_deposits (
 );
 CREATE UNIQUE INDEX idx_work_order_deposit_uuid
 ON work_order_deposits (uuid);
+CREATE INDEX idx_work_order_deposit_order_id
+ON work_order_deposits (order_id);
+-- CREATE INDEX idx_work_order_deposit_tenant_id
+-- ON work_order_deposits (tenant_id);
+
+-- ######################### --
+-- CONTNUE CODING FROM BELOW --
+-- ######################### --
+
+-- TODO: work_order_activity_sheets
 
 CREATE TABLE task_items (
     id BIGSERIAL PRIMARY KEY,

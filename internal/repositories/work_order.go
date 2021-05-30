@@ -55,7 +55,7 @@ func (r *WorkOrderRepo) Insert(ctx context.Context, m *models.WorkOrder) error {
 	_, err = stmt.ExecContext(
 		ctx,
 		m.Uuid, m.TenantId, m.CustomerId, m.AssociateId, m.Description,
-        m.AssignmentDate, m.IsOngoing, m.IsHomeSupportService, m.StartDate, m.CompletionDate, m.Hours,
+		m.AssignmentDate, m.IsOngoing, m.IsHomeSupportService, m.StartDate, m.CompletionDate, m.Hours,
 		m.IndexedText, m.ClosingReason, m.ClosingReasonOther, m.State, m.Currency,
 		m.WasJobSatisfactory, m.WasJobFinishedOnTimeAndOnBudget, m.WasAssociatePunctual,
 		m.WasAssociateProfessional, m.WouldCustomerReferOurOrganization, m.Score,

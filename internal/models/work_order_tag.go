@@ -10,12 +10,12 @@ import (
 // 0 = Inactive
 
 type WorkOrderTag struct {
-	Id          uint64 `json:"id"`
-	Uuid        string `json:"uuid"`
-	TenantId    uint64 `json:"tenant_id"`
-	OrderId     uint64 `json:"order_id"`
-	TagId       uint64 `json:"tag_id"`
-	OldId       uint64 `json:"old_id"`
+	Id       uint64 `json:"id"`
+	Uuid     string `json:"uuid"`
+	TenantId uint64 `json:"tenant_id"`
+	OrderId  uint64 `json:"order_id"`
+	TagId    uint64 `json:"tag_id"`
+	OldId    uint64 `json:"old_id"`
 }
 
 type WorkOrderTagRepository interface {

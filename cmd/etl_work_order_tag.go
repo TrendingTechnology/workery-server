@@ -69,7 +69,7 @@ func doRunImportWorkOrderTag() {
 	if err != nil {
 		log.Fatal(err)
 	}
-    if tenant != nil {
+	if tenant != nil {
 		runWorkOrderTagETL(ctx, uint64(tenant.Id), wotp, ar, vtr, oldDb)
 	}
 }
@@ -164,11 +164,11 @@ func insertWorkOrderTagETL(
 	//
 
 	m := &models.WorkOrderTag{
-		OldId:       oss.Id,
-		TenantId:    tid,
-		Uuid:        uuid.NewString(),
-		OrderId: orderId,
-		TagId:       tagId,
+		OldId:    oss.Id,
+		TenantId: tid,
+		Uuid:     uuid.NewString(),
+		OrderId:  orderId,
+		TagId:    tagId,
 	}
 	err = wotp.Insert(ctx, m)
 	if err != nil {

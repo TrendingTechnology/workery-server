@@ -260,7 +260,7 @@ func insertWorkOrderETL(
 		state = 2
 	}
 
-    var invoiceServiceFeeId null.Int
+	var invoiceServiceFeeId null.Int
 	if oss.InvoiceServiceFeeId.Valid {
 		invoiceServiceFeeIdInt64 := oss.InvoiceServiceFeeId.ValueOrZero()
 		invoiceServiceFeeIdUint64, err := isfr.GetIdByOldId(ctx, tid, uint64(invoiceServiceFeeIdInt64))
@@ -270,7 +270,7 @@ func insertWorkOrderETL(
 
 		// Convert from null supported integer times.
 		invoiceServiceFeeId = null.NewInt(int64(invoiceServiceFeeIdUint64), invoiceServiceFeeIdUint64 != 0)
-    }
+	}
 
 	var ongoingWorkOrderId null.Int
 	if oss.OngoingWorkOrderId.Valid {
@@ -282,7 +282,7 @@ func insertWorkOrderETL(
 
 		// Convert from null supported integer times.
 		ongoingWorkOrderId = null.NewInt(int64(ongoingWorkOrderIdUint64), ongoingWorkOrderIdUint64 != 0)
-    }
+	}
 
 	var clonedFromId null.Int
 	if oss.ClonedFromId.Valid {
@@ -294,7 +294,7 @@ func insertWorkOrderETL(
 
 		// Convert from null supported integer times.
 		clonedFromId = null.NewInt(int64(clonedFromIdUint64), clonedFromIdUint64 != 0)
-    }
+	}
 
 	// InvoicePaidTo
 

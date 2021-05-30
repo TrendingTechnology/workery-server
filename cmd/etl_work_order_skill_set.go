@@ -69,7 +69,7 @@ func doRunImportWorkOrderSkillSet() {
 	if err != nil {
 		log.Fatal(err)
 	}
-    if tenant != nil {
+	if tenant != nil {
 		runWorkOrderSkillSetETL(ctx, uint64(tenant.Id), wossr, ar, vtr, oldDb)
 	}
 }
@@ -94,7 +94,7 @@ func runWorkOrderSkillSetETL(
 type OldWorkOrderSkillSet struct {
 	Id          uint64 `json:"id"`
 	WorkOrderId uint64 `json:"workorder_id"`
-	SkillSetId       uint64 `json:"skillset_id"`
+	SkillSetId  uint64 `json:"skillset_id"`
 }
 
 func ListAllWorkOrderSkillSets(db *sql.DB) ([]*OldWorkOrderSkillSet, error) {
@@ -164,11 +164,11 @@ func insertWorkOrderSkillSetETL(
 	//
 
 	m := &models.WorkOrderSkillSet{
-		OldId:       oss.Id,
-		TenantId:    tid,
-		Uuid:        uuid.NewString(),
-		OrderId: orderId,
-		SkillSetId:       skillSetId,
+		OldId:      oss.Id,
+		TenantId:   tid,
+		Uuid:       uuid.NewString(),
+		OrderId:    orderId,
+		SkillSetId: skillSetId,
 	}
 	err = wossr.Insert(ctx, m)
 	if err != nil {

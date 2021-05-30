@@ -80,15 +80,15 @@ func doRunImportActivitySheetItem() {
 }
 
 type OldUActivitySheetItem struct {
-	Id          uint64 `json:"id"`
-	Comment     string `json:"comment"`
-    CreatedAt   time.Time   `json:"created_at"`
-	CreatedFrom null.String `json:"created_from"`
-    CreatedById null.Int `json:"created_by_id"`
-	AssociateId  uint64 `json:"associate_id"`
-	JobId        null.Int  `json:"job_id"`
-	State        string `json:"state"`
-	OngoingJobId null.Int `json:"ongoing_job_id"`
+	Id           uint64      `json:"id"`
+	Comment      string      `json:"comment"`
+	CreatedAt    time.Time   `json:"created_at"`
+	CreatedFrom  null.String `json:"created_from"`
+	CreatedById  null.Int    `json:"created_by_id"`
+	AssociateId  uint64      `json:"associate_id"`
+	JobId        null.Int    `json:"job_id"`
+	State        string      `json:"state"`
+	OngoingJobId null.Int    `json:"ongoing_job_id"`
 }
 
 func ListAllActivitySheetItems(db *sql.DB) ([]*OldUActivitySheetItem, error) {
@@ -175,7 +175,7 @@ func insertActivitySheetItemETL(
 		state = 1
 	}
 
-    //
+	//
 	// CreatedById
 	//
 
@@ -214,7 +214,7 @@ func insertActivitySheetItemETL(
 
 		// Convert from null supported integer times.
 		workOrderId = null.NewInt(int64(workOrderIdUint64), workOrderIdUint64 != 0)
-    }
+	}
 
 	//
 	// OngoingOrderId
@@ -230,24 +230,24 @@ func insertActivitySheetItemETL(
 
 		// Convert from null supported integer times.
 		ongoingWorkOrderId = null.NewInt(int64(ongoingWorkOrderIdUint64), ongoingWorkOrderIdUint64 != 0)
-    }
+	}
 
 	//
 	// Insert into database
 	//
 
 	m := &models.ActivitySheetItem{
-		OldId:         oldRecord.Id,
-		TenantId:      tid,
-		Uuid:          uuid.NewString(),
-		Comment:       oldRecord.Comment,
-		CreatedTime:   oldRecord.CreatedAt,
-		CreatedFromIP: oldRecord.CreatedFrom,
-		CreatedById:   createdById,
-		AssociateId:   associateId,
-		State:         state,
-		OrderId:         workOrderId,
-		OngoingOrderId:  ongoingWorkOrderId,
+		OldId:          oldRecord.Id,
+		TenantId:       tid,
+		Uuid:           uuid.NewString(),
+		Comment:        oldRecord.Comment,
+		CreatedTime:    oldRecord.CreatedAt,
+		CreatedFromIP:  oldRecord.CreatedFrom,
+		CreatedById:    createdById,
+		AssociateId:    associateId,
+		State:          state,
+		OrderId:        workOrderId,
+		OngoingOrderId: ongoingWorkOrderId,
 	}
 
 	err = asir.Insert(ctx, m)
