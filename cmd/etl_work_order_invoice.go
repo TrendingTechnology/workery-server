@@ -271,6 +271,9 @@ func ListAllWorkOrderInvoices(db *sql.DB) ([]*OldWorkOrderInvoice, error) {
 		last_modified_from_is_public, client_address, revision_version, deposit, amount_due, sub_total, sub_total_currency
 	FROM
         workery_work_order_invoices
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

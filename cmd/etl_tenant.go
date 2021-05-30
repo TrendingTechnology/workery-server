@@ -106,6 +106,9 @@ func ListAllTenants(db *sql.DB) ([]*OldTenant, error) {
 		longitude, timezone_name, is_archived
 	FROM
 	    workery_franchises
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

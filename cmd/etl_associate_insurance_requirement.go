@@ -101,6 +101,9 @@ func ListAllAssociateInsuranceRequirements(db *sql.DB) ([]*OldAssociateInsurance
         id, associate_id, insurancerequirement_id
 	FROM
         workery_associates_insurance_requirements
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

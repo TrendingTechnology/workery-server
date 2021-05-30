@@ -72,6 +72,9 @@ func ListAllUserGroups(db *sql.DB) ([]*OldUserGroup, error) {
 	    id, shareduser_id, group_id
 	FROM
 	    workery_users_groups
+	ORDER BY
+		id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

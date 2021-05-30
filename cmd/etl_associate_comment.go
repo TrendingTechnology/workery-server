@@ -101,6 +101,9 @@ func ListAllAssociateComments(db *sql.DB) ([]*OldAssociateComment, error) {
         id, about_id, comment_id
 	FROM
         workery_associate_comments
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

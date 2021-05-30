@@ -165,6 +165,9 @@ func ListAllCustomers(db *sql.DB) ([]*OldUCustomer, error) {
 		organization_type_of, avatar_image_id
 	FROM
 	    workery_customers
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

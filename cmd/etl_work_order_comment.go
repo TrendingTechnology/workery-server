@@ -107,6 +107,9 @@ func ListAllWorkOrderComments(db *sql.DB) ([]*OldWorkOrderComment, error) {
         id, created_at, about_id, comment_id
 	FROM
         workery_work_order_comments
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

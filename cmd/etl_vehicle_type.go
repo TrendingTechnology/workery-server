@@ -90,6 +90,9 @@ func ListAllVehicleTypes(db *sql.DB) ([]*OldUVehicleType, error) {
 	    id, text, description, is_archived
 	FROM
 	    workery_vehicle_types
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

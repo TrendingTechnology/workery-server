@@ -87,6 +87,9 @@ func ListAllUsers(db *sql.DB) ([]*OldUser, error) {
 	    id, email, first_name, last_name, date_joined, is_active, last_modified, was_email_activated, franchise_id
 	FROM
 	    workery_users
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
@@ -138,7 +141,9 @@ func runUserInsert(ou *OldUser, tr *repositories.TenantRepo, ur *repositories.Us
 		state = 1
 	}
 
-	tenantId := sql.NullInt64{Int64: 1, Valid: true}
+	// BUGFIX: If no user tenant account associated with the account then
+	//         assign it to london. This is why id=2.
+	tenantId := sql.NullInt64{Int64: 2, Valid: true}
 	if ou.TenantId.Valid == true {
 		tenantId = sql.NullInt64{Int64: ou.TenantId.Int64, Valid: true}
 	}

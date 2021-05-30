@@ -106,6 +106,9 @@ func ListAllWorkOrderTags(db *sql.DB) ([]*OldWorkOrderTag, error) {
         id, workorder_id, tag_id
 	FROM
         workery_work_orders_tags
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

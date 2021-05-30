@@ -92,6 +92,9 @@ func ListAllSkillSetInsuranceRequirements(db *sql.DB) ([]*OldSkillSetInsuranceRe
         id, skillset_id, insurancerequirement_id
 	FROM
         workery_skill_sets_insurance_requirements
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

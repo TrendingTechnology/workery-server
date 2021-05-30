@@ -101,6 +101,9 @@ func ListAllAssociateTags(db *sql.DB) ([]*OldAssociateTag, error) {
         id, associate_id, vehicletype_id
 	FROM
         workery_associates_vehicle_types
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

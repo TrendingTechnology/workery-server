@@ -95,6 +95,9 @@ func ListAllSkillSets(db *sql.DB) ([]*OldSkillSet, error) {
         id, category, sub_category, description, is_archived
 	FROM
         workery_skill_sets
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

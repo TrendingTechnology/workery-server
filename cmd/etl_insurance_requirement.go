@@ -87,6 +87,9 @@ func ListAllInsuranceRequirements(db *sql.DB) ([]*OldUInsuranceRequirement, erro
 	    id, text, description, is_archived
 	FROM
 	    workery_insurance_requirements
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

@@ -100,6 +100,9 @@ func ListAllActivitySheetItems(db *sql.DB) ([]*OldUActivitySheetItem, error) {
 	    id, comment, created_at, created_from, created_by_id, associate_id, job_id, state, ongoing_job_id
 	FROM
 	    workery_activity_sheet_items
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

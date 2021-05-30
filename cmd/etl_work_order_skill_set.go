@@ -106,6 +106,9 @@ func ListAllWorkOrderSkillSets(db *sql.DB) ([]*OldWorkOrderSkillSet, error) {
         id, workorder_id, skillset_id
 	FROM
         workery_work_orders_skill_sets
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

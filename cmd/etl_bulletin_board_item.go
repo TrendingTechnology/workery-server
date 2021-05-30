@@ -95,6 +95,9 @@ func ListAllBulletinBoardItems(db *sql.DB) ([]*OldBulletinBoardItem, error) {
 	    id, text, created_at, created_by_id, created_from, last_modified_at, last_modified_by_id, last_modified_from, is_archived
 	FROM
 	    workery_bulletin_board_items
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

@@ -91,6 +91,9 @@ func ListAllCustomerTags(db *sql.DB) ([]*OldUCustomerTag, error) {
 	    id, customer_id, tag_id
 	FROM
 	    workery_customers_tags
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

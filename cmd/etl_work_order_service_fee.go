@@ -97,6 +97,9 @@ func ListAllWorkOrderServiceFees(db *sql.DB) ([]*OldUWorkOrderServiceFee, error)
 	    id, title, description, percentage, created_at, created_by_id, last_modified_at, last_modified_by_id, is_archived
 	FROM
 	    workery_work_order_service_fees
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

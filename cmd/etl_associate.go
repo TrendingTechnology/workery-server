@@ -157,6 +157,9 @@ func ListAllAssociates(db *sql.DB) ([]*OldUAssociate, error) {
 		organization_type_of, avatar_image_id, service_fee_id
 	FROM
 	    workery_associates
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

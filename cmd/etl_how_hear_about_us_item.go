@@ -100,6 +100,9 @@ func ListAllHowHearAboutUsItems(oldDb *sql.DB) ([]*OldHowHearAboutUsItem, error)
 		is_for_staff, is_for_partner, is_archived
 	FROM
         workery_how_hear_about_us_items
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := oldDb.QueryContext(ctx, query)
 	if err != nil {

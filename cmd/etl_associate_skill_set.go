@@ -101,6 +101,9 @@ func ListAllAssociateSkillSets(db *sql.DB) ([]*OldAssociateSkillSet, error) {
         id, associate_id, skillset_id
 	FROM
         workery_associates_skill_sets
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

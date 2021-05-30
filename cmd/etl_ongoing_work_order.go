@@ -109,6 +109,9 @@ func ListAllOngoingWorkOrders(db *sql.DB) ([]*OldOngoingWorkOrder, error) {
         id, state, associate_id, customer_id, created_at, created_by_id, created_from, last_modified_at, last_modified_by_id, last_modified_from
 	FROM
         workery_ongoing_work_orders
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

@@ -113,6 +113,9 @@ func ListAllWorkOrderDeposits(db *sql.DB) ([]*OldUWorkOrderDeposit, error) {
 		last_modified_from_is_public
 	FROM
 	    workery_work_order_deposits
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {

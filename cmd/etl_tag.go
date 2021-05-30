@@ -90,6 +90,9 @@ func ListAllTags(db *sql.DB) ([]*OldUTag, error) {
 	    id, text, description, is_archived
 	FROM
 	    workery_tags
+	ORDER BY
+	    id
+	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
