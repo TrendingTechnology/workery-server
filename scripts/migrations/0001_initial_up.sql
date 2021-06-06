@@ -895,12 +895,6 @@ ON work_order_deposits (order_id);
 -- CREATE INDEX idx_work_order_deposit_tenant_id
 -- ON work_order_deposits (tenant_id);
 
--- ######################### --
--- CONTNUE CODING FROM BELOW --
--- ######################### --
-
--- TODO: work_order_activity_sheets
-
 CREATE TABLE task_items (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
@@ -914,20 +908,40 @@ CREATE TABLE task_items (
     closing_reason SMALLINT NOT NULL DEFAULT 0,
     closing_reason_other VARCHAR (1024) NOT NULL DEFAULT '',
     order_id BIGINT NOT NULL,
-    ongoing_order_id BIGINT NOT NULL,
+    ongoing_order_id BIGINT NULL,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
+    created_from_ip VARCHAR (50) NULL DEFAULT '',
+    created_by_id BIGINT NULL,
+    last_modified_by_id BIGINT NULL,
+    last_modified_from_ip VARCHAR (50) NULL DEFAULT '',
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     old_id BIGINT NOT NULL DEFAULT 0,
+    state SMALLINT NOT NULL DEFAULT 0,
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (ongoing_order_id) REFERENCES ongoing_work_orders(id),
     FOREIGN KEY (created_by_id) REFERENCES users(id),
     FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
 );
+CREATE INDEX idx_task_item_tenant_id
+ON task_items (tenant_id);
+CREATE INDEX idx_task_item_order_id
+ON task_items (order_id);
+CREATE INDEX idx_task_item_ongoing_order_id
+ON task_items (ongoing_order_id);
+CREATE INDEX idx_task_item_created_by_id
+ON task_items (created_by_id);
+CREATE INDEX idx_task_item_last_modified_by_id
+ON task_items (last_modified_by_id);
 CREATE UNIQUE INDEX idx_task_item_uuid
 ON task_items (uuid);
+
+
+-- ######################### --
+-- CONTNUE CODING FROM BELOW --
+-- ######################### --
+
+-- TODO: work_order_activity_sheets
 
 -------------
 

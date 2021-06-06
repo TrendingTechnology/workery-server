@@ -188,7 +188,7 @@ func insertWorkOrderDepositETL(
 		state = 0
 	}
 
-    var createdById null.Int
+	var createdById null.Int
 	if oir.CreatedById.Valid {
 		val := oir.CreatedById.ValueOrZero()
 		id, _ := ur.GetIdByOldId(ctx, tid, uint64(val))
