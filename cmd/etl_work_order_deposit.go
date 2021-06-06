@@ -61,6 +61,7 @@ func doRunImportWorkOrderDeposit() {
 
 	// Load up our repositories.
 	tr := repositories.NewTenantRepo(db)
+	or := repositories.NewWorkOrderRepo(db)
 	irr := repositories.NewWorkOrderDepositRepo(db)
 	ur := repositories.NewUserRepo(db)
 
@@ -73,7 +74,7 @@ func doRunImportWorkOrderDeposit() {
 		log.Fatal("Tenant does not exist!")
 	}
 
-	runWorkOrderDepositETL(ctx, tenant.Id, irr, ur, oldDb)
+	runWorkOrderDepositETL(ctx, tenant.Id, or, irr, ur, oldDb)
 }
 
 type OldUWorkOrderDeposit struct {
@@ -157,17 +158,31 @@ func ListAllWorkOrderDeposits(db *sql.DB) ([]*OldUWorkOrderDeposit, error) {
 	return arr, err
 }
 
-func runWorkOrderDepositETL(ctx context.Context, tenantId uint64, irr *repositories.WorkOrderDepositRepo, ur *repositories.UserRepo, oldDb *sql.DB) {
+func runWorkOrderDepositETL(
+	ctx context.Context,
+	tenantId uint64,
+	or *repositories.WorkOrderRepo,
+	irr *repositories.WorkOrderDepositRepo,
+	ur *repositories.UserRepo,
+	oldDb *sql.DB,
+) {
 	workOrderDeposits, err := ListAllWorkOrderDeposits(oldDb)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, oir := range workOrderDeposits {
-		insertWorkOrderDepositETL(ctx, tenantId, irr, ur, oir)
+		insertWorkOrderDepositETL(ctx, tenantId, or, irr, ur, oir)
 	}
 }
 
-func insertWorkOrderDepositETL(ctx context.Context, tid uint64, irr *repositories.WorkOrderDepositRepo, ur *repositories.UserRepo, oir *OldUWorkOrderDeposit) {
+func insertWorkOrderDepositETL(
+	ctx context.Context,
+	tid uint64,
+	or *repositories.WorkOrderRepo,
+	irr *repositories.WorkOrderDepositRepo,
+	ur *repositories.UserRepo,
+	oir *OldUWorkOrderDeposit,
+) {
 	var state int8 = 1
 	if oir.IsArchived == true {
 		state = 0
@@ -179,11 +194,13 @@ func insertWorkOrderDepositETL(ctx context.Context, tid uint64, irr *repositorie
 		id, _ := ur.GetIdByOldId(ctx, tid, uint64(val))
 		createdById = null.IntFrom(int64(id))
 
-		log.Println("ID:", oir.Id, "|User|IN:", oir.CreatedById, "OUT:", createdById, "\tTenantId:", tid)
+		// log.Println("ID:", oir.Id, "|User|IN:", oir.CreatedById, "OUT:", createdById, "\tTenantId:", tid)
 	}
 	if oir.LastModifiedById.Valid {
 
 	}
+
+	orderId, _ := or.GetIdByOldId(ctx, tid, oir.OrderId)
 
 	m := &models.WorkOrderDeposit{
 		OldId:              oir.Id,
@@ -199,11 +216,12 @@ func insertWorkOrderDepositETL(ctx context.Context, tid uint64, irr *repositorie
 		LastModifiedTime:   oir.LastModifiedAt,
 		CreatedById:        createdById,
 		LastModifiedById:   oir.LastModifiedById,
-		OrderId:            oir.OrderId,
+		OrderId:            orderId,
 		CreatedFromIP:      oir.CreatedFrom,
 		LastModifiedFromIP: oir.LastModifiedFrom,
 		State:              state,
 	}
+
 	err := irr.Insert(ctx, m)
 	if err != nil {
 		log.Panic(err)
