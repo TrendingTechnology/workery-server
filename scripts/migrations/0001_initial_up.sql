@@ -936,16 +936,6 @@ ON task_items (last_modified_by_id);
 CREATE UNIQUE INDEX idx_task_item_uuid
 ON task_items (uuid);
 
-
--- ######################### --
--- CONTNUE CODING FROM BELOW --
--- ######################### --
-
--- TODO: work_order_activity_sheets
-
--------------
-
-
 CREATE TABLE customers (
     -- customer.py
     id BIGSERIAL PRIMARY KEY,
@@ -1047,10 +1037,18 @@ CREATE TABLE customer_comments (
 CREATE UNIQUE INDEX idx_customer_comment_uuid
 ON customer_comments (uuid);
 
+-- ######################### --
+-- CONTNUE CODING FROM BELOW --
+-- ######################### --
+
 -- TODO: avatar_image -> PrivateImageUpload
 
+-- TODO: work_order_activity_sheets
+
+-----------------------------------------------------------------
+
 CREATE TABLE staff (
-    -- customer.py
+    -- staff.py
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
     tenant_id BIGINT NOT NULL,
@@ -1070,6 +1068,12 @@ CREATE TABLE staff (
     last_modified_by_id BIGINT NOT NULL,
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     old_id BIGINT NOT NULL DEFAULT 0,
+    personal_email character varying(254),
+    emergency_contact_alternative_telephone character varying(128),
+    emergency_contact_name character varying(127),
+    emergency_contact_relationship character varying(127),
+    emergency_contact_telephone character varying(128),
+    police_check date,
 
     -- abstract_postal_address.py
     address_country VARCHAR (127) NOT NULL DEFAULT '',
@@ -1107,20 +1111,85 @@ CREATE TABLE staff (
     other_telephone VARCHAR (127) NOT NULL DEFAULT '',
     other_telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
     other_telephone_type_of SMALLINT NOT NULL DEFAULT 0,
-    is_archived BOOLEAN NOT NULL DEFAULT FALSE,
-    -- avatar_image_id BIGINT NOT NULL,
-    personal_email VARCHAR (255) NOT NULL DEFAULT '',
-    emergency_contact_name VARCHAR (127) NOT NULL DEFAULT '',
-    emergency_contact_relationship VARCHAR (127) NOT NULL DEFAULT '',
-    emergency_contact_telephone VARCHAR (127) NOT NULL DEFAULT '',
-    emergency_contact_alternative_telephone VARCHAR (127) NOT NULL DEFAULT '',
-    police_check TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
 
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (how_hear_id) REFERENCES how_hear_about_us_items(id),
     FOREIGN KEY (created_by_id) REFERENCES users(id),
     FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
 );
+
+-- CREATE TABLE staff (
+--     -- customer.py
+--     id BIGSERIAL PRIMARY KEY,
+--     uuid VARCHAR (36) UNIQUE NOT NULL,
+--     tenant_id BIGINT NOT NULL,
+--     user_id BIGINT NOT NULL,
+--     type_of SMALLINT NOT NULL DEFAULT 0,
+--     indexed_text VARCHAR (511) NOT NULL DEFAULT '',
+--     is_ok_to_email BOOLEAN NOT NULL DEFAULT FALSE,
+--     is_ok_to_text BOOLEAN NOT NULL DEFAULT FALSE,
+--     how_hear_old SMALLINT NOT NULL DEFAULT 0,
+--     how_hear_id BIGINT NOT NULL,
+--     how_hear_other VARCHAR (2055) NOT NULL DEFAULT '',
+--     state SMALLINT NOT NULL DEFAULT 0,
+--     deactivation_reason SMALLINT NOT NULL DEFAULT 0,
+--     deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
+--     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+--     created_by_id BIGINT NOT NULL,
+--     last_modified_by_id BIGINT NOT NULL,
+--     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+--     old_id BIGINT NOT NULL DEFAULT 0,
+--
+--     -- abstract_postal_address.py
+--     address_country VARCHAR (127) NOT NULL DEFAULT '',
+--     address_region VARCHAR (127) NOT NULL DEFAULT '',
+--     address_locality VARCHAR (127) NOT NULL DEFAULT '',
+--     post_office_box_number VARCHAR (255) NOT NULL DEFAULT '',
+--     postal_code VARCHAR (127) NOT NULL DEFAULT '',
+--     street_address VARCHAR (127) NOT NULL DEFAULT '',
+--     street_address_extra VARCHAR (127) NOT NULL DEFAULT '',
+--
+--     -- abstract_person.py
+--     given_name VARCHAR (63) NOT NULL DEFAULT '',
+--     middle_name VARCHAR (63) NOT NULL DEFAULT '',
+--     last_name VARCHAR (63) NOT NULL DEFAULT '',
+--     birthdate VARCHAR (31) NOT NULL DEFAULT '',
+--     join_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+--     nationality VARCHAR (63) NOT NULL DEFAULT '',
+--     gender VARCHAR (31) NOT NULL DEFAULT '',
+--     tax_id VARCHAR (127) NOT NULL DEFAULT '',
+--
+--     -- abstract_geo_coorindate.py
+--     elevation FLOAT NOT NULL DEFAULT 0,
+--     latitude FLOAT NOT NULL DEFAULT 0,
+--     longitude FLOAT NOT NULL DEFAULT 0,
+--
+--     -- abstract_contact_point.py
+--     area_served VARCHAR (127) NOT NULL DEFAULT '',
+--     available_language VARCHAR (127) NOT NULL DEFAULT '',
+--     contact_type VARCHAR (127) NOT NULL DEFAULT '',
+--     email VARCHAR (255) NOT NULL DEFAULT '',
+--     fax_number VARCHAR (127) NOT NULL DEFAULT '',
+--     telephone VARCHAR (127) NOT NULL DEFAULT '',
+--     telephone_type_of SMALLINT NOT NULL DEFAULT 0,
+--     telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
+--     other_telephone VARCHAR (127) NOT NULL DEFAULT '',
+--     other_telephone_extension VARCHAR (31) NOT NULL DEFAULT '',
+--     other_telephone_type_of SMALLINT NOT NULL DEFAULT 0,
+--     is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+--     -- avatar_image_id BIGINT NOT NULL,
+--     personal_email VARCHAR (255) NOT NULL DEFAULT '',
+--     emergency_contact_name VARCHAR (127) NOT NULL DEFAULT '',
+--     emergency_contact_relationship VARCHAR (127) NOT NULL DEFAULT '',
+--     emergency_contact_telephone VARCHAR (127) NOT NULL DEFAULT '',
+--     emergency_contact_alternative_telephone VARCHAR (127) NOT NULL DEFAULT '',
+--     police_check TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+--
+--     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+--     FOREIGN KEY (how_hear_id) REFERENCES how_hear_about_us_items(id),
+--     FOREIGN KEY (created_by_id) REFERENCES users(id),
+--     FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
+-- );
 CREATE UNIQUE INDEX idx_staff_uuid
 ON staff (uuid);
 
