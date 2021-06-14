@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	null "gopkg.in/guregu/null.v4"
 )
 
 //---------------------
@@ -28,18 +30,12 @@ import (
 // 4 = Government Organization | GOVERNMENT_ORGANIZATION_TYPE_OF_ID
 
 type Staff struct {
-	Created                              time.Time       `json:"created"`
-	LastModified                         time.Time       `json:"last_modified"`
-	AlternateName                        sql.NullString  `json:"alternate_name"`
-	Description                          sql.NullString  `json:"description"`
-	Name                                 sql.NullString  `json:"name"`
-	Url                                  sql.NullString  `json:"url"`
-	AreaServed                           sql.NullString  `json:"area_served"`
+	CreatedTime                          time.Time       `json:"created_time"`
+	LastModifiedTime                     time.Time       `json:"last_modified_time"`
 	AvailableLanguage                    sql.NullString  `json:"available_language"`
 	ContactType                          sql.NullString  `json:"contact_type"`
 	Email                                sql.NullString  `json:"email"`
 	FaxNumber                            sql.NullString  `json:"fax_number"`
-	ProductSupported                     sql.NullString  `json:"product_supported"`
 	Telephone                            sql.NullString  `json:"telephone"`
 	TelephoneTypeOf                      int8            `json:"telephone_type_of"`
 	TelephoneExtension                   sql.NullString  `json:"telephone_extension"`
@@ -68,13 +64,11 @@ type Staff struct {
 	Id                                   uint64          `json:"id"`
 	Uuid                                 string          `json:"uuid"`
 	IndexedText                          sql.NullString  `json:"indexed_text"`
-	CreatedFrom                          sql.NullString  `json:"created_from"`
-	CreatedFromIsPublic                  bool            `json:"created_from_is_public"`
-	LastModifiedFrom                     sql.NullString  `json:"last_modified_from"`
-	LastModifiedFromIsPublic             bool            `json:"last_modified_from_is_public"`
-	IsArchived                           bool            `json:"is_archived"`
-	CreatedById                          sql.NullInt64   `json:"created_by_id"`
-	LastModifiedById                     sql.NullInt64   `json:"last_modified_by_id"`
+	CreatedFromIP                        sql.NullString  `json:"created_from_ip"`
+	LastModifiedFromIP                   sql.NullString  `json:"last_modified_from_ip"`
+	State                                int8            `json:"state"`
+	CreatedById                          null.Int        `json:"created_by_id"`
+	LastModifiedById                     null.Int        `json:"last_modified_by_id"`
 	UserId                               uint64          `json:"user_id"`
 	HowHearOther                         sql.NullString  `json:"how_hear_other"`
 	HowHearId                            sql.NullInt64   `json:"how_hear_id"`
@@ -86,6 +80,8 @@ type Staff struct {
 	EmergencyContactTelephone            sql.NullString  `json:"emergency_contact_telephone"`
 	PoliceCheck                          sql.NullTime    `json:"police_check"`
 	OldId                                uint64          `json:"old_id"`
+	IsOkToEmail                          bool            `json:"is_ok_to_email"`
+	IsOkToText                           bool            `json:"is_ok_to_text"`
 }
 
 type StaffRepository interface {

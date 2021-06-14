@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	null "gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -62,7 +63,7 @@ func doRunImportStaff() {
 	// Load up our repositories.
 	tr := repositories.NewTenantRepo(db)
 	ur := repositories.NewUserRepo(db)
-	om := repositories.NewStaffRepo(db)
+	sr := repositories.NewStaffRepo(db)
 
 	// Lookup the tenant.
 	tenant, err := tr.GetBySchemaName(ctx, staffETLSchemaName)
@@ -73,22 +74,16 @@ func doRunImportStaff() {
 		log.Fatal("Tenant does not exist!")
 	}
 
-	runStaffETL(ctx, tenant.Id, ur, om, oldDb)
+	runStaffETL(ctx, tenant.Id, ur, sr, oldDb)
 }
 
 type OldUStaff struct {
 	Created                 time.Time       `json:"created"`
 	LastModified            time.Time       `json:"last_modified"`
-	AlternateName           sql.NullString  `json:"alternate_name"`
-	Description             sql.NullString  `json:"description"`
-	Name                    sql.NullString  `json:"name"`
-	Url                     sql.NullString  `json:"url"`
-	AreaServed              sql.NullString  `json:"area_served"`
 	AvailableLanguage       sql.NullString  `json:"available_language"`
 	ContactType             sql.NullString  `json:"contact_type"`
 	Email                   sql.NullString  `json:"email"`
 	FaxNumber               sql.NullString  `json:"fax_number"`
-	ProductSupported        sql.NullString  `json:"product_supported"`
 	Telephone               sql.NullString  `json:"telephone"`
 	TelephoneTypeOf         int8            `json:"telephone_type_of"`
 	TelephoneExtension      sql.NullString  `json:"telephone_extension"`
@@ -115,13 +110,6 @@ type OldUStaff struct {
 	TaxId                   sql.NullString  `json:"tax_id"`
 	Id                      uint64          `json:"id"`
 	IndexedText             sql.NullString  `json:"indexed_text"`
-	// TypeOf                   int8            `json:"type_of"`
-	// IsOkToEmail              bool            `json:"is_ok_to_email"`
-	// IsOkToText               bool            `json:"is_ok_to_text"`
-	// IsBusiness               bool            `json:"is_business"`
-	// IsSenior                 bool            `json:"is_senior"`
-	// IsSupport                bool            `json:"is_support"`
-	// JobInfoRead              sql.NullString  `json:"job_info_read"`
 	CreatedFrom              sql.NullString `json:"created_from"`
 	CreatedFromIsPublic      bool           `json:"created_from_is_public"`
 	LastModifiedFrom         sql.NullString `json:"last_modified_from"`
@@ -129,17 +117,9 @@ type OldUStaff struct {
 	IsArchived               bool           `json:"is_archived"`
 	CreatedById              sql.NullInt64  `json:"created_by_id"`
 	LastModifiedById         sql.NullInt64  `json:"last_modified_by_id"`
-	// OrganizationId           sql.NullInt64   `json:"organization_id"`
 	OwnerId      sql.NullInt64  `json:"owner_id"`
 	HowHearOther sql.NullString `json:"how_hear_other"`
-	// IsBlacklisted            bool            `json:"is_blacklisted"`
-	// DeactivationReason       int8            `json:"deactivation_reason"`
-	// DeactivationReasonOther  string          `json:"deactivation_reason_other"`
-	// State                    string          `json:"state"`
 	HowHearId sql.NullInt64 `json:"how_hear_id"`
-	// HowHearOld               int8            `json:"how_hear_old"`
-	// OrganizationName         sql.NullString  `json:"organization_name"`
-	// OrganizationTypeOf       int8            `json:"organization_type_of"`
 	AvatarImageId                        sql.NullInt64  `json:"avatar_image_id"`
 	PersonalEmail                        sql.NullString `json:"personal_email"`
 	EmergencyContactAlternativeTelephone sql.NullString `json:"emergency_contact_alternative_telephone"`
@@ -147,6 +127,21 @@ type OldUStaff struct {
 	EmergencyContactRelationship         sql.NullString `json:"emergency_contact_relationship"`
 	EmergencyContactTelephone            sql.NullString `json:"emergency_contact_telephone"`
 	PoliceCheck                          sql.NullTime   `json:"police_check"`
+	// TypeOf                   int8            `json:"type_of"`
+	// IsOkToEmail              bool            `json:"is_ok_to_email"`
+	// IsOkToText               bool            `json:"is_ok_to_text"`
+	// IsBusiness               bool            `json:"is_business"`
+	// IsSenior                 bool            `json:"is_senior"`
+	// IsSupport                bool            `json:"is_support"`
+	// JobInfoRead              sql.NullString  `json:"job_info_read"`
+	// OrganizationId           sql.NullInt64   `json:"organization_id"`
+	// IsBlacklisted            bool            `json:"is_blacklisted"`
+	// DeactivationReason       int8            `json:"deactivation_reason"`
+	// DeactivationReasonOther  string          `json:"deactivation_reason_other"`
+	// State                    string          `json:"state"`
+	// HowHearOld               int8            `json:"how_hear_old"`
+	// OrganizationName         sql.NullString  `json:"organization_name"`
+	// OrganizationTypeOf       int8            `json:"organization_type_of"`
 }
 
 func ListAllStaffs(db *sql.DB) ([]*OldUStaff, error) {
@@ -155,9 +150,8 @@ func ListAllStaffs(db *sql.DB) ([]*OldUStaff, error) {
 
 	query := `
 	SELECT
-	    id, created, last_modified, alternate_name, description, name, url,
-		area_served, available_language, contact_type, email, fax_number,
-		product_supported, telephone, telephone_type_of, telephone_extension,
+	    id, created, last_modified, available_language, contact_type, email, fax_number,
+		telephone, telephone_type_of, telephone_extension,
 		other_telephone, other_telephone_extension, other_telephone_type_of,
 		address_country, address_locality, address_region, post_office_box_number,
 		postal_code, street_address, street_address_extra, elevation, latitude,
@@ -184,9 +178,8 @@ func ListAllStaffs(db *sql.DB) ([]*OldUStaff, error) {
 	for rows.Next() {
 		m := new(OldUStaff)
 		err = rows.Scan(
-			&m.Id, &m.Created, &m.LastModified, &m.AlternateName, &m.Description, &m.Name, &m.Url,
-			&m.AreaServed, &m.AvailableLanguage, &m.ContactType, &m.Email, &m.FaxNumber,
-			&m.ProductSupported, &m.Telephone, &m.TelephoneTypeOf, &m.TelephoneExtension,
+			&m.Id, &m.Created, &m.LastModified, &m.AvailableLanguage, &m.ContactType, &m.Email, &m.FaxNumber,
+			&m.Telephone, &m.TelephoneTypeOf, &m.TelephoneExtension,
 			&m.OtherTelephone, &m.OtherTelephoneExtension, &m.OtherTelephoneTypeOf,
 			&m.AddressCountry, &m.AddressLocality, &m.AddressRegion, &m.PostOfficeBoxNumber,
 			&m.PostalCode, &m.StreetAddress, &m.StreetAddressExtra, &m.Elevation,
@@ -210,18 +203,17 @@ func ListAllStaffs(db *sql.DB) ([]*OldUStaff, error) {
 	return arr, err
 }
 
-func runStaffETL(ctx context.Context, tenantId uint64, ur *repositories.UserRepo, omr *repositories.StaffRepo, oldDb *sql.DB) {
+func runStaffETL(ctx context.Context, tenantId uint64, ur *repositories.UserRepo, sr *repositories.StaffRepo, oldDb *sql.DB) {
 	staffs, err := ListAllStaffs(oldDb)
 	if err != nil {
 		log.Fatal("(0000)", err)
 	}
 	for _, om := range staffs {
-		log.Println(om)
-		// insertStaffETL(ctx, tenantId, ur, omr, om)
+		insertStaffETL(ctx, tenantId, ur, sr, om)
 	}
 }
 
-func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, omr *repositories.StaffRepo, om *OldUStaff) {
+func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, sr *repositories.StaffRepo, om *OldUStaff) {
 	var state int8 = 1
 	if om.IsArchived == true {
 		state = 0
@@ -303,6 +295,7 @@ func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, 
 	} else {
 		createdById = userId
 	}
+	etlCreatedById := null.NewInt(int64(createdById), createdById != 0)
 
 	var lastModifiedById uint64
 	if om.LastModifiedById.Valid {
@@ -317,24 +310,19 @@ func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, 
 	} else {
 		lastModifiedById = userId
 	}
+	etlLastModifiedById := null.NewInt(int64(lastModifiedById), lastModifiedById != 0)
 
 	m := &models.Staff{
 		OldId:                                om.Id,
 		Uuid:                                 uuid.NewString(),
 		TenantId:                             tid,
 		UserId:                               userId,
-		Created:                              om.Created,
-		LastModified:                         om.LastModified,
-		AlternateName:                        om.AlternateName,
-		Description:                          om.Description,
-		Name:                                 om.Name,
-		Url:                                  om.Url,
-		AreaServed:                           om.AreaServed,
+		CreatedTime:                          om.Created,
+		LastModifiedTime:                     om.LastModified,
 		AvailableLanguage:                    om.AvailableLanguage,
 		ContactType:                          om.ContactType,
 		Email:                                om.Email,
 		FaxNumber:                            om.FaxNumber,
-		ProductSupported:                     om.ProductSupported,
 		Telephone:                            om.Telephone,
 		TelephoneTypeOf:                      om.TelephoneTypeOf,
 		TelephoneExtension:                   om.TelephoneExtension,
@@ -360,13 +348,10 @@ func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, 
 		Gender:                               om.Gender,
 		TaxId:                                om.TaxId,
 		IndexedText:                          om.IndexedText,
-		CreatedFrom:                          om.CreatedFrom,
-		CreatedFromIsPublic:                  om.CreatedFromIsPublic,
-		LastModifiedFrom:                     om.LastModifiedFrom,
-		LastModifiedFromIsPublic:             om.LastModifiedFromIsPublic,
-		IsArchived:                           om.IsArchived,
-		CreatedById:                          om.CreatedById,
-		LastModifiedById:                     om.LastModifiedById,
+		CreatedFromIP:                        om.CreatedFrom,
+		LastModifiedFromIP:                   om.LastModifiedFrom,
+		CreatedById:                          etlCreatedById,
+		LastModifiedById:                     etlLastModifiedById,
 		HowHearOther:                         om.HowHearOther,
 		HowHearId:                            om.HowHearId,
 		AvatarImageId:                        om.AvatarImageId,
@@ -376,11 +361,12 @@ func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, 
 		EmergencyContactRelationship:         om.EmergencyContactRelationship,
 		EmergencyContactTelephone:            om.EmergencyContactTelephone,
 		PoliceCheck:                          om.PoliceCheck,
+		State:                                state,
 	}
 
 	// fmt.Println(m) // For debugging purposes only.
 
-	err := omr.Insert(ctx, m)
+	err := sr.Insert(ctx, m)
 	if err != nil {
 		log.Panic(err)
 	}
