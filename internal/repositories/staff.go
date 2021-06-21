@@ -75,7 +75,7 @@ func (r *StaffRepo) UpdateById(ctx context.Context, m *models.Staff) error {
 	//
 	// query := `
 	// UPDATE
-	//     staffs
+	//     staff
 	// SET
 	//     tenant_id = $1, user_id = $2
 	// WHERE
@@ -103,7 +103,7 @@ func (r *StaffRepo) GetById(ctx context.Context, id uint64) (*models.Staff, erro
 	// SELECT
 	//     id, uuid, tenant_id, user_id
 	// FROM
-	//     staffs
+	//     staff
 	// WHERE
 	//     id = $1`
 	// err := r.db.QueryRowContext(ctx, query, id).Scan(
@@ -131,7 +131,7 @@ func (r *StaffRepo) CheckIfExistsById(ctx context.Context, id uint64) (bool, err
     SELECT
         1
     FROM
-        staffs
+        staff
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&exists)
@@ -156,7 +156,7 @@ func (r *StaffRepo) GetIdByOldId(ctx context.Context, tid uint64, oid uint64) (u
     SELECT
         id
     FROM
-        staffs
+        staff
     WHERE
 		tenant_id = $1
 	AND
