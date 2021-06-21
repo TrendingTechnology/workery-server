@@ -1118,17 +1118,6 @@ ON staff (tenant_id);
 CREATE INDEX idx_staff_user_id
 ON staff (user_id);
 
-
--- ######################### --
--- CONTNUE CODING FROM BELOW --
--- ######################### --
-
--- TODO: avatar_image -> PrivateImageUpload
-
--- TODO: work_order_activity_sheets
-
------------------------------------------------------------------
-
 CREATE TABLE staff_tags (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
@@ -1142,6 +1131,19 @@ CREATE TABLE staff_tags (
 );
 CREATE UNIQUE INDEX idx_staff_tag_uuid
 ON staff_tags (uuid);
+CREATE INDEX idx_staff_tag_tenant_id
+ON staff_tags (tenant_id);
+
+-- ######################### --
+-- CONTNUE CODING FROM BELOW --
+-- ######################### --
+
+-- TODO: avatar_image -> PrivateImageUpload
+
+-- TODO: work_order_activity_sheets
+
+-----------------------------------------------------------------
+
 
 CREATE TABLE staff_comments (
     id BIGSERIAL PRIMARY KEY,
