@@ -1161,9 +1161,6 @@ ON staff_comments (tenant_id);
 
 -----------------------------------------------------------------
 
-
-------------------------------------------------------------
-
 CREATE TABLE partners (
     -- customer.py
     id BIGSERIAL PRIMARY KEY,
@@ -1189,20 +1186,18 @@ CREATE TABLE partners (
     how_hear_old SMALLINT NOT NULL DEFAULT 0,
     how_hear_id BIGINT NOT NULL,
     how_hear_other VARCHAR (2055) NOT NULL DEFAULT '',
-    is_business BOOLEAN NOT NULL DEFAULT FALSE,
-    is_senior BOOLEAN NOT NULL DEFAULT FALSE,
-    is_support BOOLEAN NOT NULL DEFAULT FALSE,
-    job_info_read VARCHAR (127) NOT NULL DEFAULT '',
     state SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     created_by_id BIGINT NOT NULL,
-    last_modified_by_id BIGINT NOT NULL,
+    created_from_ip VARCHAR (50) NOT NULL DEFAULT '',
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    last_modified_by_id BIGINT NOT NULL,
+    last_modified_from_ip VARCHAR (50) NOT NULL DEFAULT '',
     score FLOAT NOT NULL DEFAULT 0,
-    -- away_log_id BIGINT NOT NULL,
     old_id BIGINT NOT NULL DEFAULT 0,
+    -- away_log_id BIGINT NOT NULL,
 
     -- abstract_postal_address.py
     address_country VARCHAR (127) NOT NULL DEFAULT '',
@@ -1217,7 +1212,7 @@ CREATE TABLE partners (
     given_name VARCHAR (63) NOT NULL DEFAULT '',
     middle_name VARCHAR (63) NOT NULL DEFAULT '',
     last_name VARCHAR (63) NOT NULL DEFAULT '',
-    birthdate VARCHAR (31) NOT NULL DEFAULT '',
+    birthdate TIMESTAMP NULL,
     join_date TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     nationality VARCHAR (63) NOT NULL DEFAULT '',
     gender VARCHAR (31) NOT NULL DEFAULT '',
@@ -1250,6 +1245,7 @@ CREATE TABLE partners (
     service_fee_id BIGINT NOT NULL,
 
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (how_hear_id) REFERENCES how_hear_about_us_items(id),
     FOREIGN KEY (created_by_id) REFERENCES users(id),
     FOREIGN KEY (last_modified_by_id) REFERENCES users(id),
@@ -1258,6 +1254,10 @@ CREATE TABLE partners (
 );
 CREATE UNIQUE INDEX idx_partner_uuid
 ON partners (uuid);
+CREATE INDEX idx_partner_tenant_id
+ON partners (tenant_id);
+
+------------------------------------------------------------
 
 CREATE TABLE partner_vehicle_types (
     id BIGSERIAL PRIMARY KEY,
