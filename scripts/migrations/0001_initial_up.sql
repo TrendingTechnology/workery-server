@@ -1150,17 +1150,6 @@ ON staff_comments (uuid);
 CREATE INDEX idx_staff_comment_tenant_id
 ON staff_comments (tenant_id);
 
-
--- ######################### --
--- CONTNUE CODING FROM BELOW --
--- ######################### --
-
--- TODO: avatar_image -> PrivateImageUpload
-
--- TODO: work_order_activity_sheets
-
------------------------------------------------------------------
-
 CREATE TABLE partners (
     -- customer.py
     id BIGSERIAL PRIMARY KEY,
@@ -1257,50 +1246,6 @@ ON partners (uuid);
 CREATE INDEX idx_partner_tenant_id
 ON partners (tenant_id);
 
-------------------------------------------------------------
-
-CREATE TABLE partner_vehicle_types (
-    id BIGSERIAL PRIMARY KEY,
-    uuid VARCHAR (36) UNIQUE NOT NULL,
-    tenant_id BIGINT NOT NULL,
-    partner_id BIGINT NOT NULL,
-    vehicle_type_id BIGINT NOT NULL,
-    old_id BIGINT NOT NULL DEFAULT 0,
-    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-    FOREIGN KEY (partner_id) REFERENCES partners(id),
-    FOREIGN KEY (vehicle_type_id) REFERENCES vehicle_types(id)
-);
-CREATE UNIQUE INDEX idx_partner_vehicle_type_uuid
-ON partner_vehicle_types (uuid);
-
-CREATE TABLE partner_skill_sets (
-    id BIGSERIAL PRIMARY KEY,
-    uuid VARCHAR (36) UNIQUE NOT NULL,
-    tenant_id BIGINT NOT NULL,
-    partner_id BIGINT NOT NULL,
-    skill_set_id BIGINT NOT NULL,
-    old_id BIGINT NOT NULL DEFAULT 0,
-    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-    FOREIGN KEY (partner_id) REFERENCES partners(id),
-    FOREIGN KEY (skill_set_id) REFERENCES skill_sets(id)
-);
-CREATE UNIQUE INDEX idx_partner_skill_set_uuid
-ON partner_skill_sets (uuid);
-
-CREATE TABLE partner_tags (
-    id BIGSERIAL PRIMARY KEY,
-    uuid VARCHAR (36) UNIQUE NOT NULL,
-    tenant_id BIGINT NOT NULL,
-    partner_id BIGINT NOT NULL,
-    tag_id BIGINT NOT NULL,
-    old_id BIGINT NOT NULL DEFAULT 0,
-    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-    FOREIGN KEY (partner_id) REFERENCES partners(id),
-    FOREIGN KEY (tag_id) REFERENCES tags(id)
-);
-CREATE UNIQUE INDEX idx_partner_tag_uuid
-ON partner_tags (uuid);
-
 CREATE TABLE partner_comments (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
@@ -1314,21 +1259,18 @@ CREATE TABLE partner_comments (
 );
 CREATE UNIQUE INDEX idx_partner_comment_uuid
 ON partner_comments (uuid);
+CREATE INDEX idx_partner_comment_tenant_id
+ON partner_comments (tenant_id);
 
-CREATE TABLE partner_insurance_requirements (
-    id BIGSERIAL PRIMARY KEY,
-    uuid VARCHAR (36) UNIQUE NOT NULL,
-    tenant_id BIGINT NOT NULL,
-    partner_id BIGINT NOT NULL,
-    insurance_requirement_id BIGINT NOT NULL,
-    old_id BIGINT NOT NULL DEFAULT 0,
-    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-    FOREIGN KEY (partner_id) REFERENCES partners(id),
-    FOREIGN KEY (insurance_requirement_id) REFERENCES insurance_requirements(id)
-);
-CREATE UNIQUE INDEX idx_partner_insurance_requirement_uuid
-ON partner_insurance_requirements (uuid);
+-- ######################### --
+-- CONTNUE CODING FROM BELOW --
+-- ######################### --
 
+-- TODO: avatar_image -> PrivateImageUpload
+
+-- TODO: work_order_activity_sheets
+
+------------------------------------------------------------------------------------------------------------------------
 -- TODO: Private File Upload
 -- TODO: Private Image Upload
 -- TODO: Public Image Upload
