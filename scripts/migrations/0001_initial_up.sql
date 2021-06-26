@@ -1262,9 +1262,34 @@ ON partner_comments (uuid);
 CREATE INDEX idx_partner_comment_tenant_id
 ON partner_comments (tenant_id);
 
+CREATE TABLE public_image_uploads (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    image_file VARCHAR (255) NOT NULL,
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NULL,
+    created_from_ip VARCHAR (50) NOT NULL DEFAULT '',
+    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    last_modified_by_id BIGINT NULL,
+    last_modified_from_ip VARCHAR (50) NOT NULL DEFAULT '',
+    state SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (created_by_id) REFERENCES users(id),
+    FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
+);
+CREATE UNIQUE INDEX idx_public_image_upload_uuid
+ON public_image_uploads (uuid);
+CREATE INDEX idx_public_image_upload_tenant_id
+ON public_image_uploads (tenant_id);
+
+
 -- ######################### --
 -- CONTNUE CODING FROM BELOW --
 -- ######################### --
+
+
 
 -- TODO: avatar_image -> PrivateImageUpload
 

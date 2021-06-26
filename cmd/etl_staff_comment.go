@@ -77,10 +77,10 @@ func doRunImportStaffComment() {
 }
 
 type OldUStaffComment struct {
-	Id         uint64    `json:"id"`
-	CreatedAt  time.Time `json:"created_at"`
-	StaffId uint64    `json:"staff_id"`
-	CommentId  uint64    `json:"comment_id"`
+	Id        uint64    `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	StaffId   uint64    `json:"staff_id"`
+	CommentId uint64    `json:"comment_id"`
 }
 
 func ListAllStaffComments(db *sql.DB) ([]*OldUStaffComment, error) {
@@ -154,11 +154,11 @@ func runStaffCommentETL(
 func insertStaffCommentETL(ctx context.Context, tenantId uint64, oldId uint64, staffId uint64, commentId uint64, irr *repositories.StaffCommentRepo) {
 	fmt.Println("Pre-Imported Staff Comment ID#", oldId)
 	m := &models.StaffComment{
-		OldId:      oldId,
-		Uuid:       uuid.NewString(),
-		TenantId:   tenantId,
-		StaffId: staffId,
-		CommentId:  commentId,
+		OldId:     oldId,
+		Uuid:      uuid.NewString(),
+		TenantId:  tenantId,
+		StaffId:   staffId,
+		CommentId: commentId,
 	}
 	err := irr.Insert(ctx, m)
 	if err != nil {

@@ -10,12 +10,12 @@ import (
 // 0 = Inactive
 
 type PartnerComment struct {
-	Id          uint64 `json:"id"`
-	Uuid        string `json:"uuid"`
-	TenantId    uint64 `json:"tenant_id"`
-	PartnerId   uint64 `json:"partner_id"`
-	CommentId   uint64 `json:"comment_id"`
-	OldId       uint64 `json:"old_id"`
+	Id        uint64 `json:"id"`
+	Uuid      string `json:"uuid"`
+	TenantId  uint64 `json:"tenant_id"`
+	PartnerId uint64 `json:"partner_id"`
+	CommentId uint64 `json:"comment_id"`
+	OldId     uint64 `json:"old_id"`
 }
 
 type PartnerCommentRepository interface {

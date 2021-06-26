@@ -77,9 +77,9 @@ func doRunImportStaffTag() {
 }
 
 type OldUStaffTag struct {
-	Id         uint64 `json:"id"`
+	Id      uint64 `json:"id"`
 	StaffId uint64 `json:"staff_id"`
-	TagId      uint64 `json:"tag_id"`
+	TagId   uint64 `json:"tag_id"`
 }
 
 func ListAllStaffTags(db *sql.DB) ([]*OldUStaffTag, error) {
@@ -145,11 +145,11 @@ func runStaffTagETL(ctx context.Context, tenantId uint64, irr *repositories.Staf
 func insertStaffTagETL(ctx context.Context, tenantId uint64, oldId uint64, staffId uint64, tagId uint64, irr *repositories.StaffTagRepo) {
 	fmt.Println("Pre-Imported Staff Tag ID#", oldId)
 	m := &models.StaffTag{
-		OldId:      oldId,
-		Uuid:       uuid.NewString(),
-		TenantId:   tenantId,
-		StaffId: staffId,
-		TagId:      tagId,
+		OldId:    oldId,
+		Uuid:     uuid.NewString(),
+		TenantId: tenantId,
+		StaffId:  staffId,
+		TagId:    tagId,
 	}
 	err := irr.Insert(ctx, m)
 	if err != nil {

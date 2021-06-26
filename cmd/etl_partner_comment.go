@@ -87,9 +87,9 @@ func runPartnerCommentETL(
 }
 
 type OldPartnerComment struct {
-	Id          uint64 `json:"id"`
+	Id        uint64 `json:"id"`
 	PartnerId uint64 `json:"about_id"`
-	CommentId   uint64 `json:"comment_id"`
+	CommentId uint64 `json:"comment_id"`
 }
 
 func ListAllPartnerComments(db *sql.DB) ([]*OldPartnerComment, error) {
@@ -151,11 +151,11 @@ func insertPartnerCommentETL(
 
 	if partnerId != 0 && commentId != 0 {
 		m := &models.PartnerComment{
-			OldId:       oss.Id,
-			TenantId:    tid,
-			Uuid:        uuid.NewString(),
+			OldId:     oss.Id,
+			TenantId:  tid,
+			Uuid:      uuid.NewString(),
 			PartnerId: partnerId,
-			CommentId:   commentId,
+			CommentId: commentId,
 		}
 		err = asr.Insert(ctx, m)
 		if err != nil {
