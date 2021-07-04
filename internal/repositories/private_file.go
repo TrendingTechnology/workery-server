@@ -23,12 +23,14 @@ func (r *PrivateFileRepo) Insert(ctx context.Context, m *models.PrivateFile) err
 	defer cancel()
 
 	query := `
-    INSERT INTO public_image_uploads (
-        uuid, tenant_id, image_file, created_time, created_from_ip,
-		last_modified_time, last_modified_from_ip, created_by_id,
-		last_modified_by_id, state, old_id
+    INSERT INTO private_files (
+        uuid, tenant_id, s3_key, title, description, indexed_text, created_time,
+		created_from_ip, created_by_id, last_modified_time, last_modified_by_id,
+		last_modified_from_ip, associate_id, customer_id, partner_id, staff_id,
+		work_order_id, state, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+		$17, $18, $19
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -36,21 +38,27 @@ func (r *PrivateFileRepo) Insert(ctx context.Context, m *models.PrivateFile) err
 	}
 	defer stmt.Close()
 
-	//    time.Time `json:""`
-	//  string    `json:""`
-	//         uint64    `json:""`
-	//    uint64    `json:""`
-	// State              int8      `json:"state"`
-	// OldId              uint64    `json:"old_id"`
-
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.ImageFile, m.CreatedTime, m.CreatedFromIP,
-		m.LastModifiedTime,
-		m.LastModifiedFromIP,
+		m.Uuid,
+		m.TenantId,
+		m.S3Key,
+		m.Title,
+		m.Description,
+		m.IndexedText,
+		m.CreatedTime,
+		m.CreatedFromIP,
 		m.CreatedById,
+		m.LastModifiedTime,
 		m.LastModifiedById,
-		m.State, m.OldId,
+		m.LastModifiedFromIP,
+		m.AssociateId,
+		m.CustomerId,
+		m.PartnerId,
+		m.StaffId,
+		m.WorkOrderId,
+		m.State,
+		m.OldId,
 	)
 	return err
 }

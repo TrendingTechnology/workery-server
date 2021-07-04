@@ -33,8 +33,8 @@ func init() {
 }
 
 var privateFileETLCmd = &cobra.Command{
-	Use:   "etl_private_file",
-	Short: "Import the private files from the old workery",
+	Use:   "etl_private_file_to_tmp_dir",
+	Short: "Import the private files from the old workery and download the files to a local temporary directory",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		doRunImportPrivateFile()
@@ -98,7 +98,7 @@ func doRunImportPrivateFile() {
 
 	// Load up our repositories.
 	tr := repositories.NewTenantRepo(db)
-	puir := repositories.NewPrivateFileRepo(db)
+	pfr := repositories.NewPrivateFileRepo(db)
 
 	// Load up our S3 instances
 	oldS3Client, oldBucketName := getOldS3ClientInstance()
@@ -112,7 +112,7 @@ func doRunImportPrivateFile() {
 		log.Fatal("Tenant does not exist!")
 	}
 
-	runPrivateFileETL(ctx, tenant.Id, puir, oldDb, oldS3Client, oldBucketName)
+	runPrivateFileETL(ctx, tenant.Id, pfr, oldDb, oldS3Client, oldBucketName)
 }
 
 type OldPrivateFile struct {
@@ -198,7 +198,7 @@ func ListAllPrivateFiles(db *sql.DB) ([]*OldPrivateFile, error) {
 func runPrivateFileETL(
 	ctx context.Context,
 	tenantId uint64,
-	puir *repositories.PrivateFileRepo,
+	pfr *repositories.PrivateFileRepo,
 	oldDb *sql.DB,
 	oldS3Client *s3.S3,
 	oldBucketName string,
@@ -215,64 +215,51 @@ func runPrivateFileETL(
 	// Iterate through all the old database records and iterate over the
 	// upload AWS S3 files to match the key, then process the file.
 	for _, upload := range uploads {
-
-		key := utils.FindMatchingObjectKeyInS3Bucket(s3Objects, upload.DataFile)
-
-		// for _, obj := range objects.Contents {
-		// 	objKey := aws.StringValue(obj.Key)
-		//
-		// 	match := strings.Contains(objKey, opiu.ImageFile)
-		//
-		// 	log.Println(objKey, opiu.ImageFile, " | ", match)
-		// 	if match == true {
-		// 		log.Fatal("PROGRAMMER HALT") //TODO: CONTINUE PROGRAMMING HERE
-		// 	}
-		// }
-		// return
-        log.Println(key, "\n\n", upload.DataFile, "\n\n\n\n")
-
-		// insertPrivateFileETL(ctx, tenantId, puir, opiu, oldS3Client, oldBucketName)
+		s3key := utils.FindMatchingObjectKeyInS3Bucket(s3Objects, upload.DataFile)
+        insertPrivateFileETL(ctx, tenantId, pfr, upload, oldS3Client, oldBucketName, s3key)
 	}
 }
 
 func insertPrivateFileETL(
 	ctx context.Context,
 	tid uint64,
-	puir *repositories.PrivateFileRepo,
-	opiu *OldPrivateFile,
+	pfr *repositories.PrivateFileRepo,
+	opf *OldPrivateFile,
 	oldS3Client *s3.S3,
 	oldBucketName string,
+	oldS3key string,
 ) {
-	//
-	input := &s3.GetObjectInput{
-		Bucket: aws.String(oldBucketName),
-		Key:    aws.String(opiu.DataFile),
-	}
+	localFilePath, err := utils.DownloadS3ObjToTmpDir(oldS3Client, oldBucketName, oldS3key)
 
-	result, err := oldS3Client.GetObject(input)
+	// responseBin, err := utils.GetS3ObjBin(oldS3Client, oldBucketName, oldS3key)
 	if err != nil {
-		fmt.Println(err.Error())
+		panic(err)
 	}
-	fmt.Println(result)
-	fmt.Println(result.Body)
-	log.Fatal("PROGRAMMER HALT") //TODO: CONTINUE PROGRAMMING HERE
 
 	m := &models.PrivateFile{
-		OldId:              opiu.Id,
+		OldId:              opf.Id,
 		TenantId:           tid,
 		Uuid:               uuid.NewString(),
-		// ImageFile:          opiu.ImageFile,
-		// CreatedTime:        opiu.CreatedAt,
-		// CreatedFromIP:      opiu.CreatedFrom.String,
-		// LastModifiedTime:   opiu.LastModifiedAt,
-		// LastModifiedFromIP: opiu.LastModifiedFrom.String,
-		// CreatedById:        opiu.CreatedById,
-		// LastModifiedById:   opiu.LastModifiedById,
-		State:              1,
+		S3Key:              localFilePath,
+		Title:              opf.Title,
+		Description:        opf.Description,
+		IndexedText:        opf.IndexedText.String,
+		CreatedTime:        opf.CreatedAt,
+		CreatedFromIP:      opf.CreatedFrom,
+		CreatedById:        opf.CreatedById,
+		LastModifiedTime:   opf.LastModifiedAt,
+		LastModifiedFromIP: opf.LastModifiedFrom,
+		LastModifiedById:   opf.LastModifiedById,
+		AssociateId:        opf.AssociateId,
+		CustomerId:         opf.CustomerId,
+		PartnerId:          opf.PartnerId,
+		StaffId:            opf.StaffId,
+		WorkOrderId:        opf.WorkOrderId,
+		State:              2, // Special case of the file being downloaded locally
 	}
-	err = puir.Insert(ctx, m)
+	err = pfr.Insert(ctx, m)
 	if err != nil {
 		log.Panic(err)
 	}
-	fmt.Println("Imported ID#", opiu.Id)
+	fmt.Println("Imported ID#", opf.Id)
 }

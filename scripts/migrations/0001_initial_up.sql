@@ -1284,6 +1284,42 @@ ON public_image_uploads (uuid);
 CREATE INDEX idx_public_image_upload_tenant_id
 ON public_image_uploads (tenant_id);
 
+CREATE TABLE private_files (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    s3_key VARCHAR (511) NOT NULL,
+    title VARCHAR (63) NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    indexed_text TEXT NOT NULL DEFAULT '',
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NULL,
+    created_from_ip VARCHAR (50) NOT NULL DEFAULT '',
+    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    last_modified_by_id BIGINT NULL,
+    last_modified_from_ip VARCHAR (50) NOT NULL DEFAULT '',
+    associate_id BIGINT NULL,
+    customer_id BIGINT NULL,
+    partner_id BIGINT NULL,
+    staff_id BIGINT NULL,
+    work_order_id BIGINT NULL,
+    state SMALLINT NOT NULL DEFAULT 0,
+    old_id BIGINT NOT NULL DEFAULT 0,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (created_by_id) REFERENCES users(id),
+    FOREIGN KEY (last_modified_by_id) REFERENCES users(id),
+    FOREIGN KEY (associate_id) REFERENCES associates(id),
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    FOREIGN KEY (partner_id) REFERENCES partners(id),
+    FOREIGN KEY (staff_id) REFERENCES staff(id),
+    FOREIGN KEY (work_order_id) REFERENCES work_orders(id)
+);
+CREATE UNIQUE INDEX idx_private_file_uuid
+ON private_files (uuid);
+CREATE INDEX idx_private_file_tenant_id
+ON private_files (tenant_id);
+
+
 
 -- ######################### --
 -- CONTNUE CODING FROM BELOW --
