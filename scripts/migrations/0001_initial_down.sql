@@ -4,6 +4,7 @@
 -- TODO: Unified Search Item
 
 DROP TABLE public_image_uploads CASCADE;
+DROP TABLE private_files CASCADE;
 DROP TABLE partner_comments CASCADE;
 DROP TABLE partners CASCADE;
 DROP TABLE staff_comments CASCADE;

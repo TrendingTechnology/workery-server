@@ -1288,7 +1288,7 @@ CREATE TABLE private_files (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,
     tenant_id BIGINT NOT NULL,
-    s3_key VARCHAR (511) NOT NULL,
+    s3_key VARCHAR (1027) NOT NULL,
     title VARCHAR (63) NOT NULL DEFAULT '',
     description TEXT NOT NULL DEFAULT '',
     indexed_text TEXT NOT NULL DEFAULT '',

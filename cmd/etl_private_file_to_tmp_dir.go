@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	null "gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -99,6 +100,12 @@ func doRunImportPrivateFile() {
 	// Load up our repositories.
 	tr := repositories.NewTenantRepo(db)
 	pfr := repositories.NewPrivateFileRepo(db)
+	ur := repositories.NewUserRepo(db)
+	ar := repositories.NewAssociateRepo(db)
+	cr := repositories.NewCustomerRepo(db)
+	pr := repositories.NewPartnerRepo(db)
+	sr := repositories.NewStaffRepo(db)
+	wor := repositories.NewWorkOrderRepo(db)
 
 	// Load up our S3 instances
 	oldS3Client, oldBucketName := getOldS3ClientInstance()
@@ -112,29 +119,29 @@ func doRunImportPrivateFile() {
 		log.Fatal("Tenant does not exist!")
 	}
 
-	runPrivateFileETL(ctx, tenant.Id, pfr, oldDb, oldS3Client, oldBucketName)
+	runPrivateFileETL(ctx, tenant.Id, pfr, oldDb, oldS3Client, oldBucketName, ur, ar, cr, pr, sr, wor)
 }
 
 type OldPrivateFile struct {
-	Id                       uint64         `json:"id"`
-	DataFile                 string         `json:"data_file"`
-	Title                    string         `json:"title"`
-	Description                 string         `json:"description"`
-	IsArchived               bool           `json:"is_archived"`
-	IndexedText              sql.NullString         `json:"indexed_text"`
-	CreatedAt                time.Time      `json:"created_at"`
-	CreatedFrom              sql.NullString `json:"created_from"`
-	CreatedFromIsPublic      bool           `json:"created_from_is_public"`
-	CreatedById              sql.NullInt64  `json:"created_by_id"`
-	LastModifiedAt           time.Time      `json:"last_modified_at"`
-	LastModifiedFrom         sql.NullString `json:"last_modified_from"`
-	LastModifiedFromIsPublic bool           `json:"last_modified_from_is_public"`
-	LastModifiedById         sql.NullInt64  `json:"last_modified_by_id"`
-	AssociateId              sql.NullInt64  `json:"associate_id"`
-	CustomerId               sql.NullInt64  `json:"customer_id"`
-	PartnerId                sql.NullInt64  `json:"partner_id"`
-	StaffId                  sql.NullInt64  `json:"staff_id"`
-	WorkOrderId              sql.NullInt64  `json:"work_order_id"`
+	Id                       uint64      `json:"id"`
+	DataFile                 string      `json:"data_file"`
+	Title                    string      `json:"title"`
+	Description              string      `json:"description"`
+	IsArchived               bool        `json:"is_archived"`
+	IndexedText              null.String `json:"indexed_text"`
+	CreatedAt                time.Time   `json:"created_at"`
+	CreatedFrom              null.String `json:"created_from"`
+	CreatedFromIsPublic      bool        `json:"created_from_is_public"`
+	CreatedById              null.Int    `json:"created_by_id"`
+	LastModifiedAt           time.Time   `json:"last_modified_at"`
+	LastModifiedFrom         null.String `json:"last_modified_from"`
+	LastModifiedFromIsPublic bool        `json:"last_modified_from_is_public"`
+	LastModifiedById         null.Int    `json:"last_modified_by_id"`
+	AssociateId              null.Int    `json:"associate_id"`
+	CustomerId               null.Int    `json:"customer_id"`
+	PartnerId                null.Int    `json:"partner_id"`
+	StaffId                  null.Int    `json:"staff_id"`
+	WorkOrderId              null.Int    `json:"work_order_id"`
 }
 
 func ListAllPrivateFiles(db *sql.DB) ([]*OldPrivateFile, error) {
@@ -202,6 +209,12 @@ func runPrivateFileETL(
 	oldDb *sql.DB,
 	oldS3Client *s3.S3,
 	oldBucketName string,
+	ur *repositories.UserRepo,
+	ar *repositories.AssociateRepo,
+	cr *repositories.CustomerRepo,
+	pr *repositories.PartnerRepo,
+	sr *repositories.StaffRepo,
+	wor *repositories.WorkOrderRepo,
 ) {
 	// Fetch all the database records from the old database at once.
 	uploads, err := ListAllPrivateFiles(oldDb)
@@ -216,7 +229,7 @@ func runPrivateFileETL(
 	// upload AWS S3 files to match the key, then process the file.
 	for _, upload := range uploads {
 		s3key := utils.FindMatchingObjectKeyInS3Bucket(s3Objects, upload.DataFile)
-        insertPrivateFileETL(ctx, tenantId, pfr, upload, oldS3Client, oldBucketName, s3key)
+		insertPrivateFileETL(ctx, tenantId, pfr, upload, oldS3Client, oldBucketName, s3key, ur, ar, cr, pr, sr, wor)
 	}
 }
 
@@ -228,12 +241,100 @@ func insertPrivateFileETL(
 	oldS3Client *s3.S3,
 	oldBucketName string,
 	oldS3key string,
+	ur *repositories.UserRepo,
+	ar *repositories.AssociateRepo,
+	cr *repositories.CustomerRepo,
+	pr *repositories.PartnerRepo,
+	sr *repositories.StaffRepo,
+	wor *repositories.WorkOrderRepo,
 ) {
 	localFilePath, err := utils.DownloadS3ObjToTmpDir(oldS3Client, oldBucketName, oldS3key)
-
-	// responseBin, err := utils.GetS3ObjBin(oldS3Client, oldBucketName, oldS3key)
 	if err != nil {
 		panic(err)
+	}
+
+	var createdById null.Int
+	if opf.CreatedById.Valid {
+		CreatedByIdInt64 := opf.CreatedById.ValueOrZero()
+		CreatedByIdUint64, err := ur.GetIdByOldId(ctx, tid, uint64(CreatedByIdInt64))
+		if err != nil {
+			log.Panic("asr.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		createdById = null.NewInt(int64(CreatedByIdUint64), CreatedByIdUint64 != 0)
+	}
+
+	var lastModifiedById null.Int
+	if opf.LastModifiedById.Valid {
+		int64Value := opf.LastModifiedById.ValueOrZero()
+		uint64Value, err := ur.GetIdByOldId(ctx, tid, uint64(int64Value))
+		if err != nil {
+			log.Panic("asr.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		lastModifiedById = null.NewInt(int64(uint64Value), uint64Value != 0)
+	}
+
+	var associateId null.Int
+	if opf.AssociateId.Valid {
+		int64Value := opf.AssociateId.ValueOrZero()
+		uint64Value, err := ar.GetIdByOldId(ctx, tid, uint64(int64Value))
+		if err != nil {
+			log.Panic("asr.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		associateId = null.NewInt(int64(uint64Value), uint64Value != 0)
+	}
+
+	var customerId null.Int
+	if opf.CustomerId.Valid {
+		int64Value := opf.CustomerId.ValueOrZero()
+		uint64Value, err := cr.GetIdByOldId(ctx, tid, uint64(int64Value))
+		if err != nil {
+			log.Panic("asr.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		customerId = null.NewInt(int64(uint64Value), uint64Value != 0)
+	}
+
+	var partnerId null.Int
+	if opf.PartnerId.Valid {
+		int64Value := opf.PartnerId.ValueOrZero()
+		uint64Value, err := pr.GetIdByOldId(ctx, tid, uint64(int64Value))
+		if err != nil {
+			log.Panic("asr.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		partnerId = null.NewInt(int64(uint64Value), uint64Value != 0)
+	}
+
+	var staffId null.Int
+	if opf.StaffId.Valid {
+		int64Value := opf.StaffId.ValueOrZero()
+		uint64Value, err := sr.GetIdByOldId(ctx, tid, uint64(int64Value))
+		if err != nil {
+			log.Panic("asr.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		staffId = null.NewInt(int64(uint64Value), uint64Value != 0)
+	}
+
+	var workOrderId null.Int
+	if opf.LastModifiedById.Valid {
+		int64Value := opf.LastModifiedById.ValueOrZero()
+		uint64Value, err := wor.GetIdByOldId(ctx, tid, uint64(int64Value))
+		if err != nil {
+			log.Panic("asr.GetIdByOldId | err", err)
+		}
+
+		// Convert from null supported integer times.
+		workOrderId = null.NewInt(int64(uint64Value), uint64Value != 0)
 	}
 
 	m := &models.PrivateFile{
@@ -246,15 +347,15 @@ func insertPrivateFileETL(
 		IndexedText:        opf.IndexedText.String,
 		CreatedTime:        opf.CreatedAt,
 		CreatedFromIP:      opf.CreatedFrom,
-		CreatedById:        opf.CreatedById,
+		CreatedById:        createdById,
 		LastModifiedTime:   opf.LastModifiedAt,
 		LastModifiedFromIP: opf.LastModifiedFrom,
-		LastModifiedById:   opf.LastModifiedById,
-		AssociateId:        opf.AssociateId,
-		CustomerId:         opf.CustomerId,
-		PartnerId:          opf.PartnerId,
-		StaffId:            opf.StaffId,
-		WorkOrderId:        opf.WorkOrderId,
+		LastModifiedById:   lastModifiedById,
+		AssociateId:        associateId,
+		CustomerId:         customerId,
+		PartnerId:          partnerId,
+		StaffId:            staffId,
+		WorkOrderId:        workOrderId,
 		State:              2, // Special case of the file being downloaded locally
 	}
 	err = pfr.Insert(ctx, m)
@@ -262,4 +363,5 @@ func insertPrivateFileETL(
 		log.Panic(err)
 	}
 	fmt.Println("Imported ID#", opf.Id)
+	// log.Fatal("HALT BY PROGRAMMER") For debugging purposes only.
 }

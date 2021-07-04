@@ -2,9 +2,9 @@ package utils // Special thanks via https://docs.digitalocean.com/products/space
 
 import (
 	"io"
+	"log"
 	"os"
 	"strings"
-	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -49,7 +49,7 @@ func FindMatchingObjectKeyInS3Bucket(s3Objects *s3.ListObjectsOutput, partialKey
 
 		match := strings.Contains(objKey, partialKey)
 
-        // If a match happens then it means we have found the ACTUAL KEY in the
+		// If a match happens then it means we have found the ACTUAL KEY in the
 		// s3 objects inside the bucket.
 		if match == true {
 			return objKey
@@ -86,7 +86,7 @@ func GetS3Obj(s3Client *s3.S3, bucketName string, s3key string) (*s3.GetObjectOu
 func DownloadS3ObjToTmpDir(s3Client *s3.S3, bucketName string, s3key string) (string, error) {
 	segements := strings.Split(s3key, "/")
 	fileName := segements[len(segements)-1]
-	filePath := "/tmp/"+fileName
+	filePath := "/tmp/" + fileName
 
 	responseBin, err := GetS3ObjBin(s3Client, bucketName, s3key)
 	if err != nil {
