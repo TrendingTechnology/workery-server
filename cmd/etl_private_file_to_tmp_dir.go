@@ -248,7 +248,8 @@ func insertPrivateFileETL(
 	sr *repositories.StaffRepo,
 	wor *repositories.WorkOrderRepo,
 ) {
-	localFilePath, err := utils.DownloadS3ObjToTmpDir(oldS3Client, oldBucketName, oldS3key)
+	privateFileUuid := uuid.NewString()
+	localFilePath, err := utils.DownloadS3ObjToTmpDir(oldS3Client, oldBucketName, oldS3key, privateFileUuid)
 	if err != nil {
 		panic(err)
 	}
@@ -340,7 +341,7 @@ func insertPrivateFileETL(
 	m := &models.PrivateFile{
 		OldId:              opf.Id,
 		TenantId:           tid,
-		Uuid:               uuid.NewString(),
+		Uuid:               privateFileUuid,
 		S3Key:              localFilePath,
 		Title:              opf.Title,
 		Description:        opf.Description,

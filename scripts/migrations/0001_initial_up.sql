@@ -1316,6 +1316,8 @@ CREATE TABLE private_files (
 );
 CREATE UNIQUE INDEX idx_private_file_uuid
 ON private_files (uuid);
+CREATE UNIQUE INDEX idx_private_file_s3_key
+ON private_files (s3_key);
 CREATE INDEX idx_private_file_tenant_id
 ON private_files (tenant_id);
 

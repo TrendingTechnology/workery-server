@@ -83,9 +83,12 @@ func GetS3Obj(s3Client *s3.S3, bucketName string, s3key string) (*s3.GetObjectOu
 
 // Function will download the s3 file to the `/tmp` folder on the system and
 // return the local filepath address of the downloaded file.
-func DownloadS3ObjToTmpDir(s3Client *s3.S3, bucketName string, s3key string) (string, error) {
+func DownloadS3ObjToTmpDir(s3Client *s3.S3, bucketName string, s3key string, uuid string) (string, error) {
 	segements := strings.Split(s3key, "/")
 	fileName := segements[len(segements)-1]
+	if uuid != "" {
+		fileName = uuid + "-" + fileName
+	}
 	filePath := "/tmp/" + fileName
 
 	responseBin, err := GetS3ObjBin(s3Client, bucketName, s3key)
