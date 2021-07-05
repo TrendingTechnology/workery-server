@@ -69,11 +69,14 @@ func (r *PrivateFileRepo) UpdateById(ctx context.Context, m *models.PrivateFile)
 
 	query := `
     UPDATE
-        tags
+        private_files
     SET
-        tenant_id = $1, text = $2, description = $3, state = $4
+        tenant_id = $1, s3_key = $2, title = $3, description = $4,
+		indexed_text = $5, last_modified_time = $6, last_modified_by_id = $7,
+		last_modified_from_ip = $8, associate_id = $9, customer_id = $10,
+		partner_id = $11, staff_id = $12, work_order_id = $13, state = $14
     WHERE
-        id = $5`
+        id = $15`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -82,7 +85,10 @@ func (r *PrivateFileRepo) UpdateById(ctx context.Context, m *models.PrivateFile)
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.TenantId, m.State, m.Id,
+		m.TenantId, m.S3Key, m.Title, m.Description, m.IndexedText,
+		m.LastModifiedTime, m.LastModifiedById, m.LastModifiedFromIP,
+		m.AssociateId, m.CustomerId, m.PartnerId, m.StaffId, m.WorkOrderId,
+		m.State, m.Id,
 	)
 	return err
 }

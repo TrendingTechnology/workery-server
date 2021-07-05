@@ -109,3 +109,18 @@ func DownloadS3ObjToTmpDir(s3Client *s3.S3, bucketName string, s3key string, uui
 	}
 	return filePath, err
 }
+
+func UploadBinToS3(s3Client *s3.S3, bucketName string, s3key string, body string, acl string) error {
+	object := s3.PutObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(s3key),
+		Body:   strings.NewReader(body),
+		ACL:    aws.String(acl),
+		Metadata: map[string]*string{
+            "Cache-Control": aws.String("max-age=86400"),
+			// "Content-Type": aws.String("max-age=86400"),
+        },
+	}
+	_, err := s3Client.PutObject(&object)
+	return err
+}

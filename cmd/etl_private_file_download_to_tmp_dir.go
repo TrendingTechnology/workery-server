@@ -24,21 +24,21 @@ import (
 )
 
 var (
-	privateFileETLSchemaName string
+	privateFileDownloadToTMPDIRETLSchemaName string
 )
 
 func init() {
-	privateFileETLCmd.Flags().StringVarP(&privateFileETLSchemaName, "schema_name", "s", "", "The schema name in the postgres.")
-	privateFileETLCmd.MarkFlagRequired("schema_name")
-	rootCmd.AddCommand(privateFileETLCmd)
+	privateFileDownloadToTMPDIRETLCmd.Flags().StringVarP(&privateFileDownloadToTMPDIRETLSchemaName, "schema_name", "s", "", "The schema name in the postgres.")
+	privateFileDownloadToTMPDIRETLCmd.MarkFlagRequired("schema_name")
+	rootCmd.AddCommand(privateFileDownloadToTMPDIRETLCmd)
 }
 
-var privateFileETLCmd = &cobra.Command{
-	Use:   "etl_private_file_to_tmp_dir",
-	Short: "Import the private files from the old workery and download the files to a local temporary directory",
+var privateFileDownloadToTMPDIRETLCmd = &cobra.Command{
+	Use:   "etl_private_file_download_to_tmp_dir",
+	Short: "Download private files from the old workery to a local temporary directory",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		doRunImportPrivateFile()
+		doRunDownloadPrivateFileToTmpDir()
 	},
 }
 
@@ -74,7 +74,7 @@ func listAllS3Objects(s3Client *s3.S3, bucketName string) *s3.ListObjectsOutput 
 	return objects
 }
 
-func doRunImportPrivateFile() {
+func doRunDownloadPrivateFileToTmpDir() {
 	// Load up our NEW database.
 	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
 	if err != nil {
@@ -88,7 +88,7 @@ func doRunImportPrivateFile() {
 	oldDBUser := os.Getenv("WORKERY_OLD_DB_USER")
 	oldDBPassword := os.Getenv("WORKERY_OLD_DB_PASSWORD")
 	oldDBName := os.Getenv("WORKERY_OLD_DB_NAME")
-	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName, privateFileETLSchemaName)
+	oldDb, err := utils.ConnectDB(oldDBHost, oldDBPort, oldDBUser, oldDBPassword, oldDBName, privateFileDownloadToTMPDIRETLSchemaName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,7 +111,7 @@ func doRunImportPrivateFile() {
 	oldS3Client, oldBucketName := getOldS3ClientInstance()
 
 	// Lookup the tenant.
-	tenant, err := tr.GetBySchemaName(ctx, privateFileETLSchemaName)
+	tenant, err := tr.GetBySchemaName(ctx, privateFileDownloadToTMPDIRETLSchemaName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -144,7 +144,7 @@ type OldPrivateFile struct {
 	WorkOrderId              null.Int    `json:"work_order_id"`
 }
 
-func ListAllPrivateFiles(db *sql.DB) ([]*OldPrivateFile, error) {
+func ListAllOldPrivateFiles(db *sql.DB) ([]*OldPrivateFile, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -217,7 +217,7 @@ func runPrivateFileETL(
 	wor *repositories.WorkOrderRepo,
 ) {
 	// Fetch all the database records from the old database at once.
-	uploads, err := ListAllPrivateFiles(oldDb)
+	uploads, err := ListAllOldPrivateFiles(oldDb)
 	if err != nil {
 		log.Fatal(err)
 	}
