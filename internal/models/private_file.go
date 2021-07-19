@@ -41,5 +41,6 @@ type PrivateFileRepository interface {
 	GetById(ctx context.Context, id uint64) (*PrivateFile, error)
 	GetIdByOldId(ctx context.Context, tid uint64, oid uint64) (uint64, error)
 	CheckIfExistsById(ctx context.Context, id uint64) (bool, error)
+	CheckIfExistsByS3Key(ctx context.Context, s3Key string) (bool, error)
 	InsertOrUpdateById(ctx context.Context, u *PrivateFile) error
 }

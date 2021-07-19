@@ -103,7 +103,7 @@ func (r *PrivateFileRepo) GetById(ctx context.Context, id uint64) (*models.Priva
     SELECT
         id, uuid, tenant_id, text, description, state
 	FROM
-        tags
+        private_files
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
@@ -130,7 +130,7 @@ func (r *PrivateFileRepo) GetIdByOldId(ctx context.Context, tenantId uint64, old
 	SELECT
 		id
 	FROM
-		tags
+		private_files
 	WHERE
 		tenant_id = $1 AND old_id = $2
 	`
@@ -156,10 +156,35 @@ func (r *PrivateFileRepo) CheckIfExistsById(ctx context.Context, id uint64) (boo
     SELECT
         1
     FROM
-        tags
+        private_files
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(&exists)
+	if err != nil {
+		// CASE 1 OF 2: Cannot find record with that email.
+		if err == sql.ErrNoRows {
+			return false, nil
+		} else { // CASE 2 OF 2: All other errors.
+			return false, err
+		}
+	}
+	return exists, nil
+}
+
+func (r *PrivateFileRepo) CheckIfExistsByS3Key(ctx context.Context, s3Key string) (bool, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	var exists bool
+
+	query := `
+    SELECT
+        1
+    FROM
+        private_files
+    WHERE
+        s3_key = $1`
+	err := r.db.QueryRowContext(ctx, query, s3Key).Scan(&exists)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
 		if err == sql.ErrNoRows {

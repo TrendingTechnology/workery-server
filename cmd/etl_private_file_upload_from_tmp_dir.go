@@ -150,14 +150,28 @@ func uploadPrivateFileToS3(pfr *repositories.PrivateFileRepo, s3 *s3.S3, bucketN
 	// It's important that the following happens:
 	// - Tenant ID must exists in key
 	// - Private indiciation must exists
+	// - Remove the UUID code from the filepath
 	tenantIdStr := strconv.FormatUint(privateFile.TenantId, 10)
 	filename := strings.ReplaceAll(privateFile.S3Key, "/tmp/", "")
+	filename = strings.ReplaceAll(filename, privateFile.Uuid+"-", "")
 	newS3Key := "tenant/" + tenantIdStr + "/private/uploads/" + filename
+
+	// When we remove the local key and write it to S3, we need to check if
+	// a file with a similar s3 does not exist, if it does then we need to
+	// generate a new key.
+	doesExist, err := pfr.CheckIfExistsByS3Key(context.Background(), newS3Key)
+	if err != nil {
+		log.Fatal("pfr.CheckIfExistsByS3Key:", err)
+	}
+	if doesExist {
+		log.Println("Duplicate found! Appending UUID to file for private file ID:", privateFile.Id)
+		newS3Key = "tenant/" + tenantIdStr + "/private/uploads/" +privateFile.Uuid+ "-" + filename
+	}
 
 	// Open the file and read the content.
 	f, err := os.Open(privateFile.S3Key)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("os.Open:", err)
 	}
 	defer f.Close()
 
@@ -169,7 +183,7 @@ func uploadPrivateFileToS3(pfr *repositories.PrivateFileRepo, s3 *s3.S3, bucketN
     // Upload the content to S3.
 	err = utils.UploadBinToS3(s3, bucketName, newS3Key, contents, "private")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("UploadBinToS3",err)
 	}
 
 	// Update the private file in the database.
@@ -177,7 +191,7 @@ func uploadPrivateFileToS3(pfr *repositories.PrivateFileRepo, s3 *s3.S3, bucketN
 	privateFile.S3Key = newS3Key
     err = pfr.UpdateById(context.Background(), privateFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("pfr.UpdateById:", err)
 	}
 
 	log.Println("Imported ID#", privateFile.Id)
