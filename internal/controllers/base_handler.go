@@ -9,22 +9,57 @@ import (
 )
 
 type BaseHandler struct {
-	SecretSigningKeyBin []byte
-	UserRepo            models.UserRepository
-	SessionManager      *session.SessionManager
+	SecretSigningKeyBin               []byte
+	ActivitySheetItemRepo             models.ActivitySheetItemRepository
+	AssociateCommentRepo              models.AssociateCommentRepository
+	AssociateInsuranceRequirementRepo models.AssociateInsuranceRequirementRepository
+	AssociateSkillSetRepo             models.AssociateSkillSetRepository
+	AssociateTagRepo                  models.AssociateTagRepository
+	AssociateVehicleTypeRepo          models.AssociateVehicleTypeRepository
+	AssociateRepo                     models.AssociateRepository
+	BulletinBoardItemRepo             models.BulletinBoardItemRepository
+	CommentRepo                       models.CommentRepository
+	CustomerCommentRepo               models.CustomerCommentRepository
+	CustomerTagRepo                   models.CustomerTagRepository
+	CustomerRepo                      models.CustomerRepository
+	HowHearAboutUsItemRepo            models.HowHearAboutUsItemRepository
+	InsuranceRequirementRepo          models.InsuranceRequirementRepository
+	OngoingWorkOrderRepo              models.OngoingWorkOrderRepository
+	PartnerCommentRepo                models.PartnerCommentRepository
+	PartnerRepo                       models.PartnerRepository
+	PrivateFileRepo                   models.PrivateFileRepository
+	PublicImageUploadRepo             models.PublicImageUploadRepository
+	SkillSetInsuranceRequirementRepo  models.SkillSetInsuranceRequirementRepository
+	SkillSetRepo                      models.SkillSetRepository
+	StaffCommentRepo                  models.StaffCommentRepository
+	StaffTagRepo                      models.StaffTagRepository
+	StaffRepo                         models.StaffRepository
+	TagRepo                           models.TagRepository
+	TaskItemRepo                      models.TaskItemRepository
+	TenantRepo                        models.TenantRepository
+	UserRepo                          models.UserRepository
+	VehicleTypeRepo                   models.VehicleTypeRepository
+	WorkOrderCommentRepo              models.WorkOrderCommentRepository
+	WorkOrderDepositRepo              models.WorkOrderDepositRepository
+	WorkOrderInvoiceRepo              models.WorkOrderInvoiceRepository
+	WorkOrderServiceFeeRepo           models.WorkOrderServiceFeeRepository
+	WorkOrderSkillSetRepo             models.WorkOrderSkillSetRepository
+	WorkOrderTagRepo                  models.WorkOrderTagRepository
+	WorkOrderRepo                     models.WorkOrderRepository
+	SessionManager                    *session.SessionManager
 }
 
-func NewBaseHandler(
-	keyBin []byte,
-	ur models.UserRepository,
-	sm *session.SessionManager,
-) *BaseHandler {
-	return &BaseHandler{
-		SecretSigningKeyBin: keyBin,
-		UserRepo:            ur,
-		SessionManager:      sm,
-	}
-}
+// func NewBaseHandler(
+// 	keyBin []byte,
+// 	ur models.UserRepository,
+// 	sm *session.SessionManager,
+// ) *BaseHandler {
+// 	return &BaseHandler{
+// 		SecretSigningKeyBin: keyBin,
+// 		UserRepo:            ur,
+// 		SessionManager:      sm,
+// 	}
+// }
 
 func (h *BaseHandler) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")

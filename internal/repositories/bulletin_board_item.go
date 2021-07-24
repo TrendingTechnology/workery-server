@@ -143,3 +143,33 @@ func (r *BulletinBoardItemRepo) InsertOrUpdateById(ctx context.Context, m *model
 	}
 	return r.UpdateById(ctx, m)
 }
+
+func (r *BulletinBoardItemRepo) GetByOld(ctx context.Context, tenantId uint64, oldId uint64) (*models.BulletinBoardItem, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	m := new(models.BulletinBoardItem)
+
+	query := `
+    SELECT
+	    id, uuid, tenant_id, text, created_time, created_by_id, created_from_ip,
+    	last_modified_time, last_modified_by_id, last_modified_from_ip, state
+    FROM
+	    bulletin_board_items
+    WHERE
+        old_id = $1 AND tenant_id = $2`
+	err := r.db.QueryRowContext(ctx, query, oldId, tenantId).Scan(
+		&m.Id, &m.Uuid, &m.TenantId, &m.Text, &m.CreatedTime, &m.CreatedById,
+		&m.CreatedFromIP, &m.LastModifiedTime, &m.LastModifiedById,
+		&m.LastModifiedFromIP, &m.State,
+	)
+	if err != nil {
+		// CASE 1 OF 2: Cannot find record with that email.
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else { // CASE 2 OF 2: All other errors.
+			return nil, err
+		}
+	}
+	return m, nil
+}

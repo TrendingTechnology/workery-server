@@ -38,20 +38,101 @@ func doRunServe() {
 
 func runServeCmd() {
 	// Load up our database.
-	db, err := utils.ConnectDB(databaseHost, databasePort, databaseUser, databasePassword, databaseName, "public")
+	db, err := utils.ConnectDB(
+		databaseHost,
+		databasePort,
+		databaseUser,
+		databasePassword,
+		databaseName,
+		"public",
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	// Load up our repositories.
+	asir := repo.NewActivitySheetItemRepo(db)
+	acr := repo.NewAssociateCommentRepo(db)
+	airr := repo.NewAssociateInsuranceRequirementRepo(db)
+	assr := repo.NewAssociateSkillSetRepo(db)
+	atr := repo.NewAssociateTagRepo(db)
+	avtr := repo.NewAssociateVehicleTypeRepo(db)
+	ar := repo.NewAssociateRepo(db)
+	bbir := repo.NewBulletinBoardItemRepo(db)
+	comr := repo.NewCommentRepo(db)
+	ccr := repo.NewCustomerCommentRepo(db)
+	ctr := repo.NewCustomerTagRepo(db)
+	cr := repo.NewCustomerRepo(db)
+    hhauir := repo.NewHowHearAboutUsItemRepo(db)
+	irr := repo.NewInsuranceRequirementRepo(db)
+	owor := repo.NewOngoingWorkOrderRepo(db)
+	pcr := repo.NewPartnerCommentRepo(db)
+	pr := repo.NewPartnerRepo(db)
+	pfr := repo.NewPrivateFileRepo(db)
+	// piur := repo.NewPublicImageUploadRepo(db)
+	skillsirr := repo.NewSkillSetInsuranceRequirementRepo(db)
+	skillsr := repo.NewSkillSetRepo(db)
+	staffcr := repo.NewStaffCommentRepo(db)
+	staffTagr := repo.NewStaffTagRepo(db)
+	staffr := repo.NewStaffRepo(db)
+	tagr := repo.NewTagRepo(db)
+	tir := repo.NewTaskItemRepo(db)
+	tr := repo.NewTenantRepo(db)
 	ur := repo.NewUserRepo(db)
+	vtr := repo.NewVehicleTypeRepo(db)
+	wocr := repo.NewWorkOrderCommentRepo(db)
+	wodr := repo.NewWorkOrderDepositRepo(db)
+	woir := repo.NewWorkOrderInvoiceRepo(db)
+	wosfr := repo.NewWorkOrderServiceFeeRepo(db)
+	wossr := repo.NewWorkOrderSkillSetRepo(db)
+	wotr := repo.NewWorkOrderTagRepo(db)
+	wor := repo.NewWorkOrderRepo(db)
 
 	// Open up our session handler, powered by redis and let's save the user
 	// account with our ID
 	sm := session.New()
 
-	c := controllers.NewBaseHandler([]byte(applicationSigningKey), ur, sm)
+	c := &controllers.BaseHandler{
+		SecretSigningKeyBin:                 []byte(applicationSigningKey),
+		ActivitySheetItemRepo:               asir,
+		AssociateCommentRepo:                acr,
+		AssociateInsuranceRequirementRepo:   airr,
+		AssociateSkillSetRepo:               assr,
+		AssociateTagRepo:                    atr,
+		AssociateVehicleTypeRepo:            avtr,
+		AssociateRepo:                       ar,
+		BulletinBoardItemRepo:               bbir,
+		CommentRepo:                         comr,
+		CustomerCommentRepo:                 ccr,
+		CustomerTagRepo:                     ctr,
+		CustomerRepo:                        cr,
+		HowHearAboutUsItemRepo:              hhauir,
+		InsuranceRequirementRepo:            irr,
+		OngoingWorkOrderRepo:                owor,
+		PartnerCommentRepo:                  pcr,
+		PartnerRepo:                         pr,
+		PrivateFileRepo:                     pfr,
+		// PublicImageUploadRepo:               piur,
+		SkillSetInsuranceRequirementRepo:    skillsirr,
+		SkillSetRepo:                        skillsr,
+		StaffCommentRepo:                    staffcr,
+		StaffTagRepo:                        staffTagr,
+		StaffRepo:                           staffr,
+		TagRepo:                             tagr,
+		TaskItemRepo:                        tir,
+		TenantRepo:                          tr,
+		UserRepo:                            ur,
+		VehicleTypeRepo: vtr,
+		WorkOrderCommentRepo: wocr,
+		WorkOrderDepositRepo: wodr,
+		WorkOrderInvoiceRepo: woir,
+		WorkOrderServiceFeeRepo: wosfr,
+		WorkOrderSkillSetRepo: wossr,
+		WorkOrderTagRepo: wotr,
+		WorkOrderRepo: wor,
+		SessionManager:                      sm,
+	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", c.AttachMiddleware(c.HandleRequests))
