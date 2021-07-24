@@ -8,7 +8,7 @@ import (
 	"github.com/over55/workery-server/internal/session"
 )
 
-type BaseHandler struct {
+type Controller struct {
 	SecretSigningKeyBin               []byte
 	ActivitySheetItemRepo             models.ActivitySheetItemRepository
 	AssociateCommentRepo              models.AssociateCommentRepository
@@ -49,19 +49,19 @@ type BaseHandler struct {
 	SessionManager                    *session.SessionManager
 }
 
-// func NewBaseHandler(
+// func NewController(
 // 	keyBin []byte,
 // 	ur models.UserRepository,
 // 	sm *session.SessionManager,
-// ) *BaseHandler {
-// 	return &BaseHandler{
+// ) *Controller {
+// 	return &Controller{
 // 		SecretSigningKeyBin: keyBin,
 // 		UserRepo:            ur,
 // 		SessionManager:      sm,
 // 	}
 // }
 
-func (h *BaseHandler) HandleRequests(w http.ResponseWriter, r *http.Request) {
+func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Get our URL paths which are slash-seperated.

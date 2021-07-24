@@ -12,7 +12,7 @@ import (
 
 // Middleware will split the full URL path into slash-sperated parts and save to
 // the context to flow downstream in the app for this particular request.
-func (h *BaseHandler) URLProcessorMiddleware(fn http.HandlerFunc) http.HandlerFunc {
+func (h *Controller) URLProcessorMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Split path into slash-separated parts, for example, path "/foo/bar"
 		// gives p==["foo", "bar"] and path "/" gives p==[""]. Our API starts with
@@ -31,7 +31,7 @@ func (h *BaseHandler) URLProcessorMiddleware(fn http.HandlerFunc) http.HandlerFu
 	}
 }
 
-func (h *BaseHandler) JWTProcessorMiddleware(fn http.HandlerFunc) http.HandlerFunc {
+func (h *Controller) JWTProcessorMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -70,7 +70,7 @@ func (h *BaseHandler) JWTProcessorMiddleware(fn http.HandlerFunc) http.HandlerFu
 	}
 }
 
-func (h *BaseHandler) AuthorizationMiddleware(fn http.HandlerFunc) http.HandlerFunc {
+func (h *Controller) AuthorizationMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -104,7 +104,7 @@ func (h *BaseHandler) AuthorizationMiddleware(fn http.HandlerFunc) http.HandlerF
 	}
 }
 
-func (h *BaseHandler) PaginationMiddleware(fn http.HandlerFunc) http.HandlerFunc {
+func (h *Controller) PaginationMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Open our program's context based on the request and save the
 		// slash-seperated array from our URL path.
@@ -140,7 +140,7 @@ func (h *BaseHandler) PaginationMiddleware(fn http.HandlerFunc) http.HandlerFunc
 	}
 }
 
-func (h *BaseHandler) AttachMiddleware(fn http.HandlerFunc) http.HandlerFunc {
+func (h *Controller) AttachMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 	// Attach our middleware handlers here. Please note that all our middleware
 	// will start from the bottom and proceed upwards.
 	// Ex: `URLProcessorMiddleware` will be executed first and

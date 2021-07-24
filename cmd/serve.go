@@ -93,7 +93,9 @@ func runServeCmd() {
 	// account with our ID
 	sm := session.New()
 
-	c := &controllers.BaseHandler{
+    // Instead of using a `New` sort of function, we will populate our structure
+	// so we can use it.
+	c := &controllers.Controller{
 		SecretSigningKeyBin:                 []byte(applicationSigningKey),
 		ActivitySheetItemRepo:               asir,
 		AssociateCommentRepo:                acr,
