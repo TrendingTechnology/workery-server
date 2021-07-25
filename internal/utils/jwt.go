@@ -13,7 +13,7 @@ func GenerateJWTTokenPair(hmacSecret []byte, uuid string, d time.Duration) (stri
 	//
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["uuid"] = uuid
+	claims["session_uuid"] = uuid
 	claims["exp"] = time.Now().Add(d).Unix()
 
 	tokenString, err := token.SignedString(hmacSecret)
@@ -26,7 +26,7 @@ func GenerateJWTTokenPair(hmacSecret []byte, uuid string, d time.Duration) (stri
 	//
 	refreshToken := jwt.New(jwt.SigningMethodHS256)
 	rtClaims := refreshToken.Claims.(jwt.MapClaims)
-	rtClaims["uuid"] = uuid
+	rtClaims["session_uuid"] = uuid
 	rtClaims["exp"] = time.Now().Add(d + time.Hour*72).Unix()
 
 	refreshTokenString, err := refreshToken.SignedString(hmacSecret)
@@ -45,7 +45,7 @@ func ProcessJWTToken(hmacSecret []byte, reqToken string) (string, error) {
 	})
 	if err == nil && token.Valid {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			uuid := claims["uuid"].(string)
+			uuid := claims["session_uuid"].(string)
 			// m["exp"] := string(claims["exp"].(float64))
 			return uuid, nil
 		} else {

@@ -50,18 +50,6 @@ type Controller struct {
 	SessionManager                    *session.SessionManager
 }
 
-// func NewController(
-// 	keyBin []byte,
-// 	ur models.UserRepository,
-// 	sm *session.SessionManager,
-// ) *Controller {
-// 	return &Controller{
-// 		SecretSigningKeyBin: keyBin,
-// 		UserRepo:            ur,
-// 		SessionManager:      sm,
-// 	}
-// }
-
 func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -70,18 +58,13 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	p := ctx.Value("url_split").([]string)
 	n := len(p)
 
-	// Get our authorization information.
-	isAuthsorized, ok := ctx.Value("is_authorized").(bool)
-
 	switch {
-	case n == 1 && p[0] == "version" && r.Method == http.MethodGet:
-		if ok && isAuthsorized {
-			h.getAuthenticatedVersion(w, r)
-		} else {
-			h.getVersion(w, r)
-		}
+	case n == 2 && p[0] == "v1" && p[1] == "tenants" && r.Method == http.MethodGet:
+		h.listLiteTenantsEndpoint(w, r)
+	case n == 2 && p[0] == "v1" && p[1] == "franchises" && r.Method == http.MethodGet: // Same URL names.
+		h.listLiteTenantsEndpoint(w, r)
 	case n == 1 && p[0] == "login" && r.Method == http.MethodPost:
-		h.postLogin(w, r)
+		h.loginEndpoint(w, r)
 	default:
 		http.NotFound(w, r)
 	}

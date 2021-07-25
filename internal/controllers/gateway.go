@@ -14,7 +14,7 @@ import (
 
 // To run this API, try running in your console:
 // $ http post 127.0.0.1:5000/api/v1/register email="fherbert@dune.com" password="the-spice-must-flow" name="Frank Herbert"
-func (h *Controller) postRegister(w http.ResponseWriter, r *http.Request) {
+func (h *Controller) registerEndpoint(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	// Initialize our array which will store all the results from the remote server.
@@ -78,7 +78,7 @@ func (h *Controller) postRegister(w http.ResponseWriter, r *http.Request) {
 
 // To run this API, try running in your console:
 // $ http post 127.0.0.1:5000/api/v1/login email="fherbert@dune.com" password="the-spice-must-flow"
-func (h *Controller) postLogin(w http.ResponseWriter, r *http.Request) {
+func (h *Controller) loginEndpoint(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var requestData models.LoginRequest
