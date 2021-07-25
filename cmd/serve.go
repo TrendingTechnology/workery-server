@@ -66,6 +66,7 @@ func runServeCmd() {
 	cr := repo.NewCustomerRepo(db)
     hhauir := repo.NewHowHearAboutUsItemRepo(db)
 	irr := repo.NewInsuranceRequirementRepo(db)
+	ltr := repo.NewLiteTenantRepo(db)
 	owor := repo.NewOngoingWorkOrderRepo(db)
 	pcr := repo.NewPartnerCommentRepo(db)
 	pr := repo.NewPartnerRepo(db)
@@ -111,6 +112,7 @@ func runServeCmd() {
 		CustomerRepo:                        cr,
 		HowHearAboutUsItemRepo:              hhauir,
 		InsuranceRequirementRepo:            irr,
+		LiteTenantRepo:                      ltr,
 		OngoingWorkOrderRepo:                owor,
 		PartnerCommentRepo:                  pcr,
 		PartnerRepo:                         pr,
