@@ -141,6 +141,9 @@ func (h *Controller) loginEndpoint(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+    // For debugging purposes only.
+	log.Println("loginEndpoint | Response:", responseData)
 }
 
 // To run this API, try running in your console:

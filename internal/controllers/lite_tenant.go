@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 
 	null "gopkg.in/guregu/null.v4"
+	"github.com/vmihailenco/msgpack/v5"
 
     "github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/idos"
@@ -16,7 +16,7 @@ func (h *Controller) listLiteTenantsEndpoint(w http.ResponseWriter, r *http.Requ
 	ctx := r.Context()
 
 	// Permission handling.
-	role := uint64(ctx.Value("user_role").(uint8))
+	role := uint64(ctx.Value("user_role").(int8))
 	if role != 1 {
 		http.Error(w, "Forbidden - You are not an administrator", http.StatusForbidden)
 		return
@@ -67,8 +67,11 @@ func (h *Controller) listLiteTenantsEndpoint(w http.ResponseWriter, r *http.Requ
 	results, count := <-resultCh, <-countCh
 
     // Take our data-layer results, serialize, and send to the user.
-	ido := idos.NewLiteTenantListResponseIDO(results, count)
-	if err := json.NewEncoder(w).Encode(&ido); err != nil { // [2]
+	responseData := idos.NewLiteTenantListResponseIDO(results, count)
+	b, err := msgpack.Marshal(&responseData)
+    if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+		return
+    }
+	w.Write(b)
 }

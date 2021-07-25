@@ -10,6 +10,7 @@ require (
 	github.com/lib/pq v1.9.0
 	github.com/rs/cors v1.7.0
 	github.com/spf13/cobra v1.1.3
+	github.com/vmihailenco/msgpack/v5 v5.3.4 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	gopkg.in/guregu/null.v4 v4.0.0 // indirect
 )

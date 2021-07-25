@@ -91,7 +91,7 @@ func (s *LiteTenantRepo) ListByFilter(ctx context.Context, filter *models.LiteTe
 
 	querySelect := `
     SELECT
-        id, schema, name, state
+        id, schema_name, name, state
     FROM
         tenants`
 

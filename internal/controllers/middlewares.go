@@ -16,8 +16,8 @@ func (h *Controller) URLProcessorMiddleware(fn http.HandlerFunc) http.HandlerFun
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Split path into slash-separated parts, for example, path "/foo/bar"
 		// gives p==["foo", "bar"] and path "/" gives p==[""]. Our API starts with
-		// "/api/v1", as a result we will start the array slice at "3".
-		p := strings.Split(r.URL.Path, "/")[3:]
+		// "/api", as a result we will start the array slice at "2".
+		p := strings.Split(r.URL.Path, "/")[2:]
 
 		// log.Println(p) // For debugging purposes only.
 
@@ -47,7 +47,7 @@ func (h *Controller) JWTProcessorMiddleware(fn http.HandlerFunc) http.HandlerFun
 		if reqToken != "" && strings.Contains(reqToken, "undefined") == false {
 
 			// Special thanks to "poise" via https://stackoverflow.com/a/44700761
-			splitToken := strings.Split(reqToken, "Bearer ")
+			splitToken := strings.Split(reqToken, "JWT ")
 			if len(splitToken) < 2 {
 				http.Error(w, "not properly formatted authorization header", http.StatusBadRequest)
 				return

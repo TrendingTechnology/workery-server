@@ -63,7 +63,7 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 		h.listLiteTenantsEndpoint(w, r)
 	case n == 2 && p[0] == "v1" && p[1] == "franchises" && r.Method == http.MethodGet: // Same URL names.
 		h.listLiteTenantsEndpoint(w, r)
-	case n == 1 && p[0] == "login" && r.Method == http.MethodPost:
+	case n == 2 && p[0] == "v1" && p[1] == "login" && r.Method == http.MethodPost:
 		h.loginEndpoint(w, r)
 	default:
 		http.NotFound(w, r)
