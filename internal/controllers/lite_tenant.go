@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"encoding/json"
 
 	null "gopkg.in/guregu/null.v4"
-	"github.com/vmihailenco/msgpack/v5"
 
     "github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/idos"
@@ -68,7 +68,7 @@ func (h *Controller) listLiteTenantsEndpoint(w http.ResponseWriter, r *http.Requ
 
     // Take our data-layer results, serialize, and send to the user.
 	responseData := idos.NewLiteTenantListResponseIDO(results, count)
-	b, err := msgpack.Marshal(&responseData)
+	b, err := json.Marshal(&responseData)
     if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

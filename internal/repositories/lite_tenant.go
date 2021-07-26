@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	// "log"
 	"context"
 	"database/sql"
 	"time"
@@ -58,7 +59,7 @@ func (s *LiteTenantRepo) queryRowsWithFilter(ctx context.Context, query string, 
 	// by setting the `tenant_id` placeholder and then append our value to
 	// the array.
 	filterValues = append(filterValues, filter.LastSeenId)
-	query += ` WHERE id < $` + strconv.Itoa(len(filterValues))
+	query += ` WHERE id > $` + strconv.Itoa(len(filterValues))
 
 	//
 	// The following code will add our OPTIONAL filters
@@ -81,6 +82,10 @@ func (s *LiteTenantRepo) queryRowsWithFilter(ctx context.Context, query string, 
 	// Execute our custom built SQL query to the database.
 	// (Notice our usage of the `variadic function`?)
 	//
+
+	// log.Println("query:", query)
+	// log.Println("filterValues:", filterValues)
+
 
 	return s.db.QueryContext(ctx, query, filterValues...)
 }
