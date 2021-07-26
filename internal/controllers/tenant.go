@@ -14,6 +14,8 @@ import (
 )
 
 func (h *Controller) tenantGetEndpoint(w http.ResponseWriter, r *http.Request, idStr string) {
+	defer r.Body.Close()
+
 	// Extract the session details from our "Session" middleware.
 	ctx := r.Context()
 	role := uint64(ctx.Value("user_role").(int8))
@@ -43,6 +45,8 @@ func (h *Controller) tenantGetEndpoint(w http.ResponseWriter, r *http.Request, i
 }
 
 func (h *Controller) tenantUpdateEndpoint(w http.ResponseWriter, r *http.Request, idStr string) {
+	defer r.Body.Close()
+
 	// Extract the session details from our "Session" middleware.
 	ctx := r.Context()
 	role := uint64(ctx.Value("user_role").(int8))
@@ -71,6 +75,7 @@ func (h *Controller) tenantUpdateEndpoint(w http.ResponseWriter, r *http.Request
 
 	// Get the user `PUT` data from the HTTP request.
 	var putData *idos.TenantIDO
+
 	if err := json.NewDecoder(r.Body).Decode(&putData); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -102,43 +107,3 @@ func (h *Controller) tenantUpdateEndpoint(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
-
-// func (h *Controller) deleteTenantById(w http.ResponseWriter, r *http.Request, idStr string) {
-// 	// Extract the session details from our "Session" middleware.
-// 	ctx := r.Context()
-// 	role := uint64(ctx.Value("user_role_id").(uint8))
-//
-// 	// Permission handling - If use is not administrator then error.
-// 	if role != 1 {
-// 		http.Error(w, "Forbidden - You are not an administrator", http.StatusForbidden)
-// 		return
-// 	}
-// 	userId, err := strconv.ParseUint(idStr, 10, 64)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
-//
-// 	// Check to see if the tenant already exists.
-// 	dto, err := h.FoundationService.GetUserById(userId)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-// 	if dto == nil {
-// 		http.Error(w, "Does not exist", http.StatusNotFound)
-// 		return
-// 	}
-//
-// 	// Perform the delete operation.
-// 	w.WriteHeader(http.StatusNoContent)
-// 	response, err := h.FoundationService.DeleteTenantById(userId)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-//
-// 	if err := json.NewEncoder(w).Encode(&response); err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 	}
-// }

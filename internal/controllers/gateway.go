@@ -20,6 +20,8 @@ func (h *Controller) registerEndpoint(w http.ResponseWriter, r *http.Request) {
 	// Initialize our array which will store all the results from the remote server.
 	var requestData models.RegisterRequest
 
+	defer r.Body.Close()
+
 	// Read the JSON string and convert it into our golang stuct else we need
 	// to send a `400 Bad Request` errror message back to the client,
 	err := json.NewDecoder(r.Body).Decode(&requestData) // [1]
@@ -79,6 +81,8 @@ func (h *Controller) registerEndpoint(w http.ResponseWriter, r *http.Request) {
 // To run this API, try running in your console:
 // $ http post 127.0.0.1:5000/api/v1/login email="fherbert@dune.com" password="the-spice-must-flow"
 func (h *Controller) loginEndpoint(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	ctx := r.Context()
 
 	var requestData models.LoginRequest
@@ -149,6 +153,8 @@ func (h *Controller) loginEndpoint(w http.ResponseWriter, r *http.Request) {
 // To run this API, try running in your console:
 // $ http post 127.0.0.1:5000/api/v1/refresh-token value="xxx"
 func (h *Controller) postRefreshToken(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	var requestData models.RefreshTokenRequest
 
 	err := json.NewDecoder(r.Body).Decode(&requestData)
