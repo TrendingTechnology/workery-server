@@ -38,8 +38,8 @@ func (h *Controller) JWTProcessorMiddleware(fn http.HandlerFunc) http.HandlerFun
         // Extract our auth header array.
 		reqToken := r.Header.Get("Authorization")
 
-		// For debugging purposes.
-		log.Println("JWTProcessorMiddleware | reqToken:", reqToken)
+		// // For debugging purposes.
+		// log.Println("JWTProcessorMiddleware | reqToken:", reqToken)
 
         // Before running our JWT middleware we need to confirm there is an
 		// an `Authorization` header to run our middleware. This is an important

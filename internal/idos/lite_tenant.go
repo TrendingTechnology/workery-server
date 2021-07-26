@@ -13,10 +13,10 @@ type LiteTenantFilterIDO struct {
 }
 
 type LiteTenantIDO struct {
-	Id     uint64 `db:"id"`
-	Schema string `db:"schema"`
-	Name   string `db:"name"`
-	State int8 `db:"state" json:"state"`
+	Id         uint64 `db:"id"`
+	SchemaName string `db:"schema_name"`
+	Name       string `db:"name"`
+	State      int8 `db:"state" json:"state"`
 }
 
 type LiteTenantListResponseIDO struct {
@@ -62,7 +62,7 @@ func toLiteTenantIDOArray(arr []*models.LiteTenant) []*LiteTenantIDO {
 func toLiteTenantIDO(m *models.LiteTenant) *LiteTenantIDO {
 	return &LiteTenantIDO{
 		Id:     m.Id,
-		Schema: m.Schema,
+		SchemaName: m.SchemaName,
 		Name:   m.Name,
 		State:  m.State,
 	}

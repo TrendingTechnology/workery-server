@@ -111,12 +111,8 @@ func (s *LiteTenantRepo) ListByFilter(ctx context.Context, filter *models.LiteTe
 		m := new(models.LiteTenant)
 		err := rows.Scan(
 			&m.Id,
-			&m.Schema,
+			&m.SchemaName,
 			&m.Name,
-			// &m.Timezone,
-			// &m.SubmitUrl,
-			// &m.FrontendVersion,
-			// &m.Uuid,
 			&m.State,
 		)
 		if err != nil {

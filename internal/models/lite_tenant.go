@@ -13,10 +13,10 @@ type LiteTenantFilter struct {
 }
 
 type LiteTenant struct {
-	Id     uint64 `db:"id"`
-	Schema string `db:"schema"`
-	Name   string `db:"name"`
-	State int8 `db:"state" json:"state"`
+	Id         uint64 `db:"id"`
+	SchemaName string `db:"schema_name"`
+	Name       string `db:"name"`
+	State      int8   `db:"state" json:"state"`
 }
 
 type LiteTenantRepository interface {
