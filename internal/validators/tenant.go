@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 	"unicode/utf8"
 
-	"github.com/over55/workery-server/internal/models"
+	"github.com/over55/workery-server/internal/idos"
 )
 
-func ValidateTenantSaveFromRequest(dirtyData *models.Tenant) (bool, string) {
+func ValidateTenantSaveFromRequest(dirtyData *idos.TenantIDO) (bool, string) {
 	e := make(map[string]string)
 
-	if dirtyData.Schema == "" {
-		e["schema"] = "missing value"
+	if dirtyData.SchemaName == "" {
+		e["schema_name"] = "missing value"
 	} else {
-		if utf8.RuneCountInString(dirtyData.Schema) > 63 {
-			e["schema"] = "character count over 63"
+		if utf8.RuneCountInString(dirtyData.SchemaName) > 63 {
+			e["schema_name"] = "character count over 63"
 		}
 	}
 	if dirtyData.Name == "" {

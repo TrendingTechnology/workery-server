@@ -64,7 +64,7 @@ func runServeCmd() {
 	ccr := repo.NewCustomerCommentRepo(db)
 	ctr := repo.NewCustomerTagRepo(db)
 	cr := repo.NewCustomerRepo(db)
-    hhauir := repo.NewHowHearAboutUsItemRepo(db)
+	hhauir := repo.NewHowHearAboutUsItemRepo(db)
 	irr := repo.NewInsuranceRequirementRepo(db)
 	ltr := repo.NewLiteTenantRepo(db)
 	owor := repo.NewOngoingWorkOrderRepo(db)
@@ -94,48 +94,48 @@ func runServeCmd() {
 	// account with our ID
 	sm := session.New()
 
-    // Instead of using a `New` sort of function, we will populate our structure
+	// Instead of using a `New` sort of function, we will populate our structure
 	// so we can use it.
 	c := &controllers.Controller{
-		SecretSigningKeyBin:                 []byte(applicationSigningKey),
-		ActivitySheetItemRepo:               asir,
-		AssociateCommentRepo:                acr,
-		AssociateInsuranceRequirementRepo:   airr,
-		AssociateSkillSetRepo:               assr,
-		AssociateTagRepo:                    atr,
-		AssociateVehicleTypeRepo:            avtr,
-		AssociateRepo:                       ar,
-		BulletinBoardItemRepo:               bbir,
-		CommentRepo:                         comr,
-		CustomerCommentRepo:                 ccr,
-		CustomerTagRepo:                     ctr,
-		CustomerRepo:                        cr,
-		HowHearAboutUsItemRepo:              hhauir,
-		InsuranceRequirementRepo:            irr,
-		LiteTenantRepo:                      ltr,
-		OngoingWorkOrderRepo:                owor,
-		PartnerCommentRepo:                  pcr,
-		PartnerRepo:                         pr,
-		PrivateFileRepo:                     pfr,
+		SecretSigningKeyBin:               []byte(applicationSigningKey),
+		ActivitySheetItemRepo:             asir,
+		AssociateCommentRepo:              acr,
+		AssociateInsuranceRequirementRepo: airr,
+		AssociateSkillSetRepo:             assr,
+		AssociateTagRepo:                  atr,
+		AssociateVehicleTypeRepo:          avtr,
+		AssociateRepo:                     ar,
+		BulletinBoardItemRepo:             bbir,
+		CommentRepo:                       comr,
+		CustomerCommentRepo:               ccr,
+		CustomerTagRepo:                   ctr,
+		CustomerRepo:                      cr,
+		HowHearAboutUsItemRepo:            hhauir,
+		InsuranceRequirementRepo:          irr,
+		LiteTenantRepo:                    ltr,
+		OngoingWorkOrderRepo:              owor,
+		PartnerCommentRepo:                pcr,
+		PartnerRepo:                       pr,
+		PrivateFileRepo:                   pfr,
 		// PublicImageUploadRepo:               piur,
-		SkillSetInsuranceRequirementRepo:    skillsirr,
-		SkillSetRepo:                        skillsr,
-		StaffCommentRepo:                    staffcr,
-		StaffTagRepo:                        staffTagr,
-		StaffRepo:                           staffr,
-		TagRepo:                             tagr,
-		TaskItemRepo:                        tir,
-		TenantRepo:                          tr,
-		UserRepo:                            ur,
-		VehicleTypeRepo: vtr,
-		WorkOrderCommentRepo: wocr,
-		WorkOrderDepositRepo: wodr,
-		WorkOrderInvoiceRepo: woir,
-		WorkOrderServiceFeeRepo: wosfr,
-		WorkOrderSkillSetRepo: wossr,
-		WorkOrderTagRepo: wotr,
-		WorkOrderRepo: wor,
-		SessionManager:                      sm,
+		SkillSetInsuranceRequirementRepo: skillsirr,
+		SkillSetRepo:                     skillsr,
+		StaffCommentRepo:                 staffcr,
+		StaffTagRepo:                     staffTagr,
+		StaffRepo:                        staffr,
+		TagRepo:                          tagr,
+		TaskItemRepo:                     tir,
+		TenantRepo:                       tr,
+		UserRepo:                         ur,
+		VehicleTypeRepo:                  vtr,
+		WorkOrderCommentRepo:             wocr,
+		WorkOrderDepositRepo:             wodr,
+		WorkOrderInvoiceRepo:             woir,
+		WorkOrderServiceFeeRepo:          wosfr,
+		WorkOrderSkillSetRepo:            wossr,
+		WorkOrderTagRepo:                 wotr,
+		WorkOrderRepo:                    wor,
+		SessionManager:                   sm,
 	}
 
 	mux := http.NewServeMux()

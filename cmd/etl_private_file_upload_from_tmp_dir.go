@@ -7,9 +7,9 @@ import (
 	// "fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
 
 	// "github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -62,7 +62,6 @@ func getS3ClientInstance() (*s3.S3, string) {
 	s3Client := s3.New(newSession)
 	return s3Client, bucketName
 }
-
 
 func ListAllPrivateFilesByTenantId(db *sql.DB, tenantId uint64) ([]*models.PrivateFile, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -136,7 +135,7 @@ func doRunUploadPrivateFileFromTmpDir() {
 		log.Fatal("Tenant does not exist!")
 	}
 
-    privateFiles, err := ListAllPrivateFilesByTenantId(db, tenant.Id)
+	privateFiles, err := ListAllPrivateFilesByTenantId(db, tenant.Id)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -165,7 +164,7 @@ func uploadPrivateFileToS3(pfr *repositories.PrivateFileRepo, s3 *s3.S3, bucketN
 	}
 	if doesExist {
 		log.Println("Duplicate found! Appending UUID to file for private file ID:", privateFile.Id)
-		newS3Key = "tenant/" + tenantIdStr + "/private/uploads/" +privateFile.Uuid+ "-" + filename
+		newS3Key = "tenant/" + tenantIdStr + "/private/uploads/" + privateFile.Uuid + "-" + filename
 	}
 
 	// Open the file and read the content.
@@ -175,21 +174,21 @@ func uploadPrivateFileToS3(pfr *repositories.PrivateFileRepo, s3 *s3.S3, bucketN
 	}
 	defer f.Close()
 
-    // Read the contents of the file in byte[] format and convert to string.
+	// Read the contents of the file in byte[] format and convert to string.
 	buf := new(bytes.Buffer)
-    buf.ReadFrom(f)
-    contents := buf.String()
+	buf.ReadFrom(f)
+	contents := buf.String()
 
-    // Upload the content to S3.
+	// Upload the content to S3.
 	err = utils.UploadBinToS3(s3, bucketName, newS3Key, contents, "private")
 	if err != nil {
-		log.Fatal("UploadBinToS3",err)
+		log.Fatal("UploadBinToS3", err)
 	}
 
 	// Update the private file in the database.
 	privateFile.State = 1
 	privateFile.S3Key = newS3Key
-    err = pfr.UpdateById(context.Background(), privateFile)
+	err = pfr.UpdateById(context.Background(), privateFile)
 	if err != nil {
 		log.Fatal("pfr.UpdateById:", err)
 	}

@@ -4,8 +4,8 @@ import (
 	// "log"
 	"context"
 	"database/sql"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/over55/workery-server/internal/models"
 )
@@ -19,7 +19,6 @@ func NewLiteTenantRepo(db *sql.DB) *LiteTenantRepo {
 		db: db,
 	}
 }
-
 
 func (s *LiteTenantRepo) ListAllIds(ctx context.Context) ([]uint64, error) {
 	query := `SELECT id FROM tenants ORDER BY (id) ASC`
@@ -85,7 +84,6 @@ func (s *LiteTenantRepo) queryRowsWithFilter(ctx context.Context, query string, 
 
 	// log.Println("query:", query)
 	// log.Println("filterValues:", filterValues)
-
 
 	return s.db.QueryContext(ctx, query, filterValues...)
 }

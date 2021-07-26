@@ -60,9 +60,17 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case n == 2 && p[0] == "v1" && p[1] == "tenants" && r.Method == http.MethodGet:
-		h.listLiteTenantsEndpoint(w, r)
+		h.liteTenantsListEndpoint(w, r)
 	case n == 2 && p[0] == "v1" && p[1] == "franchises" && r.Method == http.MethodGet: // Same URL names.
-		h.listLiteTenantsEndpoint(w, r)
+		h.liteTenantsListEndpoint(w, r)
+	// case n == 2 && p[0] == "v1" && p[1] == "tenants" && r.Method == http.MethodPost:
+	// 	h.postCreateTenant(w, r)
+	case n == 3 && p[0] == "v1" && p[1] == "franchise" && r.Method == http.MethodGet:
+		h.tenantGetEndpoint(w, r, p[2])
+	case n == 3 && p[0] == "v1" && p[1] == "franchise" && r.Method == http.MethodPut:
+		h.tenantUpdateEndpoint(w, r, p[2])
+	// case n == 3 && p[0] == "v1" && p[1] == "tenant" && r.Method == http.MethodDelete:
+	// 	h.deleteTenantById(w, r, p[2])
 	case n == 2 && p[0] == "v1" && p[1] == "login" && r.Method == http.MethodPost:
 		h.loginEndpoint(w, r)
 	default:

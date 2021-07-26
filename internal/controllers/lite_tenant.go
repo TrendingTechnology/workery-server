@@ -1,18 +1,18 @@
 package controllers
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
-	"encoding/json"
 
 	null "gopkg.in/guregu/null.v4"
 
-    "github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/idos"
+	"github.com/over55/workery-server/internal/models"
 )
 
-func (h *Controller) listLiteTenantsEndpoint(w http.ResponseWriter, r *http.Request) {
+func (h *Controller) liteTenantsListEndpoint(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	// Permission handling.
@@ -50,14 +50,14 @@ func (h *Controller) listLiteTenantsEndpoint(w http.ResponseWriter, r *http.Requ
 	go func() {
 		results, err := h.LiteTenantRepo.ListByFilter(ctx, f)
 		if err != nil {
-			log.Println("WARNING | listLiteTenantsEndpoint | ListByFilter | err:", err)
+			log.Println("WARNING | liteTenantsListEndpoint | ListByFilter | err:", err)
 		}
 		resultCh <- results[:]
 	}()
 	go func() {
 		count, err := h.LiteTenantRepo.CountByFilter(ctx, f)
 		if err != nil { // For debugging purposes only.
-			log.Println("WARNING | listLiteTenantsEndpoint | CountByFilter | err:", err)
+			log.Println("WARNING | liteTenantsListEndpoint | CountByFilter | err:", err)
 		}
 		countCh <- count
 	}()
@@ -66,12 +66,12 @@ func (h *Controller) listLiteTenantsEndpoint(w http.ResponseWriter, r *http.Requ
 	// running `goroutines`.
 	results, count := <-resultCh, <-countCh
 
-    // Take our data-layer results, serialize, and send to the user.
+	// Take our data-layer results, serialize, and send to the user.
 	responseData := idos.NewLiteTenantListResponseIDO(results, count)
 	b, err := json.Marshal(&responseData)
-    if err != nil {
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-    }
+	}
 	w.Write(b)
 }

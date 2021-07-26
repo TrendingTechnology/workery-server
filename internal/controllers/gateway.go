@@ -142,7 +142,7 @@ func (h *Controller) loginEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    // For debugging purposes only.
+	// For debugging purposes only.
 	log.Println("loginEndpoint | Response:", responseData)
 }
 

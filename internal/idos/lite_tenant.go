@@ -16,7 +16,7 @@ type LiteTenantIDO struct {
 	Id         uint64 `db:"id"`
 	SchemaName string `db:"schema_name"`
 	Name       string `db:"name"`
-	State      int8 `db:"state" json:"state"`
+	State      int8   `db:"state" json:"state"`
 }
 
 type LiteTenantListResponseIDO struct {
@@ -45,9 +45,9 @@ func NewLiteTenantListResponseIDO(arr []*models.LiteTenant, count uint64) *LiteT
 // DEPRECATED
 func NewLiteTenantFilter(ido *LiteTenantFilterIDO) *models.LiteTenantFilter {
 	return &models.LiteTenantFilter{
-		State: ido.State,
+		State:      ido.State,
 		LastSeenId: ido.LastSeenId,
-		Limit: ido.Limit,
+		Limit:      ido.Limit,
 	}
 }
 
@@ -61,9 +61,9 @@ func toLiteTenantIDOArray(arr []*models.LiteTenant) []*LiteTenantIDO {
 
 func toLiteTenantIDO(m *models.LiteTenant) *LiteTenantIDO {
 	return &LiteTenantIDO{
-		Id:     m.Id,
+		Id:         m.Id,
 		SchemaName: m.SchemaName,
-		Name:   m.Name,
-		State:  m.State,
+		Name:       m.Name,
+		State:      m.State,
 	}
 }

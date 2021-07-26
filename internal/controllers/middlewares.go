@@ -35,13 +35,13 @@ func (h *Controller) JWTProcessorMiddleware(fn http.HandlerFunc) http.HandlerFun
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-        // Extract our auth header array.
+		// Extract our auth header array.
 		reqToken := r.Header.Get("Authorization")
 
 		// // For debugging purposes.
 		// log.Println("JWTProcessorMiddleware | reqToken:", reqToken)
 
-        // Before running our JWT middleware we need to confirm there is an
+		// Before running our JWT middleware we need to confirm there is an
 		// an `Authorization` header to run our middleware. This is an important
 		// step!
 		if reqToken != "" && strings.Contains(reqToken, "undefined") == false {
@@ -76,9 +76,9 @@ func (h *Controller) JWTProcessorMiddleware(fn http.HandlerFunc) http.HandlerFun
 
 			urlSplit := ctx.Value("url_split").([]string)
 			skipPath := map[string]bool{
-				"register":           true,
-				"login":              true,
-				"refresh-token":      true,
+				"register":      true,
+				"login":         true,
+				"refresh-token": true,
 			}
 
 			// DEVELOPERS NOTE:
@@ -148,7 +148,6 @@ func (h *Controller) AuthorizationMiddleware(fn http.HandlerFunc) http.HandlerFu
 	}
 }
 
-
 func (h *Controller) IPAddressMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Extract the IPAddress. Code taken from: https://stackoverflow.com/a/55738279
@@ -180,9 +179,9 @@ func (h *Controller) ProtectedURLsMiddleware(fn http.HandlerFunc) http.HandlerFu
 
 		urlSplit := ctx.Value("url_split").([]string)
 		skipPath := map[string]bool{
-			"register":           true,
-			"login":              true,
-			"refresh-token":      true,
+			"register":      true,
+			"login":         true,
+			"refresh-token": true,
 		}
 
 		// DEVELOPERS NOTE:

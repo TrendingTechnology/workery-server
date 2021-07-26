@@ -117,9 +117,9 @@ func UploadBinToS3(s3Client *s3.S3, bucketName string, s3key string, body string
 		Body:   strings.NewReader(body),
 		ACL:    aws.String(acl),
 		Metadata: map[string]*string{
-            "Cache-Control": aws.String("max-age=86400"),
+			"Cache-Control": aws.String("max-age=86400"),
 			// "Content-Type": aws.String("max-age=86400"),
-        },
+		},
 	}
 	_, err := s3Client.PutObject(&object)
 	return err
