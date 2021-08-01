@@ -18,10 +18,10 @@ func (h *Controller) tenantGetEndpoint(w http.ResponseWriter, r *http.Request, i
 
 	// Extract the session details from our "Session" middleware.
 	ctx := r.Context()
-	role := uint64(ctx.Value("user_role").(int8))
+	role_id := uint64(ctx.Value("user_role_id").(int8))
 
 	// Permission handling - If use is not administrator then error.
-	if role != 1 {
+	if role_id != 1 {
 		http.Error(w, "Forbidden - You are not an administrator", http.StatusForbidden)
 		return
 	}
@@ -49,10 +49,10 @@ func (h *Controller) tenantUpdateEndpoint(w http.ResponseWriter, r *http.Request
 
 	// Extract the session details from our "Session" middleware.
 	ctx := r.Context()
-	role := uint64(ctx.Value("user_role").(int8))
+	role_id := uint64(ctx.Value("user_role_id").(int8))
 
 	// Permission handling - If use is not administrator then error.
-	if role != 1 {
+	if role_id != 1 {
 		http.Error(w, "Forbidden - You are not an administrator", http.StatusForbidden)
 		return
 	}

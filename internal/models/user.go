@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Role
+// RoleId
 //---------------------
 // 1 = Executive
 // 2 = Management
@@ -19,25 +19,27 @@ import (
 // 0 = Inactive
 
 type User struct {
-	Id                uint64    `json:"id"`
-	Uuid              string    `json:"uuid"`
-	TenantId          uint64    `json:"tenant_id"`
-	Email             string    `json:"email"`
-	FirstName         string    `json:"first_name"`
-	LastName          string    `json:"last_name"`
-	PasswordAlgorithm string    `json:"password_algorithm"`
-	PasswordHash      string    `json:"password_hash"`
-	State             int8      `json:"state"`
-	Role              int8      `json:"role"`
-	Timezone          string    `json:"timezone"`
-	CreatedTime       time.Time `json:"created_time"`
-	ModifiedTime      time.Time `json:"modified_time"`
-	JoinedTime        time.Time `json:"joined_time"`
-	Salt              string    `json:"salt"`
-	WasEmailActivated bool      `json:"was_email_activated"`
-	PrAccessCode      string    `json:"pr_access_code"`
-	PrExpiryTime      time.Time `json:"pr_expiry_time"`
-	OldId             uint64    `json:"old_id"`
+	Id                uint64    `json:"id,omitempty"`
+	Uuid              string    `json:"uuid,omitempty"`
+	TenantId          uint64    `json:"tenant_id,omitempty"`
+	Email             string    `json:"email,omitempty"`
+	FirstName         string    `json:"first_name,omitempty"`
+	LastName          string    `json:"last_name,omitempty"`
+	PasswordAlgorithm string    `json:"password_algorithm,omitempty"`
+	PasswordHash      string    `json:"password_hash,omitempty"`
+	State             int8      `json:"state,omitempty"`
+	RoleId              int8    `json:"role_id,omitempty"`
+	Timezone          string    `json:"timezone,omitempty"`
+	CreatedTime       time.Time `json:"created_time,omitempty"`
+	ModifiedTime      time.Time `json:"modified_time,omitempty"`
+	JoinedTime        time.Time `json:"joined_time,omitempty"`
+	Salt              string    `json:"salt,omitempty"`
+	WasEmailActivated bool      `json:"was_email_activated,omitempty"`
+	PrAccessCode      string    `json:"pr_access_code,omitempty"`
+	PrExpiryTime      time.Time `json:"pr_expiry_time,omitempty"`
+	OldId             uint64    `json:"old_id,omitempty"`
+	AccessToken       string    `json:"pr_access_code,omitempty"`
+	RefreshToken      string    `json:"pr_access_code,omitempty"`
 }
 
 type UserRepository interface {

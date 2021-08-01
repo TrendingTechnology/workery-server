@@ -53,7 +53,7 @@ CREATE TABLE users (
     password_algorithm VARCHAR (63) NOT NULL,
     password_hash VARCHAR (511) NOT NULL,
     state SMALLINT NOT NULL DEFAULT 0,
-    role SMALLINT NOT NULL DEFAULT 0,
+    role_id SMALLINT NOT NULL DEFAULT 0,
     timezone VARCHAR (63) NOT NULL DEFAULT 'utc',
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),

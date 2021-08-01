@@ -26,7 +26,7 @@ type LoginResponse struct {
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
 	Email        string `json:"email"`
-	Role         int8   `json:"role"`
+	RoleId         int8   `json:"role_id"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }

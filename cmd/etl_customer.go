@@ -271,7 +271,7 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 				PrAccessCode:      "",
 				PrExpiryTime:      time.Now(),
 				TenantId:          tid,
-				Role:              5, // Customer
+				RoleId:              5, // Customer
 			}
 			err = ur.InsertOrUpdateByEmail(ctx, um)
 			if err != nil {

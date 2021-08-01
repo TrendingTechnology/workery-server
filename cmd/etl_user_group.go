@@ -119,7 +119,7 @@ func runUserGroupInsert(ot *OldUserGroup, r *repositories.UserRepo) {
 		panic(err)
 	}
 	if user != nil {
-		user.Role = int8(ot.GroupId)
+		user.RoleId = int8(ot.GroupId)
 		r.UpdateById(ctx, user)
 		fmt.Println("Processed UserId #", user.Id)
 	} else {

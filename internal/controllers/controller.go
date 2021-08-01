@@ -73,6 +73,8 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// 	h.deleteTenantById(w, r, p[2])
 	case n == 2 && p[0] == "v1" && p[1] == "login" && r.Method == http.MethodPost:
 		h.loginEndpoint(w, r)
+	case n == 2 && p[0] == "v1" && p[1] == "profile" && r.Method == http.MethodGet:
+		h.profileEndpoint(w, r)
 	default:
 		http.NotFound(w, r)
 	}

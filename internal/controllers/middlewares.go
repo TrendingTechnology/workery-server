@@ -138,7 +138,7 @@ func (h *Controller) AuthorizationMiddleware(fn http.HandlerFunc) http.HandlerFu
 
 			// Save individual pieces of the user profile.
 			ctx = context.WithValue(ctx, "user_tenant_id", user.TenantId)
-			ctx = context.WithValue(ctx, "user_role", user.Role)
+			ctx = context.WithValue(ctx, "user_role_id", user.RoleId)
 			ctx = context.WithValue(ctx, "user_id", user.Id)
 			ctx = context.WithValue(ctx, "user_uuid", user.Uuid)
 			ctx = context.WithValue(ctx, "user_timezone", user.Timezone)

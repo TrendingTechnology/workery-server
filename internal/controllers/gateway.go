@@ -56,7 +56,7 @@ func (h *Controller) registerEndpoint(w http.ResponseWriter, r *http.Request) {
 		LastName:     requestData.LastName,
 		PasswordHash: passwordHash,
 		State:        1,
-		Role:         4,
+		RoleId:         4,
 		Timezone:     "utc",
 		CreatedTime:  time.Now(),
 		ModifiedTime: time.Now(),
@@ -136,7 +136,7 @@ func (h *Controller) loginEndpoint(w http.ResponseWriter, r *http.Request) {
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
 		Email:        user.Email,
-		Role:         user.Role,
+		RoleId:         user.RoleId,
 		TenantId:     user.TenantId,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -204,6 +204,40 @@ func (h *Controller) postRefreshToken(w http.ResponseWriter, r *http.Request) {
 		RefreshToken: refreshToken,
 	}
 	if err := json.NewEncoder(w).Encode(&responseData); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *Controller) profileEndpoint(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userId := uint64(ctx.Value("user_id").(uint64))
+	user, err := h.UserRepo.GetById(ctx, userId)
+
+
+	// Start our session.
+	sessionExpiryTime := time.Hour * 24 * 7 // 1 week
+	sessionUuid := uuid.NewString()
+	err = h.SessionManager.SaveUser(ctx, sessionUuid, user, sessionExpiryTime)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Generate our JWT token.
+	accessToken, refreshToken, err := utils.GenerateJWTTokenPair(h.SecretSigningKeyBin, sessionUuid, sessionExpiryTime)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+    // Update our results.
+	user.AccessToken = accessToken
+	user.RefreshToken = refreshToken
+	user.PasswordHash = ""
+
+	// Return our serialized result.
+	if err := json.NewEncoder(w).Encode(&user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

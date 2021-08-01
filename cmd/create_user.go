@@ -21,7 +21,7 @@ var (
 	cuEmail     string
 	cuPassword  string
 	cuState     int
-	cuRole      int
+	cuRoleId      int
 )
 
 func init() {
@@ -37,8 +37,8 @@ func init() {
 	createUserCmd.MarkFlagRequired("password")
 	createUserCmd.Flags().IntVarP(&cuState, "state", "s", 0, "State of the user account")
 	createUserCmd.MarkFlagRequired("state")
-	createUserCmd.Flags().IntVarP(&cuRole, "role", "r", 0, "Role of the user account")
-	createUserCmd.MarkFlagRequired("role")
+	createUserCmd.Flags().IntVarP(&cuRoleId, "role_id", "r", 0, "RoleId of the user account")
+	createUserCmd.MarkFlagRequired("role_id")
 	rootCmd.AddCommand(createUserCmd)
 }
 
@@ -84,7 +84,7 @@ func runAddUser() {
 		PasswordAlgorithm: utils.HashPasswordAlgorithm(),
 		PasswordHash:      passwordHash,
 		State:             int8(cuState),
-		Role:              int8(cuRole),
+		RoleId:              int8(cuRoleId),
 		Timezone:          "utc",
 		CreatedTime:       time.Now(),
 		ModifiedTime:      time.Now(),

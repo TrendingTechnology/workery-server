@@ -18,8 +18,8 @@ func (h *Controller) liteTenantsListEndpoint(w http.ResponseWriter, r *http.Requ
 	ctx := r.Context()
 
 	// Permission handling.
-	role := uint64(ctx.Value("user_role").(int8))
-	if role != 1 {
+	role_id := uint64(ctx.Value("user_role_id").(int8))
+	if role_id != 1 {
 		http.Error(w, "Forbidden - You are not an administrator", http.StatusForbidden)
 		return
 	}
