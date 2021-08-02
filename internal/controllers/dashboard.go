@@ -22,52 +22,80 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 	// Find "customer_count".
 	//
 
-	lcf := &models.LiteCustomerFilter{
-		TenantId: tenantId,
-		States: []int8{models.CustomerActiveState},
-	}
-	customerCount, err := h.LiteCustomerRepo.CountByFilter(ctx, lcf)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+    customerCountCh := make(chan uint64)
+	go func() {
+		lcf := &models.LiteCustomerFilter{
+			TenantId: tenantId,
+			States: []int8{models.CustomerActiveState},
+		}
+		customerCount, err := h.LiteCustomerRepo.CountByFilter(ctx, lcf)
+		if err != nil {
+			log.Println("WARNING | dashboardEndpoint | h.LiteCustomerRepo.CountByFilter | err", err)
+			return
+		}
+		customerCountCh <- customerCount
+	}()
 
 	//
 	// Find "job_count".
 	//
 
-	lwof := &models.LiteWorkOrderFilter{
-		TenantId: tenantId,
-		States: []int8{
-			models.WorkOrderNewState,
-			models.WorkOrderPendingState,
-			models.WorkOrderOngoingState,
-			models.WorkOrderInProgressState,
-		},
-	}
-	workOrderCount, err := h.LiteWorkOrderRepo.CountByFilter(ctx, lwof)
+    jobCountCh := make(chan uint64)
+	go func() {
+		lwof := &models.LiteWorkOrderFilter{
+			TenantId: tenantId,
+			States: []int8{
+				models.WorkOrderNewState,
+				models.WorkOrderPendingState,
+				models.WorkOrderOngoingState,
+				models.WorkOrderInProgressState,
+			},
+		}
+		workOrderCount, err := h.LiteWorkOrderRepo.CountByFilter(ctx, lwof)
+		if err != nil {
+			log.Println("WARNING | dashboardEndpoint | h.LiteWorkOrderRepo.CountByFilter | err", err)
+			return
+		}
+		jobCountCh <- workOrderCount
+	}()
 
 	//
 	// Find "member_count".
 	//
 
-	laf := &models.LiteAssociateFilter{
-		TenantId: tenantId,
-		States: []int8{models.AssociateActiveState},
-	}
-	memberCount, err := h.LiteAssociateRepo.CountByFilter(ctx, laf)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+    memberCountCh := make(chan uint64)
+	go func() {
+		laf := &models.LiteAssociateFilter{
+			TenantId: tenantId,
+			States: []int8{models.AssociateActiveState},
+		}
+		memberCount, err := h.LiteAssociateRepo.CountByFilter(ctx, laf)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		memberCountCh <- memberCount
+	}()
+
+	//
+	// TODO
+	//
+	// "tasks_count": tasks_count,                 // TODO
+	// "bulletin_board_items": bbi_s.data,         // TODO
+	// "last_modified_jobs_by_user": lmjbu_s.data, // TODO
+	// "away_log": away_log_s.data,                // TODO
+	// "last_modified_jobs_by_team": lmjbt_s.data, // TODO
+	// "past_few_day_comments": c_s.data,          // TODO
 
 	//
 	// Generate our response
 	//
 
+	customerCount, jobCount, memberCount := <- customerCountCh, <- jobCountCh, <- memberCountCh
+
 	ido := &idos.DashboardIDO{
 		CustomerCount: customerCount,
-		JobCount: workOrderCount,
+		JobCount: jobCount,
 		MemberCount: memberCount,
 	}
 	log.Println(ido)
@@ -148,15 +176,15 @@ past_few_day_comments = WorkOrderComment.objects.filter(
 c_s = WorkOrderCommentListCreateSerializer(past_few_day_comments, many=True)
 
 return {
-	"customer_count": customer_count,
-	"job_count": job_count,
-	"member_count": member_count,
-	"tasks_count": tasks_count,
-	"bulletin_board_items": bbi_s.data,
-	"last_modified_jobs_by_user": lmjbu_s.data,
-	"away_log": away_log_s.data,
-	"last_modified_jobs_by_team": lmjbt_s.data,
-	"past_few_day_comments": c_s.data,
+	"customer_count": customer_count, // DONE
+	"job_count": job_count,           // DONE
+	"member_count": member_count,     // DONE
+	"tasks_count": tasks_count,                 // TODO
+	"bulletin_board_items": bbi_s.data,         // TODO
+	"last_modified_jobs_by_user": lmjbu_s.data, // TODO
+	"away_log": away_log_s.data,                // TODO
+	"last_modified_jobs_by_team": lmjbt_s.data, // TODO
+	"past_few_day_comments": c_s.data,          // TODO
 }
 /
 
