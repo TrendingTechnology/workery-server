@@ -217,9 +217,9 @@ func runCustomerETL(ctx context.Context, tenantId uint64, ur *repositories.UserR
 }
 
 func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, omr *repositories.CustomerRepo, om *OldUCustomer) {
-	var state int8 = 1
-	if om.IsArchived == true {
-		state = 0
+	var state int8 = 0
+	if om.State == "active" {
+		state = models.CustomerActiveState
 	}
 
 	// Variable used to keep the ID of the user record in our database.

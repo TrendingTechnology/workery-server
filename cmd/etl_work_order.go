@@ -255,9 +255,30 @@ func insertWorkOrderETL(
 		log.Panic("cr.GetIdByOldId | err", err)
 	}
 
-	var state int8 = 1 // Running
-	if oss.State == "terminated" {
-		state = 2
+	var state int8
+	switch s := oss.State; s {
+	case "new":
+		state = models.WorkOrderNewState
+	case "declined":
+		state = models.WorkOrderDeclinedState
+	case "pending":
+		state = models.WorkOrderPendingState
+	case "cancelled":
+		state = models.WorkOrderCancelledState
+	case "ongoing":
+		state = models.WorkOrderOngoingState
+	case "in_progress":
+		state = models.WorkOrderInProgressState
+	case "completed_and_unpaid":
+		state = models.WorkOrderCompletedButUnpaidState
+	case "completed_but_unpaid":
+		state = models.WorkOrderCompletedButUnpaidState
+	case "completed_and_paid":
+		state = models.WorkOrderCompletedAndPaidState
+	case "archived":
+		state = models.WorkOrderArchivedState
+	default:
+		state = models.WorkOrderArchivedState
 	}
 
 	var invoiceServiceFeeId null.Int

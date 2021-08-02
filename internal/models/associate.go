@@ -6,6 +6,15 @@ import (
 	"time"
 )
 
+
+const (
+	AssociateActiveState = 1
+	AssociateInactiveState = 0
+	AssociateUnassignedTypeOf = 1
+	AssociateResidentialTypeOf = 2
+	AssociateCommercialTypeOf = 3
+)
+
 // State
 //---------------------
 // 1 = Active

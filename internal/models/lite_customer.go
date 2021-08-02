@@ -4,13 +4,12 @@ import (
 	"context"
 	// "time"
 
-	null "gopkg.in/guregu/null.v4"
+	// null "gopkg.in/guregu/null.v4"
 )
 
-
 // Structure used to encapsulate the various filters we want to apply when we
-// perform our `listing` functionality for the `LiteWorkOrder` model.
-type LiteWorkOrderFilter struct {
+// perform our `listing` functionality for the `LiteCustomer` model.
+type LiteCustomerFilter struct {
 	TenantId              uint64    `json:"tenant_id"`
 	States                []int8    `json:"states"`
 	LastSeenId            uint64    `json:"last_seen_id"`
@@ -26,12 +25,12 @@ type LiteWorkOrderFilter struct {
 // status
 // financial (TODO)
 
-type LiteWorkOrder struct {
+type LiteCustomer struct {
 	Id                                uint64      `json:"id"`
 	// Uuid                              string      `json:"uuid"`
 	TenantId                          uint64      `json:"tenant_id"`
-	CustomerId                        uint64      `json:"customer_id"`
-	AssociateId                       null.Int    `json:"associate_id"`
+	// CustomerId                        uint64      `json:"customer_id"`
+	// AssociateId                       null.Int    `json:"associate_id"`
 	// Description                       string      `json:"description"`
 	// AssignmentDate                    null.Time   `json:"assignment_date"`
 	// IsOngoing                         bool        `json:"is_ongoing"`
@@ -68,7 +67,7 @@ type LiteWorkOrder struct {
 	// OldId                             uint64      `json:"old_id"`
 	// InvoiceServiceFeeId               null.Int    `json:"invoice_service_fee_id"`
 	// LatestPendingTaskId               null.Int    `json:"latest_pending_task_id"`
-	// OngoingWorkOrderId                null.Int    `json:"ongoing_work_order_id"`
+	// OngoingCustomerId                null.Int    `json:"ongoing_work_order_id"`
 	// WasSurveyConducted                bool        `json:"was_survey_conducted"`
 	// WasThereFinancialsInputted        bool        `json:"was_there_financials_inputted"`
 	// InvoiceActualServiceFeeAmountPaid float64     `json:"invoice_actual_service_fee_amount_paid"`
@@ -90,7 +89,7 @@ type LiteWorkOrder struct {
 	// ClosingReasonComment              string      `json:"closing_reason_comment"`
 }
 
-type LiteWorkOrderRepository interface {
-    ListByFilter(ctx context.Context, filter *LiteWorkOrderFilter) ([]*LiteWorkOrder, error)
-    CountByFilter(ctx context.Context, filter *LiteWorkOrderFilter) (uint64, error)
+type LiteCustomerRepository interface {
+    ListByFilter(ctx context.Context, filter *LiteCustomerFilter) ([]*LiteCustomer, error)
+    CountByFilter(ctx context.Context, filter *LiteCustomerFilter) (uint64, error)
 }

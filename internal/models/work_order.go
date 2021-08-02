@@ -7,6 +7,21 @@ import (
 	null "gopkg.in/guregu/null.v4"
 )
 
+const (
+	WorkOrderArchivedState = 0
+ 	WorkOrderNewState = 1
+	WorkOrderDeclinedState = 2
+	WorkOrderPendingState = 3
+	WorkOrderCancelledState = 4
+	WorkOrderOngoingState = 5
+	WorkOrderInProgressState = 6
+	WorkOrderCompletedButUnpaidState = 7
+	WorkOrderCompletedAndPaidState = 8
+	WorkOrderResidentialTypeOf = 1
+	WorkOrderCommercialTypeOf = 2
+	WorkOrderUnassignedTypeOf = 3
+)
+
 //---------------------
 // state
 //---------------------

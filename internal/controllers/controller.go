@@ -24,7 +24,10 @@ type Controller struct {
 	CustomerRepo                      models.CustomerRepository
 	HowHearAboutUsItemRepo            models.HowHearAboutUsItemRepository
 	InsuranceRequirementRepo          models.InsuranceRequirementRepository
+    LiteAssociateRepo                 models.LiteAssociateRepository
+	LiteCustomerRepo                  models.LiteCustomerRepository
 	LiteTenantRepo                    models.LiteTenantRepository
+	LiteWorkOrderRepo                 models.LiteWorkOrderRepository
 	OngoingWorkOrderRepo              models.OngoingWorkOrderRepository
 	PartnerCommentRepo                models.PartnerCommentRepository
 	PartnerRepo                       models.PartnerRepository

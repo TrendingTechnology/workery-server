@@ -9,17 +9,17 @@ import (
 	"github.com/over55/workery-server/internal/models"
 )
 
-type LiteWorkOrderRepo struct {
+type LiteAssociateRepo struct {
 	db *sql.DB
 }
 
-func NewLiteWorkOrderRepo(db *sql.DB) *LiteWorkOrderRepo {
-	return &LiteWorkOrderRepo{
+func NewLiteAssociateRepo(db *sql.DB) *LiteAssociateRepo {
+	return &LiteAssociateRepo{
 		db: db,
 	}
 }
 
-func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query string, f *models.LiteWorkOrderFilter) (*sql.Rows, error) {
+func (s *LiteAssociateRepo) queryRowsWithFilter(ctx context.Context, query string, f *models.LiteAssociateFilter) (*sql.Rows, error) {
 	// Array will hold all the unique values we want to add into the query.
 	var filterValues []interface{}
 
@@ -65,7 +65,7 @@ func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query strin
 	return s.db.QueryContext(ctx, query, filterValues...)
 }
 
-func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.LiteWorkOrderFilter) ([]*models.LiteWorkOrder, error) {
+func (s *LiteAssociateRepo) ListByFilter(ctx context.Context, filter *models.LiteAssociateFilter) ([]*models.LiteAssociate, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -73,9 +73,7 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
     SELECT
         id,
 		tenant_id,
-		state,
-		customer_id,
-		associate_id
+		state
     FROM
         work_orders
     `
@@ -85,16 +83,14 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
 		return nil, err
 	}
 
-	var arr []*models.LiteWorkOrder
+	var arr []*models.LiteAssociate
 	defer rows.Close()
 	for rows.Next() {
-		m := new(models.LiteWorkOrder)
+		m := new(models.LiteAssociate)
 		err := rows.Scan(
 			&m.Id,
 			&m.TenantId,
 			&m.State,
-			&m.CustomerId,
-			&m.AssociateId,
 		)
 		if err != nil {
 			return nil, err
@@ -108,7 +104,7 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
 	return arr, err
 }
 
-func (s *LiteWorkOrderRepo) CountByFilter(ctx context.Context, f *models.LiteWorkOrderFilter) (uint64, error) {
+func (s *LiteAssociateRepo) CountByFilter(ctx context.Context, f *models.LiteAssociateFilter) (uint64, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 

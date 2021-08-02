@@ -2,20 +2,75 @@ package controllers
 
 import (
 	// "encoding/json"
-	// "log"
+	"log"
 	"net/http"
 	"encoding/json"
 	// "time"
     //
 	// "github.com/google/uuid"
     //
-	// "github.com/over55/workery-server/internal/models"
+	"github.com/over55/workery-server/internal/models"
 	// "github.com/over55/workery-server/internal/idos"
 	"github.com/over55/workery-server/internal/idos"
 )
 
-func (h *Controller) dashboardEndpoint(w http.ResponseWriter, req *http.Request) {
-	ido := &idos.DashboardIDO{}
+func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	tenantId := uint64(ctx.Value("user_tenant_id").(uint64))
+
+    //
+	// Find "customer_count".
+	//
+
+	lcf := &models.LiteCustomerFilter{
+		TenantId: tenantId,
+		States: []int8{models.CustomerActiveState},
+	}
+	customerCount, err := h.LiteCustomerRepo.CountByFilter(ctx, lcf)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//
+	// Find "job_count".
+	//
+
+	lwof := &models.LiteWorkOrderFilter{
+		TenantId: tenantId,
+		States: []int8{
+			models.WorkOrderNewState,
+			models.WorkOrderPendingState,
+			models.WorkOrderOngoingState,
+			models.WorkOrderInProgressState,
+		},
+	}
+	workOrderCount, err := h.LiteWorkOrderRepo.CountByFilter(ctx, lwof)
+
+	//
+	// Find "member_count".
+	//
+
+	laf := &models.LiteAssociateFilter{
+		TenantId: tenantId,
+		States: []int8{models.AssociateActiveState},
+	}
+	memberCount, err := h.LiteAssociateRepo.CountByFilter(ctx, laf)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//
+	// Generate our response
+	//
+
+	ido := &idos.DashboardIDO{
+		CustomerCount: customerCount,
+		JobCount: workOrderCount,
+		MemberCount: memberCount,
+	}
+	log.Println(ido)
 	if err := json.NewEncoder(w).Encode(&ido); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -23,18 +78,18 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, req *http.Request)
 
 /*
 # --- COUNTING ---
-customer_count = Customer.objects.filter(
+customer_count = Customer.objects.filter(  // DONE
 	state=Customer.CUSTOMER_STATE.ACTIVE
 ).count()
 
-job_count = WorkOrder.objects.filter(
+job_count = WorkOrder.objects.filter( // DONE
 	Q(state=WORK_ORDER_STATE.NEW) |
 	Q(state=WORK_ORDER_STATE.PENDING) |
 	Q(state=WORK_ORDER_STATE.ONGOING) |
 	Q(state=WORK_ORDER_STATE.IN_PROGRESS)
 ).count()
 
-member_count = Associate.objects.filter(
+member_count = Associate.objects.filter( // DONE
 	owner__is_active=True
 ).count()
 
