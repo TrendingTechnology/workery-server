@@ -65,7 +65,9 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
     SELECT
         id,
 		tenant_id,
-		state
+		state,
+		customer_id,
+		associate_id
     FROM
         work_orders
     `
@@ -83,6 +85,8 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
 			&m.Id,
 			&m.TenantId,
 			&m.State,
+			&m.CustomerId,
+			&m.AssociateId,
 		)
 		if err != nil {
 			return nil, err

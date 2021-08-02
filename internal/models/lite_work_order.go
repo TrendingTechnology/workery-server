@@ -30,8 +30,8 @@ type LiteWorkOrder struct {
 	Id                                uint64      `json:"id"`
 	// Uuid                              string      `json:"uuid"`
 	TenantId                          uint64      `json:"tenant_id"`
-	// CustomerId                        uint64      `json:"customer_id"`
-	// AssociateId                       null.Int    `json:"associate_id"`
+	CustomerId                        uint64      `json:"customer_id"`
+	AssociateId                       null.Int    `json:"associate_id"`
 	// Description                       string      `json:"description"`
 	// AssignmentDate                    null.Time   `json:"assignment_date"`
 	// IsOngoing                         bool        `json:"is_ongoing"`
