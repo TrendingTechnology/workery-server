@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"encoding/json"
 	// "time"
-    //
+
 	// "github.com/google/uuid"
-    //
+	null "gopkg.in/guregu/null.v4"
+
 	"github.com/over55/workery-server/internal/models"
 	// "github.com/over55/workery-server/internal/idos"
 	"github.com/over55/workery-server/internal/idos"
@@ -78,25 +79,71 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	//
-	// TODO
+	// Find "tasks_count".
 	//
-	// "tasks_count": tasks_count,                 // TODO
-	// "bulletin_board_items": bbi_s.data,         // TODO
-	// "last_modified_jobs_by_user": lmjbu_s.data, // TODO
-	// "away_log": away_log_s.data,                // TODO
-	// "last_modified_jobs_by_team": lmjbt_s.data, // TODO
-	// "past_few_day_comments": c_s.data,          // TODO
+
+	tasksCountCh := make(chan uint64)
+	go func() {
+		ltf := &models.LiteTaskFilter{
+			TenantId: tenantId,
+			IsClosed: null.BoolFrom(false),
+		}
+		taskCount, err := h.LiteTaskRepo.CountByFilter(ctx, ltf)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		tasksCountCh <- taskCount
+	}()
+
+	//
+	// Find "bulletin_board_items".
+	//
+
+	bulletinBoardItemsCh := make(chan []*models.BulletinBoardItem)
+	go func() {
+		bbif := &models.BulletinBoardItemFilter{
+			TenantId: tenantId,
+			States: []int8{models.BulletinBoardItemActiveState},
+		}
+		bulletinBoardItems, err := h.BulletinBoardItemRepo.ListByFilter(ctx, bbif)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		bulletinBoardItemsCh <- bulletinBoardItems[:]
+	}()
+
+	//
+	// Find "last_modified_jobs_by_user".
+	//
+
+	//
+	// Find "away_log".
+	//
+
+	//
+	// Find "last_modified_jobs_by_team".
+	//
+
+	//
+	// Find "past_few_day_comments".
+	//
+
+
 
 	//
 	// Generate our response
 	//
 
-	customerCount, jobCount, memberCount := <- customerCountCh, <- jobCountCh, <- memberCountCh
+	customerCount, jobCount, memberCount, taskCount, bulletinBoardItems := <- customerCountCh, <- jobCountCh, <- memberCountCh, <- tasksCountCh, <- bulletinBoardItemsCh
 
 	ido := &idos.DashboardIDO{
 		CustomerCount: customerCount,
 		JobCount: jobCount,
 		MemberCount: memberCount,
+		TasksCount: taskCount,
+		BulletinBoardItems: bulletinBoardItems,
 	}
 	log.Println(ido)
 	if err := json.NewEncoder(w).Encode(&ido); err != nil {
@@ -105,35 +152,6 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-# --- COUNTING ---
-customer_count = Customer.objects.filter(  // DONE
-	state=Customer.CUSTOMER_STATE.ACTIVE
-).count()
-
-job_count = WorkOrder.objects.filter( // DONE
-	Q(state=WORK_ORDER_STATE.NEW) |
-	Q(state=WORK_ORDER_STATE.PENDING) |
-	Q(state=WORK_ORDER_STATE.ONGOING) |
-	Q(state=WORK_ORDER_STATE.IN_PROGRESS)
-).count()
-
-member_count = Associate.objects.filter( // DONE
-	owner__is_active=True
-).count()
-
-tasks_count = TaskItem.objects.filter(
-	is_closed=False
-).count()
-
-# --- BULLETIN BOARD ITEMS ---
-bulletin_board_items = BulletinBoardItem.objects.filter(
-	is_archived=False
-).order_by(
-	'-created_at'
-).prefetch_related(
-	'created_by'
-)
-bbi_s = BulletinBoardItemListCreateSerializer(bulletin_board_items, many=True)
 
 # --- LATEST JOBS BY USER ---
 last_modified_jobs_by_user = WorkOrder.objects.filter(

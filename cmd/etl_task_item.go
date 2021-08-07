@@ -84,7 +84,7 @@ type OldUTaskItem struct {
 	Title                    string      `json:"title"`
 	Description              string      `json:"description"`
 	DueDate                  time.Time   `json:"due_date"`
-	IsClosed                 string      `json:"is_closed"`
+	IsClosed                 bool        `json:"is_closed"`
 	WasPostponed             string      `json:"was_postponed"`
 	ClosingReason            int8        `json:"closing_reason"`
 	ClosingReasonOther       string      `json:"closing_reason_other"`

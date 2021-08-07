@@ -7,6 +7,11 @@ import (
 	null "gopkg.in/guregu/null.v4"
 )
 
+const (
+	TaskActiveState = 1
+	TaskInactiveState = 0
+)
+
 // State
 //---------------------
 // 1 = Active
@@ -20,7 +25,7 @@ type TaskItem struct {
 	Title              string      `json:"title"`                 // 05
 	Description        string      `json:"description"`           // 06
 	DueDate            time.Time   `json:"due_date"`              // 07
-	IsClosed           string      `json:"is_closed"`             // 08
+	IsClosed           bool        `json:"is_closed"`             // 08
 	WasPostponed       string      `json:"was_postponed"`         // 09
 	ClosingReason      int8        `json:"closing_reason"`        // 10
 	ClosingReasonOther string      `json:"closing_reason_other"`  // 11

@@ -26,6 +26,7 @@ type Controller struct {
 	InsuranceRequirementRepo          models.InsuranceRequirementRepository
     LiteAssociateRepo                 models.LiteAssociateRepository
 	LiteCustomerRepo                  models.LiteCustomerRepository
+	LiteTaskRepo                      models.LiteTaskRepository
 	LiteTenantRepo                    models.LiteTenantRepository
 	LiteWorkOrderRepo                 models.LiteWorkOrderRepository
 	OngoingWorkOrderRepo              models.OngoingWorkOrderRepository
