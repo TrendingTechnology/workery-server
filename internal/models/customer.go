@@ -7,17 +7,17 @@ import (
 )
 
 const (
-	CustomerActiveState = 1
-	CustomerInactiveState = 0
-	CustomerNotSpecifiedDeactivationReason = 0
-	CustomerOtherDeactivationReason = 1
-	CustomerBlacklistedDeactivationReason = 2
-	CustomerMovedDeactivationReason = 3
-	CustomerDeceasedDeactivationReason = 4
+	CustomerActiveState                     = 1
+	CustomerInactiveState                   = 0
+	CustomerNotSpecifiedDeactivationReason  = 0
+	CustomerOtherDeactivationReason         = 1
+	CustomerBlacklistedDeactivationReason   = 2
+	CustomerMovedDeactivationReason         = 3
+	CustomerDeceasedDeactivationReason      = 4
 	CustomerDoNotConstactDeactivationReason = 5
-	CustomerUnassignedTypeOf = 1
-	CustomerResidentialTypeOf = 2
-	CustomerCommercialTypeOf = 3
+	CustomerUnassignedTypeOf                = 1
+	CustomerResidentialTypeOf               = 2
+	CustomerCommercialTypeOf                = 3
 )
 
 //---------------------

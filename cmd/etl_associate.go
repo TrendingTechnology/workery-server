@@ -281,7 +281,7 @@ func insertAssociateETL(
 				PrAccessCode:      "",
 				PrExpiryTime:      time.Now(),
 				TenantId:          tenantId,
-				RoleId:              5, // Associate
+				RoleId:            5, // Associate
 			}
 			err = userRepo.InsertOrUpdateByEmail(ctx, um)
 			if err != nil {

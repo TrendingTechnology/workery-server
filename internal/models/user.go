@@ -28,7 +28,7 @@ type User struct {
 	PasswordAlgorithm string    `json:"password_algorithm,omitempty"`
 	PasswordHash      string    `json:"password_hash,omitempty"`
 	State             int8      `json:"state,omitempty"`
-	RoleId              int8    `json:"role_id,omitempty"`
+	RoleId            int8      `json:"role_id,omitempty"`
 	Timezone          string    `json:"timezone,omitempty"`
 	CreatedTime       time.Time `json:"created_time,omitempty"`
 	ModifiedTime      time.Time `json:"modified_time,omitempty"`

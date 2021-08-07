@@ -525,6 +525,33 @@ CREATE UNIQUE INDEX idx_associate_insurance_requirement_uuid
 ON associate_insurance_requirements (uuid);
 -- TODO: INDEXES
 
+CREATE TABLE associate_away_logs (
+    id BIGSERIAL PRIMARY KEY,
+    uuid VARCHAR (36) UNIQUE NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    associate_id BIGINT NOT NULL,
+    reason SMALLINT NOT NULL DEFAULT 0,
+    reason_other VARCHAR (511) NULL,
+    until_further_notice BOOLEAN NOT NULL DEFAULT FALSE,
+    until_date TIMESTAMP NULL,
+    start_date TIMESTAMP NULL,
+    state SMALLINT NOT NULL DEFAULT 0,
+    created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    created_by_id BIGINT NULL,
+    created_from_ip VARCHAR (50) NULL,
+    last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
+    last_modified_by_id BIGINT NULL,
+    last_modified_from_ip VARCHAR (50) NULL,
+    old_id BIGINT NOT NULL DEFAULT 0,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (associate_id) REFERENCES associates(id)
+);
+CREATE UNIQUE INDEX idx_associate_away_log_uuid
+ON associate_away_logs (uuid);
+CREATE INDEX idx_associate_away_log_tenant_id
+ON associate_away_logs (tenant_id);
+-- TODO: INDEXES
+
 CREATE TABLE ongoing_work_orders (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR (36) UNIQUE NOT NULL,

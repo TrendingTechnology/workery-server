@@ -101,7 +101,7 @@ func (h *Controller) tenantUpdateEndpoint(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-    // Return our result
+	// Return our result
 	ido := idos.NewTenantIDO(m)
 	if err := json.NewEncoder(w).Encode(&ido); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

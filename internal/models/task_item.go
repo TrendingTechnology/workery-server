@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	TaskActiveState = 1
+	TaskActiveState   = 1
 	TaskInactiveState = 0
 )
 

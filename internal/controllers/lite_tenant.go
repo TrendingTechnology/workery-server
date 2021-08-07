@@ -14,7 +14,7 @@ import (
 
 func (h *Controller) liteTenantsListEndpoint(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	
+
 	ctx := r.Context()
 
 	// Permission handling.

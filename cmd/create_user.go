@@ -21,7 +21,7 @@ var (
 	cuEmail     string
 	cuPassword  string
 	cuState     int
-	cuRoleId      int
+	cuRoleId    int
 )
 
 func init() {
@@ -84,7 +84,7 @@ func runAddUser() {
 		PasswordAlgorithm: utils.HashPasswordAlgorithm(),
 		PasswordHash:      passwordHash,
 		State:             int8(cuState),
-		RoleId:              int8(cuRoleId),
+		RoleId:            int8(cuRoleId),
 		Timezone:          "utc",
 		CreatedTime:       time.Now(),
 		ModifiedTime:      time.Now(),

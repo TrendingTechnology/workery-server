@@ -20,6 +20,7 @@ DROP TABLE work_order_tags CASCADE;
 DROP TABLE activity_sheet_items CASCADE;
 DROP TABLE work_orders CASCADE;
 DROP TABLE ongoing_work_orders CASCADE;
+DROP TABLE associate_away_logs CASCADE;
 DROP TABLE associate_insurance_requirements CASCADE;
 DROP TABLE associate_comments CASCADE;
 DROP TABLE associate_tags CASCADE;

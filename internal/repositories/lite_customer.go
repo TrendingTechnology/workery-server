@@ -152,7 +152,7 @@ func (s *LiteCustomerRepo) CountByFilter(ctx context.Context, f *models.LiteCust
 
 	err := s.db.QueryRowContext(ctx, query, filterValues...).Scan(&count)
 
-    // For debugging purposes only.
+	// For debugging purposes only.
 	// log.Println("query:", query)
 	// log.Println("filterValues:", filterValues)
 

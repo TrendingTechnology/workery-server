@@ -7,15 +7,14 @@ import (
 	null "gopkg.in/guregu/null.v4"
 )
 
-
 // Structure used to encapsulate the various filters we want to apply when we
 // perform our `listing` functionality for the `LiteWorkOrder` model.
 type LiteWorkOrderFilter struct {
-	TenantId              uint64    `json:"tenant_id"`
-	States                []int8    `json:"states"`
-	LastModifiedById      null.Int  `json:"last_modified_by_id"`
-	LastSeenId            uint64    `json:"last_seen_id"`
-	Limit                 uint64    `json:"limit"`
+	TenantId         uint64   `json:"tenant_id"`
+	States           []int8   `json:"states"`
+	LastModifiedById null.Int `json:"last_modified_by_id"`
+	LastSeenId       uint64   `json:"last_seen_id"`
+	Limit            uint64   `json:"limit"`
 }
 
 // client full name
@@ -28,11 +27,11 @@ type LiteWorkOrderFilter struct {
 // financial (TODO)
 
 type LiteWorkOrder struct {
-	Id                                uint64      `json:"id"`
+	Id uint64 `json:"id"`
 	// Uuid                              string      `json:"uuid"`
-	TenantId                          uint64      `json:"tenant_id"`
-	CustomerId                        uint64      `json:"customer_id"`
-	AssociateId                       null.Int    `json:"associate_id"`
+	TenantId    uint64   `json:"tenant_id"`
+	CustomerId  uint64   `json:"customer_id"`
+	AssociateId null.Int `json:"associate_id"`
 	// Description                       string      `json:"description"`
 	// AssignmentDate                    null.Time   `json:"assignment_date"`
 	// IsOngoing                         bool        `json:"is_ongoing"`
@@ -44,7 +43,7 @@ type LiteWorkOrder struct {
 	// IndexedText                       string      `json:"indexed_text"`
 	// ClosingReason                     int8        `json:"closing_reason"`
 	// ClosingReasonOther                null.String `json:"closing_reason_other"`
-	State                             int8        `json:"state"`
+	State int8 `json:"state"`
 	// Currency                          string      `json:"currency"`
 	// WasJobSatisfactory                bool        `json:"was_job_satisfactory"`
 	// WasJobFinishedOnTimeAndOnBudget   bool        `json:"was_job_finished_on_time_and_on_budget"`
@@ -92,6 +91,6 @@ type LiteWorkOrder struct {
 }
 
 type LiteWorkOrderRepository interface {
-    ListByFilter(ctx context.Context, filter *LiteWorkOrderFilter) ([]*LiteWorkOrder, error)
-    CountByFilter(ctx context.Context, filter *LiteWorkOrderFilter) (uint64, error)
+	ListByFilter(ctx context.Context, filter *LiteWorkOrderFilter) ([]*LiteWorkOrder, error)
+	CountByFilter(ctx context.Context, filter *LiteWorkOrderFilter) (uint64, error)
 }

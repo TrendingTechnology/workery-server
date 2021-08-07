@@ -3,8 +3,8 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/over55/workery-server/internal/models"
 )

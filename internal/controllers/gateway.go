@@ -56,7 +56,7 @@ func (h *Controller) registerEndpoint(w http.ResponseWriter, r *http.Request) {
 		LastName:     requestData.LastName,
 		PasswordHash: passwordHash,
 		State:        1,
-		RoleId:         4,
+		RoleId:       4,
 		Timezone:     "utc",
 		CreatedTime:  time.Now(),
 		ModifiedTime: time.Now(),
@@ -136,7 +136,7 @@ func (h *Controller) loginEndpoint(w http.ResponseWriter, r *http.Request) {
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
 		Email:        user.Email,
-		RoleId:         user.RoleId,
+		RoleId:       user.RoleId,
 		TenantId:     user.TenantId,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -214,7 +214,6 @@ func (h *Controller) profileEndpoint(w http.ResponseWriter, r *http.Request) {
 	userId := uint64(ctx.Value("user_id").(uint64))
 	user, err := h.UserRepo.GetById(ctx, userId)
 
-
 	// Start our session.
 	sessionExpiryTime := time.Hour * 24 * 7 // 1 week
 	sessionUuid := uuid.NewString()
@@ -231,7 +230,7 @@ func (h *Controller) profileEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    // Update our results.
+	// Update our results.
 	user.AccessToken = accessToken
 	user.RefreshToken = refreshToken
 	user.PasswordHash = ""

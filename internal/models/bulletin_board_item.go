@@ -7,18 +7,17 @@ import (
 )
 
 const (
-	BulletinBoardItemActiveState = 1
+	BulletinBoardItemActiveState   = 1
 	BulletinBoardItemArchivedState = 0
 )
-
 
 // Structure used to encapsulate the various filters we want to apply when we
 // perform our `listing` functionality for the `BulletinBoardItem` model.
 type BulletinBoardItemFilter struct {
-	TenantId              uint64    `json:"tenant_id"`
-	States                []int8    `json:"states"`
-	LastSeenId            uint64    `json:"last_seen_id"`
-	Limit                 uint64    `json:"limit"`
+	TenantId   uint64 `json:"tenant_id"`
+	States     []int8 `json:"states"`
+	LastSeenId uint64 `json:"last_seen_id"`
+	Limit      uint64 `json:"limit"`
 }
 
 type BulletinBoardItem struct {
@@ -44,5 +43,5 @@ type BulletinBoardItemRepository interface {
 	CheckIfExistsById(ctx context.Context, id uint64) (bool, error)
 	InsertOrUpdateById(ctx context.Context, u *BulletinBoardItem) error
 	ListByFilter(ctx context.Context, filter *BulletinBoardItemFilter) ([]*BulletinBoardItem, error)
-    CountByFilter(ctx context.Context, filter *BulletinBoardItemFilter) (uint64, error)
+	CountByFilter(ctx context.Context, filter *BulletinBoardItemFilter) (uint64, error)
 }
