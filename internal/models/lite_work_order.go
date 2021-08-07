@@ -13,6 +13,7 @@ import (
 type LiteWorkOrderFilter struct {
 	TenantId              uint64    `json:"tenant_id"`
 	States                []int8    `json:"states"`
+	LastModifiedById      null.Int  `json:"last_modified_by_id"`
 	LastSeenId            uint64    `json:"last_seen_id"`
 	Limit                 uint64    `json:"limit"`
 }

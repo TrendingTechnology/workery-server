@@ -30,8 +30,13 @@ func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query strin
 	query += ` WHERE tenant_id = $` + strconv.Itoa(len(filterValues))
 
 	//
-	// The following code will add our filters
+	// The following code will add our OPTIONAL filters
 	//
+
+	if !f.LastModifiedById.IsZero() {
+		filterValues = append(filterValues, f.LastModifiedById)
+		query += `AND last_modified_by_id = $` + strconv.Itoa(len(filterValues))
+	}
 
 	if len(f.States) > 0 {
 		query += ` AND (`
@@ -54,7 +59,7 @@ func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query strin
 		filterValues = append(filterValues, f.LastSeenId)
 		query += ` AND id < $` + strconv.Itoa(len(filterValues))
 	}
-	query += ` ORDER BY id `
+	query += ` ORDER BY last_modified_time `
 	filterValues = append(filterValues, f.Limit)
 	query += ` DESC LIMIT $` + strconv.Itoa(len(filterValues))
 

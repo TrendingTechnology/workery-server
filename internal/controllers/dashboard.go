@@ -18,6 +18,7 @@ import (
 func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	tenantId := uint64(ctx.Value("user_tenant_id").(uint64))
+	userId := uint64(ctx.Value("user_id").(uint64))
 
     //
 	// Find "customer_count".
@@ -25,16 +26,16 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 
     customerCountCh := make(chan uint64)
 	go func() {
-		lcf := &models.LiteCustomerFilter{
+		f := &models.LiteCustomerFilter{
 			TenantId: tenantId,
 			States: []int8{models.CustomerActiveState},
 		}
-		customerCount, err := h.LiteCustomerRepo.CountByFilter(ctx, lcf)
+		count, err := h.LiteCustomerRepo.CountByFilter(ctx, f)
 		if err != nil {
 			log.Println("WARNING | dashboardEndpoint | h.LiteCustomerRepo.CountByFilter | err", err)
 			return
 		}
-		customerCountCh <- customerCount
+		customerCountCh <- count
 	}()
 
 	//
@@ -43,7 +44,7 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 
     jobCountCh := make(chan uint64)
 	go func() {
-		lwof := &models.LiteWorkOrderFilter{
+		f := &models.LiteWorkOrderFilter{
 			TenantId: tenantId,
 			States: []int8{
 				models.WorkOrderNewState,
@@ -52,12 +53,12 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 				models.WorkOrderInProgressState,
 			},
 		}
-		workOrderCount, err := h.LiteWorkOrderRepo.CountByFilter(ctx, lwof)
+		count, err := h.LiteWorkOrderRepo.CountByFilter(ctx, f)
 		if err != nil {
 			log.Println("WARNING | dashboardEndpoint | h.LiteWorkOrderRepo.CountByFilter | err", err)
 			return
 		}
-		jobCountCh <- workOrderCount
+		jobCountCh <- count
 	}()
 
 	//
@@ -66,16 +67,16 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 
     memberCountCh := make(chan uint64)
 	go func() {
-		laf := &models.LiteAssociateFilter{
+		f := &models.LiteAssociateFilter{
 			TenantId: tenantId,
 			States: []int8{models.AssociateActiveState},
 		}
-		memberCount, err := h.LiteAssociateRepo.CountByFilter(ctx, laf)
+		count, err := h.LiteAssociateRepo.CountByFilter(ctx, f)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		memberCountCh <- memberCount
+		memberCountCh <- count
 	}()
 
 	//
@@ -84,16 +85,16 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	tasksCountCh := make(chan uint64)
 	go func() {
-		ltf := &models.LiteTaskFilter{
+		f := &models.LiteTaskFilter{
 			TenantId: tenantId,
 			IsClosed: null.BoolFrom(false),
 		}
-		taskCount, err := h.LiteTaskRepo.CountByFilter(ctx, ltf)
+		count, err := h.LiteTaskRepo.CountByFilter(ctx, f)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		tasksCountCh <- taskCount
+		tasksCountCh <- count
 	}()
 
 	//
@@ -102,29 +103,59 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	bulletinBoardItemsCh := make(chan []*models.BulletinBoardItem)
 	go func() {
-		bbif := &models.BulletinBoardItemFilter{
+		f := &models.BulletinBoardItemFilter{
 			TenantId: tenantId,
 			States: []int8{models.BulletinBoardItemActiveState},
 		}
-		bulletinBoardItems, err := h.BulletinBoardItemRepo.ListByFilter(ctx, bbif)
+		arr, err := h.BulletinBoardItemRepo.ListByFilter(ctx, f)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		bulletinBoardItemsCh <- bulletinBoardItems[:]
+		bulletinBoardItemsCh <- arr[:]
 	}()
 
 	//
 	// Find "last_modified_jobs_by_user".
 	//
 
+	lmbuCh := make(chan []*models.LiteWorkOrder)
+	go func() {
+		f := &models.LiteWorkOrderFilter{
+			TenantId: tenantId,
+			LastModifiedById: null.IntFrom(int64(userId)),
+			Limit: 5,
+		}
+		arr, err := h.LiteWorkOrderRepo.ListByFilter(ctx, f)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		lmbuCh <- arr[:]
+	}()
+
 	//
 	// Find "away_log".
 	//
+	//TODO: IMPL.
 
 	//
 	// Find "last_modified_jobs_by_team".
 	//
+
+	lmbtCh := make(chan []*models.LiteWorkOrder)
+	go func() {
+		f := &models.LiteWorkOrderFilter{
+			TenantId: tenantId,
+			Limit: 10,
+		}
+		arr, err := h.LiteWorkOrderRepo.ListByFilter(ctx, f)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		lmbtCh <- arr[:]
+	}()
 
 	//
 	// Find "past_few_day_comments".
@@ -136,7 +167,7 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 	// Generate our response
 	//
 
-	customerCount, jobCount, memberCount, taskCount, bulletinBoardItems := <- customerCountCh, <- jobCountCh, <- memberCountCh, <- tasksCountCh, <- bulletinBoardItemsCh
+	customerCount, jobCount, memberCount, taskCount, bulletinBoardItems, lmbu, lmbt := <- customerCountCh, <- jobCountCh, <- memberCountCh, <- tasksCountCh, <- bulletinBoardItemsCh, <- lmbuCh, <- lmbtCh
 
 	ido := &idos.DashboardIDO{
 		CustomerCount: customerCount,
@@ -144,6 +175,8 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 		MemberCount: memberCount,
 		TasksCount: taskCount,
 		BulletinBoardItems: bulletinBoardItems,
+		LastModifiedJobsByUser: lmbu,
+		LastModifiedJobsByTeam: lmbt,
 	}
 	log.Println(ido)
 	if err := json.NewEncoder(w).Encode(&ido); err != nil {
@@ -152,26 +185,6 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-
-# --- LATEST JOBS BY USER ---
-last_modified_jobs_by_user = WorkOrder.objects.filter(
-	last_modified_by = user
-).order_by(
-	'-last_modified'
-).prefetch_related(
-	'associate',
-	'customer'
-)[0:5]
-lmjbu_s = WorkOrderListCreateSerializer(last_modified_jobs_by_user, many=True)
-
-# --- LATEST JOBS BY TEAM ---
-last_modified_jobs_by_team = WorkOrder.objects.order_by(
-	'-last_modified'
-).prefetch_related(
-	'associate',
-	'customer'
-)[0:10]
-lmjbt_s = WorkOrderListCreateSerializer(last_modified_jobs_by_team, many=True)
 
 # --- ASSOCIATE AWAY LOGS ---
 away_log = AwayLog.objects.filter(

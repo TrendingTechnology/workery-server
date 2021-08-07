@@ -23,12 +23,6 @@ const (
 )
 
 //---------------------
-// state
-//---------------------
-// 1 = Active
-// 0 = Inactive
-
-//---------------------
 // invoice_paid_to
 //---------------------
 // 1 = Paid to associate | WORK_ORDER_PAID_TO.Assocaiate
