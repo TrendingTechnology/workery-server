@@ -137,6 +137,11 @@ func (s *LiteWorkOrderRepo) CountByFilter(ctx context.Context, f *models.LiteWor
 	// The following code will add our filters
 	//
 
+	if !f.LastModifiedById.IsZero() {
+		filterValues = append(filterValues, f.LastModifiedById)
+		query += `AND last_modified_by_id = $` + strconv.Itoa(len(filterValues))
+	}
+
 	if len(f.States) > 0 {
 		query += ` AND (`
 		for i, v := range f.States {

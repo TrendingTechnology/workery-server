@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"time"
 
 	"github.com/over55/workery-server/internal/models"
@@ -164,4 +165,138 @@ func (r *AssociateAwayLogRepo) InsertOrUpdateById(ctx context.Context, m *models
 		return r.Insert(ctx, m)
 	}
 	return r.UpdateById(ctx, m)
+}
+
+func (s *AssociateAwayLogRepo) queryRowsWithFilter(ctx context.Context, query string, f *models.AssociateAwayLogFilter) (*sql.Rows, error) {
+	// Array will hold all the unique values we want to add into the query.
+	var filterValues []interface{}
+
+	// The SQL query statement we will be calling in the database, start
+	// by setting the `tenant_id` placeholder and then append our value to
+	// the array.
+	filterValues = append(filterValues, f.TenantId)
+	query += ` WHERE tenant_id = $` + strconv.Itoa(len(filterValues))
+
+	//
+	// The following code will add our filters
+	//
+
+	if len(f.States) > 0 {
+		query += ` AND (`
+		for i, v := range f.States {
+			s := strconv.Itoa(int(v))
+			filterValues = append(filterValues, s)
+			if i != 0 {
+				query += ` OR`
+			}
+			query += ` state = $` + strconv.Itoa(len(filterValues))
+		}
+		query += ` )`
+	}
+
+	//
+	// The following code will add our pagination.
+	//
+
+	if f.LastSeenId > 0 {
+		filterValues = append(filterValues, f.LastSeenId)
+		query += ` AND id < $` + strconv.Itoa(len(filterValues))
+	}
+	query += ` ORDER BY id `
+	filterValues = append(filterValues, f.Limit)
+	query += ` DESC LIMIT $` + strconv.Itoa(len(filterValues))
+
+	//
+	// Execute our custom built SQL query to the database.
+	//
+
+	return s.db.QueryContext(ctx, query, filterValues...)
+}
+
+func (s *AssociateAwayLogRepo) ListByFilter(ctx context.Context, filter *models.AssociateAwayLogFilter) ([]*models.AssociateAwayLog, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	querySelect := `
+    SELECT
+		id, uuid, tenant_id, associate_id, reason, reason_other,
+		until_further_notice, until_date, start_date, state,
+		created_time, created_by_id, created_from_ip, last_modified_time,
+		last_modified_by_id, last_modified_from_ip
+    FROM
+        associate_away_logs
+    `
+
+	rows, err := s.queryRowsWithFilter(ctx, querySelect, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var arr []*models.AssociateAwayLog
+	defer rows.Close()
+	for rows.Next() {
+		m := new(models.AssociateAwayLog)
+		err := rows.Scan(
+			&m.Id, &m.Uuid, &m.TenantId, &m.AssociateId, &m.Reason, &m.ReasonOther,
+			&m.UntilFurtherNotice, &m.UntilDate, &m.StartDate, &m.State,
+			&m.CreatedTime, &m.CreatedById, &m.CreatedFromIP, &m.LastModifiedTime,
+			&m.LastModifiedById, &m.LastModifiedFromIP,
+		)
+		if err != nil {
+			return nil, err
+		}
+		arr = append(arr, m)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return arr, err
+}
+
+func (s *AssociateAwayLogRepo) CountByFilter(ctx context.Context, f *models.AssociateAwayLogFilter) (uint64, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// The result we are looking for.
+	var count uint64
+
+	// Array will hold all the unique values we want to add into the query.
+	var filterValues []interface{}
+
+	// The SQL query statement we will be calling in the database, start
+	// by setting the `tenant_id` placeholder and then append our value to
+	// the array.
+	filterValues = append(filterValues, f.TenantId)
+	query := `
+	SELECT COUNT(id) FROM
+	    associate_away_logs
+	WHERE
+		tenant_id = $` + strconv.Itoa(len(filterValues))
+
+	//
+	// The following code will add our filters
+	//
+
+	if len(f.States) > 0 {
+		query += ` AND (`
+		for i, v := range f.States {
+			s := strconv.Itoa(int(v))
+			filterValues = append(filterValues, s)
+			if i != 0 {
+				query += ` OR`
+			}
+			query += ` state = $` + strconv.Itoa(len(filterValues))
+		}
+		query += ` )`
+	}
+
+	//
+	// Execute our custom built SQL query to the database.
+	//
+
+	err := s.db.QueryRowContext(ctx, query, filterValues...).Scan(&count)
+
+	// Return our values.
+	return count, err
 }

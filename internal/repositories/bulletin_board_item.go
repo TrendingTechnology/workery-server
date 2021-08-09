@@ -227,10 +227,19 @@ func (s *BulletinBoardItemRepo) ListByFilter(ctx context.Context, filter *models
 
 	querySelect := `
     SELECT
-		id, uuid, tenant_id, text, created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip, state
+		id,
+		uuid,
+		tenant_id,
+		text,
+		created_time,
+		created_by_id,
+		created_from_ip,
+		last_modified_time,
+		last_modified_by_id,
+		last_modified_from_ip,
+		state
     FROM
-        work_orders
+        bulletin_board_items
     `
 
 	rows, err := s.queryRowsWithFilter(ctx, querySelect, filter)
@@ -243,9 +252,17 @@ func (s *BulletinBoardItemRepo) ListByFilter(ctx context.Context, filter *models
 	for rows.Next() {
 		m := new(models.BulletinBoardItem)
 		err := rows.Scan(
-			&m.Id, &m.Uuid, &m.TenantId, &m.Text, &m.CreatedTime, &m.CreatedById,
-			&m.CreatedFromIP, &m.LastModifiedTime, &m.LastModifiedById,
-			&m.LastModifiedFromIP, &m.State,
+			&m.Id,
+			&m.Uuid,
+			&m.TenantId,
+			&m.Text,
+			&m.CreatedTime,
+			&m.CreatedById,
+			&m.CreatedFromIP,
+			&m.LastModifiedTime,
+			&m.LastModifiedById,
+			&m.LastModifiedFromIP,
+			&m.State,
 		)
 		if err != nil {
 			return nil, err
@@ -275,7 +292,7 @@ func (s *BulletinBoardItemRepo) CountByFilter(ctx context.Context, f *models.Bul
 	filterValues = append(filterValues, f.TenantId)
 	query := `
 	SELECT COUNT(id) FROM
-	    work_orders
+	    bulletin_board_items
 	WHERE
 		tenant_id = $` + strconv.Itoa(len(filterValues))
 

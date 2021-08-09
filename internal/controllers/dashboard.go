@@ -24,7 +24,7 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 	// Find "customer_count".
 	//
 
-	customerCountCh := make(chan uint64)
+	ccCh := make(chan uint64)
 	go func() {
 		f := &models.LiteCustomerFilter{
 			TenantId: tenantId,
@@ -33,16 +33,18 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 		count, err := h.LiteCustomerRepo.CountByFilter(ctx, f)
 		if err != nil {
 			log.Println("WARNING | dashboardEndpoint | h.LiteCustomerRepo.CountByFilter | err", err)
-			return
+			ccCh <- 0
+		} else {
+			ccCh <- count
 		}
-		customerCountCh <- count
+
 	}()
 
 	//
 	// Find "job_count".
 	//
 
-	jobCountCh := make(chan uint64)
+	jcCh := make(chan uint64)
 	go func() {
 		f := &models.LiteWorkOrderFilter{
 			TenantId: tenantId,
@@ -56,16 +58,17 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 		count, err := h.LiteWorkOrderRepo.CountByFilter(ctx, f)
 		if err != nil {
 			log.Println("WARNING | dashboardEndpoint | h.LiteWorkOrderRepo.CountByFilter | err", err)
-			return
+			jcCh <- 0
+		} else {
+			jcCh <- count
 		}
-		jobCountCh <- count
 	}()
 
 	//
 	// Find "member_count".
 	//
 
-	memberCountCh := make(chan uint64)
+	mcCh := make(chan uint64)
 	go func() {
 		f := &models.LiteAssociateFilter{
 			TenantId: tenantId,
@@ -73,10 +76,11 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 		}
 		count, err := h.LiteAssociateRepo.CountByFilter(ctx, f)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			log.Println("WARNING | dashboardEndpoint | LiteAssociateRepo.CountByFilter|err:", err)
+			mcCh <- 0
+		} else {
+			mcCh <- count
 		}
-		memberCountCh <- count
 	}()
 
 	//
@@ -91,17 +95,18 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 		}
 		count, err := h.LiteTaskRepo.CountByFilter(ctx, f)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			log.Println("WARNING | dashboardEndpoint | LiteTaskRepo.CountByFilter|err:", err)
+			tasksCountCh <- 0
+		} else {
+			tasksCountCh <- count
 		}
-		tasksCountCh <- count
 	}()
 
 	//
 	// Find "bulletin_board_items".
 	//
 
-	bulletinBoardItemsCh := make(chan []*models.BulletinBoardItem)
+	bbiCh := make(chan []*models.BulletinBoardItem)
 	go func() {
 		f := &models.BulletinBoardItemFilter{
 			TenantId: tenantId,
@@ -109,10 +114,11 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 		}
 		arr, err := h.BulletinBoardItemRepo.ListByFilter(ctx, f)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			log.Println("WARNING | dashboardEndpoint | BulletinBoardItemRepo.ListByFilter|err:", err)
+			bbiCh <- []*models.BulletinBoardItem{}
+		} else {
+			bbiCh <- arr[:]
 		}
-		bulletinBoardItemsCh <- arr[:]
 	}()
 
 	//
@@ -128,16 +134,31 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 		}
 		arr, err := h.LiteWorkOrderRepo.ListByFilter(ctx, f)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			log.Println("WARNING | dashboardEndpoint | LiteWorkOrderRepo.ListByFilter|err:", err)
+			lmbuCh <- []*models.LiteWorkOrder{}
+		} else {
+			lmbuCh <- arr[:]
 		}
-		lmbuCh <- arr[:]
 	}()
 
 	//
 	// Find "away_log".
 	//
-	//TODO: IMPL.
+
+	alCh := make(chan []*models.AssociateAwayLog)
+	go func() {
+		f := &models.AssociateAwayLogFilter{
+			TenantId: tenantId,
+			States:   []int8{models.AssociateAwayLogActiveState},
+		}
+		arr, err := h.AssociateAwayLogRepo.ListByFilter(ctx, f)
+		if err != nil {
+			log.Println("WARNING | dashboardEndpoint | AssociateAwayLogRepo.ListByFilter|err:", err)
+			alCh <- []*models.AssociateAwayLog{}
+		} else {
+			alCh <- arr[:]
+		}
+	}()
 
 	//
 	// Find "last_modified_jobs_by_team".
@@ -151,32 +172,56 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 		}
 		arr, err := h.LiteWorkOrderRepo.ListByFilter(ctx, f)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			log.Println("WARNING | dashboardEndpoint | LiteWorkOrderRepo.ListByFilter|err:", err)
+			lmbtCh <- []*models.LiteWorkOrder{}
+		} else {
+			lmbtCh <- arr[:]
 		}
-		lmbtCh <- arr[:]
 	}()
 
 	//
 	// Find "past_few_day_comments".
 	//
 
+	wocCh := make(chan []*models.WorkOrderComment)
+	go func() {
+		// sevenDaysAgoTime := null.TimeFrom(time.Now().Add(-7*24*time.Hour)) // 7 days ago //TODO: UNCOMMENT WHEN READY!
+		f := &models.WorkOrderCommentFilter{
+			TenantId:    tenantId,
+			// CreatedTime: null.TimeFrom(sevenDaysAgoTime), //TODO: UNCOMMENT WHEN READY!
+			Limit:       10,
+		}
+		arr, err := h.WorkOrderCommentRepo.ListByFilter(ctx, f)
+		if err != nil {
+			log.Println("WARNING | dashboardEndpoint | WorkOrderCommentRepo.ListByFilter|err:", err)
+			wocCh <- []*models.WorkOrderComment{}
+		} else {
+			wocCh <- arr[:]
+		}
+	}()
+
+	//
+	// Block this function until all the `goroutines` finish before proceeding further.
+	//
+
+	cc, jc, mc, tc, bbi, lmbu, lmbt, al, woc := <-ccCh, <-jcCh, <-mcCh, <-tasksCountCh, <-bbiCh, <-lmbuCh, <-lmbtCh, <-alCh, <-wocCh
+
 	//
 	// Generate our response
 	//
 
-	customerCount, jobCount, memberCount, taskCount, bulletinBoardItems, lmbu, lmbt := <-customerCountCh, <-jobCountCh, <-memberCountCh, <-tasksCountCh, <-bulletinBoardItemsCh, <-lmbuCh, <-lmbtCh
-
 	ido := &idos.DashboardIDO{
-		CustomerCount:          customerCount,
-		JobCount:               jobCount,
-		MemberCount:            memberCount,
-		TasksCount:             taskCount,
-		BulletinBoardItems:     bulletinBoardItems,
+		CustomerCount:          cc,
+		JobCount:               jc,
+		MemberCount:            mc,
+		TasksCount:             tc,
+		BulletinBoardItems:     bbi,
 		LastModifiedJobsByUser: lmbu,
 		LastModifiedJobsByTeam: lmbt,
+		AwayLog:                al,
+		PastFewDayComments:     woc,
 	}
-	log.Println(ido)
+	log.Println("PastFewDayComments:", woc)
 	if err := json.NewEncoder(w).Encode(&ido); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -184,38 +229,6 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 
 /*
 
-# --- ASSOCIATE AWAY LOGS ---
-away_log = AwayLog.objects.filter(
-	was_deleted=False
-).prefetch_related(
-	'associate'
-)
-away_log_s = AwayLogListCreateSerializer(away_log, many=True)
-
-# --- LATEST AWAY COMMENT ---
-one_week_before_today = get_todays_date_minus_days(5)
-past_few_day_comments = WorkOrderComment.objects.filter(
-	created_at__gte=one_week_before_today
-).order_by(
-	'-created_at'
-).prefetch_related(
-	'about',
-	'comment'
-)
-c_s = WorkOrderCommentListCreateSerializer(past_few_day_comments, many=True)
-
-return {
-	"customer_count": customer_count, // DONE
-	"job_count": job_count,           // DONE
-	"member_count": member_count,     // DONE
-	"tasks_count": tasks_count,                 // TODO
-	"bulletin_board_items": bbi_s.data,         // TODO
-	"last_modified_jobs_by_user": lmjbu_s.data, // TODO
-	"away_log": away_log_s.data,                // TODO
-	"last_modified_jobs_by_team": lmjbt_s.data, // TODO
-	"past_few_day_comments": c_s.data,          // TODO
-}
-/
 
     def to_associate_representation(self, user):
         associate = Associate.objects.get(owner=user)

@@ -53,6 +53,7 @@ func runServeCmd() {
 
 	// Load up our repositories.
 	asir := repo.NewActivitySheetItemRepo(db)
+	aalr := repo.NewAssociateAwayLogRepo(db)
 	acr := repo.NewAssociateCommentRepo(db)
 	airr := repo.NewAssociateInsuranceRequirementRepo(db)
 	assr := repo.NewAssociateSkillSetRepo(db)
@@ -103,6 +104,7 @@ func runServeCmd() {
 	c := &controllers.Controller{
 		SecretSigningKeyBin:               []byte(applicationSigningKey),
 		ActivitySheetItemRepo:             asir,
+		AssociateAwayLogRepo:              aalr,
 		AssociateCommentRepo:              acr,
 		AssociateInsuranceRequirementRepo: airr,
 		AssociateSkillSetRepo:             assr,

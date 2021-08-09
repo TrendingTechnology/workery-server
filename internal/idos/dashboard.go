@@ -13,7 +13,7 @@ type DashboardIDO struct {
 	TasksCount             uint64                      `json:"tasks_count"`
 	BulletinBoardItems     []*models.BulletinBoardItem `json:"bulletin_board_items"`
 	LastModifiedJobsByUser []*models.LiteWorkOrder     `json:"last_modified_jobs_by_user"`
-	// AwayLog                []*models.AwayLog           `json:"away_log"` //TODO: IMPL.
-	LastModifiedJobsByTeam []*models.LiteWorkOrder `json:"last_modified_jobs_by_team"`
-	PastFewDayComments     []*models.Comment       `json:"past_few_day_comments"`
+	AwayLog                []*models.AssociateAwayLog  `json:"away_log"`
+	LastModifiedJobsByTeam []*models.LiteWorkOrder     `json:"last_modified_jobs_by_team"`
+	PastFewDayComments     []*models.WorkOrderComment  `json:"past_few_day_comments"`
 }

@@ -11,6 +11,7 @@ import (
 type Controller struct {
 	SecretSigningKeyBin               []byte
 	ActivitySheetItemRepo             models.ActivitySheetItemRepository
+	AssociateAwayLogRepo              models.AssociateAwayLogRepository
 	AssociateCommentRepo              models.AssociateCommentRepository
 	AssociateInsuranceRequirementRepo models.AssociateInsuranceRequirementRepository
 	AssociateSkillSetRepo             models.AssociateSkillSetRepository
