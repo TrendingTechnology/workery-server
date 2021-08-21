@@ -17,3 +17,7 @@ type DashboardIDO struct {
 	LastModifiedJobsByTeam []*models.LiteWorkOrder     `json:"last_modified_jobs_by_team"`
 	PastFewDayComments     []*models.WorkOrderComment  `json:"past_few_day_comments"`
 }
+
+type NavigationIDO struct {
+	TasksCount               uint64                      `json:"tasks_count"`
+}

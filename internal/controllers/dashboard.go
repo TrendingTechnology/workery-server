@@ -221,43 +221,20 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 		AwayLog:                al,
 		PastFewDayComments:     woc,
 	}
-	log.Println("PastFewDayComments:", woc)
 	if err := json.NewEncoder(w).Encode(&ido); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-/*
+func (h *Controller) navigationEndpoint(w http.ResponseWriter, r *http.Request) {
+	// ctx := r.Context()
+	// tenantId := uint64(ctx.Value("user_tenant_id").(uint64))
+	// userId := uint64(ctx.Value("user_id").(uint64))
 
-
-    def to_associate_representation(self, user):
-        associate = Associate.objects.get(owner=user)
-        return {
-            'balance_owing_amount': str(associate.balance_owing_amount.amount),
-        }
-
-    def to_representation(self, user):
-        if user.is_associate():
-            return self.to_associate_representation(user)
-        else:
-            return self.to_staff_representation(user)
-
-*/
-
-//------------//
-// NAVIGATION //
-//------------//
-
-// class NavigationSerializer(serializers.Serializer):
-//     def to_representation(self, user):
-//         tasks_count = 0
-//         if user.is_associate():
-//             tasks_count = TaskItem.objects.filter(
-//                 is_closed=False,
-//                 job__associate__owner=user,
-//             ).count()
-//         else:
-//             tasks_count = TaskItem.objects.filter(is_closed=False).count()
-//         return {
-//             "tasks_count": tasks_count,
-//         }
+	res := &idos.NavigationIDO{
+		TasksCount: 123,
+	}
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}

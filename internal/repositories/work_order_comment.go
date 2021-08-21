@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 	"strconv"
-	"log"
+	// "log"
 
 	"github.com/over55/workery-server/internal/models"
 )
@@ -170,7 +170,7 @@ func (s *WorkOrderCommentRepo) queryRowsWithFilter(ctx context.Context, query st
 	// by setting the `tenant_id` placeholder and then append our value to
 	// the array.
 	filterValues = append(filterValues, f.TenantId)
-	query += ` WHERE tenant_id = $` + strconv.Itoa(len(filterValues))
+	query += ` WHERE a.tenant_id = $` + strconv.Itoa(len(filterValues))
 
 	//
 	// The following code will add our OPTIONAL filters
@@ -178,7 +178,7 @@ func (s *WorkOrderCommentRepo) queryRowsWithFilter(ctx context.Context, query st
 
 	if !f.CreatedTime.IsZero() {
 		filterValues = append(filterValues, f.CreatedTime)
-		query += ` AND created_time >= $` + strconv.Itoa(len(filterValues))
+		query += ` AND a.created_time >= $` + strconv.Itoa(len(filterValues))
 	}
 
 	if len(f.States) > 0 {
@@ -189,7 +189,7 @@ func (s *WorkOrderCommentRepo) queryRowsWithFilter(ctx context.Context, query st
 			if i != 0 {
 				query += ` OR`
 			}
-			query += ` state = $` + strconv.Itoa(len(filterValues))
+			query += ` a.state = $` + strconv.Itoa(len(filterValues))
 		}
 		query += ` )`
 	}
@@ -200,9 +200,9 @@ func (s *WorkOrderCommentRepo) queryRowsWithFilter(ctx context.Context, query st
 
 	if f.LastSeenId > 0 {
 		filterValues = append(filterValues, f.LastSeenId)
-		query += ` AND id < $` + strconv.Itoa(len(filterValues))
+		query += ` AND a.id < $` + strconv.Itoa(len(filterValues))
 	}
-	query += ` ORDER BY created_time `
+	query += ` ORDER BY a.created_time `
 	filterValues = append(filterValues, f.Limit)
 	query += ` DESC LIMIT $` + strconv.Itoa(len(filterValues))
 
@@ -210,8 +210,8 @@ func (s *WorkOrderCommentRepo) queryRowsWithFilter(ctx context.Context, query st
 	// Execute our custom built SQL query to the database.
 	//
 
-	log.Println("SERVE LOG | WorkOrderCommentRepo | queryRowsWithFilter | query", query)
-	log.Println("SERVE LOG | WorkOrderCommentRepo | queryRowsWithFilter | filterValues", filterValues)
+	// log.Println("SERVE LOG | WorkOrderCommentRepo | queryRowsWithFilter | query", query)
+	// log.Println("SERVE LOG | WorkOrderCommentRepo | queryRowsWithFilter | filterValues", filterValues)
 
 	return s.db.QueryContext(ctx, query, filterValues...)
 }
@@ -222,14 +222,23 @@ func (s *WorkOrderCommentRepo) ListByFilter(ctx context.Context, filter *models.
 
 	querySelect := `
     SELECT
-        id,
-		uuid,
-		tenant_id,
-		order_id,
-		comment_id,
-		created_time
+        a.id,
+		a.uuid,
+		a.tenant_id,
+		a.order_id,
+		a.comment_id,
+		a.created_time,
+		b.text
     FROM
         work_order_comments
+	AS
+	    a
+	JOIN
+	    comments
+	AS
+	    b
+	ON
+	    a.comment_id = b.id
     `
 
 	rows, err := s.queryRowsWithFilter(ctx, querySelect, filter)
@@ -248,6 +257,7 @@ func (s *WorkOrderCommentRepo) ListByFilter(ctx context.Context, filter *models.
 			&m.OrderId,
 			&m.CommentId,
 			&m.CreatedTime,
+			&m.Text,
 		)
 		if err != nil {
 			return nil, err

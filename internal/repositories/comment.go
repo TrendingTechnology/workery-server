@@ -24,7 +24,9 @@ func (r *CommentRepo) Insert(ctx context.Context, m *models.Comment) error {
 
 	query := `
     INSERT INTO comments (
-        uuid, tenant_id, created_time, created_by_id, created_from_ip, last_modified_time, last_modified_by_id, last_modified_from_ip, text, state, old_id
+        uuid, tenant_id, created_time, created_by_id, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_from_ip,
+		text, state, old_id
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
     )`

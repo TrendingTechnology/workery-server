@@ -82,6 +82,8 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 		h.profileEndpoint(w, r)
 	case n == 2 && p[0] == "v1" && p[1] == "dashboard" && r.Method == http.MethodGet:
 		h.dashboardEndpoint(w, r)
+	case n == 2 && p[0] == "v1" && p[1] == "navigation" && r.Method == http.MethodGet:
+		h.navigationEndpoint(w, r)
 	default:
 		http.NotFound(w, r)
 	}
