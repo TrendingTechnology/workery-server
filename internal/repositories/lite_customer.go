@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"strconv"
 	"time"
-	// "log"
+	"log"
 
 	"github.com/over55/workery-server/internal/models"
 )
@@ -34,6 +34,12 @@ func (s *LiteCustomerRepo) queryRowsWithFilter(ctx context.Context, query string
 	// The following code will add our filters
 	//
 
+	if !f.Search.IsZero() {
+		log.Fatal("TODO: PLEASE IMPLEMENT")
+		// filterValues = append(filterValues, f.Search)
+		// query += `AND state = $` + strconv.Itoa(len(filterValues))
+	}
+
 	if len(f.States) > 0 {
 		query += ` AND (`
 		for i, v := range f.States {
@@ -51,21 +57,19 @@ func (s *LiteCustomerRepo) queryRowsWithFilter(ctx context.Context, query string
 	// The following code will add our pagination.
 	//
 
-	if f.LastSeenId > 0 {
-		filterValues = append(filterValues, f.LastSeenId)
-		query += ` AND id < $` + strconv.Itoa(len(filterValues))
-	}
-	query += ` ORDER BY id `
+	query += ` ORDER BY ` + f.SortField + ` ` + f.SortOrder
 	filterValues = append(filterValues, f.Limit)
-	query += ` DESC LIMIT $` + strconv.Itoa(len(filterValues))
+	query += ` LIMIT $` + strconv.Itoa(len(filterValues))
+	filterValues = append(filterValues, f.Offset)
+	query += ` OFFSET $` + strconv.Itoa(len(filterValues))
 
 	//
 	// Execute our custom built SQL query to the database.
 	//
 
 	// For debugging purposes only.
-	// log.Println("query:", query)
-	// log.Println("filterValues:", filterValues)
+	// log.Println("LiteCustomerRepo | query:", query, "\n")
+	// log.Println("LiteCustomerRepo | filterValues:", filterValues, "\n")
 
 	return s.db.QueryContext(ctx, query, filterValues...)
 }
@@ -78,7 +82,12 @@ func (s *LiteCustomerRepo) ListByFilter(ctx context.Context, filter *models.Lite
     SELECT
         id,
 		tenant_id,
-		state
+		state,
+		given_name,
+		last_name,
+		telephone,
+		email,
+		join_date
     FROM
         customers
     `
@@ -96,6 +105,11 @@ func (s *LiteCustomerRepo) ListByFilter(ctx context.Context, filter *models.Lite
 			&m.Id,
 			&m.TenantId,
 			&m.State,
+			&m.GivenName,
+			&m.LastName,
+			&m.Telephone,
+			&m.Email,
+			&m.JoinDate,
 		)
 		if err != nil {
 			return nil, err
@@ -132,6 +146,12 @@ func (s *LiteCustomerRepo) CountByFilter(ctx context.Context, f *models.LiteCust
 	//
 	// The following code will add our filters
 	//
+
+	if !f.Search.IsZero() {
+		log.Fatal("TODO: PLEASE IMPLEMENT")
+		// filterValues = append(filterValues, f.Search)
+		// query += `AND state = $` + strconv.Itoa(len(filterValues))
+	}
 
 	if len(f.States) > 0 {
 		query += ` AND (`

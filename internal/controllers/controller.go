@@ -64,6 +64,7 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	n := len(p)
 
 	switch {
+	// --- TENANTS ---
 	case n == 2 && p[0] == "v1" && p[1] == "tenants" && r.Method == http.MethodGet:
 		h.liteTenantsListEndpoint(w, r)
 	case n == 2 && p[0] == "v1" && p[1] == "franchises" && r.Method == http.MethodGet: // Same URL names.
@@ -76,6 +77,8 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 		h.tenantUpdateEndpoint(w, r, p[2])
 	// case n == 3 && p[0] == "v1" && p[1] == "tenant" && r.Method == http.MethodDelete:
 	// 	h.deleteTenantById(w, r, p[2])
+
+	// --- GATEWAY & PROFILE & DASHBOARD ---
 	case n == 2 && p[0] == "v1" && p[1] == "login" && r.Method == http.MethodPost:
 		h.loginEndpoint(w, r)
 	case n == 2 && p[0] == "v1" && p[1] == "profile" && r.Method == http.MethodGet:
@@ -84,19 +87,18 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 		h.dashboardEndpoint(w, r)
 	case n == 2 && p[0] == "v1" && p[1] == "navigation" && r.Method == http.MethodGet:
 		h.navigationEndpoint(w, r)
+
+	// --- CUSTOMERS ---
+    case n == 2 && p[0] == "v1" && p[1] == "customers" && r.Method == http.MethodGet:
+		h.customersListEndpoint(w, r)
+
+	// --- CATCH ALL: D.N.E. ---
 	default:
 		http.NotFound(w, r)
 	}
 }
 
 /*
-# Dashboard / Navigation
-url(r'^api/dashboard$', DashboardAPIView.as_view(), name='workery_dashboard_api_endpoint'),
-url(r'^api/navigation$', NavigationAPIView.as_view(), name='workery_navigation_api_endpoint'),
-
-# Profile.
-url(r'^api/profile$', ProfileAPIView.as_view(), name='workery_profile_api_endpoint'),
-
 # Away logs.
 url(r'^api/away-logs$', AwayLogListCreateAPIView.as_view(), name='workery_away_log_list_create_api_endpoint'),
 url(r'^api/away-log/(?P<pk>[^/.]+)/$', AwayLogRetrieveUpdateDestroyAPIView.as_view(), name='workery_away_log_retrieve_update_destroy_api_endpoint'),

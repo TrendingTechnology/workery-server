@@ -17,7 +17,7 @@ func NewCustomerRepo(db *sql.DB) *CustomerRepo {
 		db: db,
 	}
 }
-
+ 
 func (r *CustomerRepo) Insert(ctx context.Context, m *models.Customer) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
