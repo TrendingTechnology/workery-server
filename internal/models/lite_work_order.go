@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	// "time"
 
 	null "gopkg.in/guregu/null.v4"
 )
@@ -13,18 +12,12 @@ type LiteWorkOrderFilter struct {
 	TenantId         uint64   `json:"tenant_id"`
 	States           []int8   `json:"states"`
 	LastModifiedById null.Int `json:"last_modified_by_id"`
-	LastSeenId       uint64   `json:"last_seen_id"`
+	SortOrder        string      `json:"sort_order"`
+	SortField        string      `json:"sort_field"`
+	Search           null.String `json:"search"`
+	Offset           uint64      `json:"offset"`
 	Limit            uint64   `json:"limit"`
 }
-
-// client full name
-// client id
-// associate full name
-// associate id
-// assign date
-// start date
-// status
-// financial (TODO)
 
 type LiteWorkOrder struct {
 	Id uint64 `json:"id"`

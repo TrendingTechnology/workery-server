@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"strconv"
 	"time"
+	"log"
 
 	"github.com/over55/workery-server/internal/models"
 )
@@ -38,6 +39,12 @@ func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query strin
 		query += `AND last_modified_by_id = $` + strconv.Itoa(len(filterValues))
 	}
 
+	if !f.Search.IsZero() {
+		log.Fatal("TODO: PLEASE IMPLEMENT")
+		// filterValues = append(filterValues, f.Search)
+		// query += `AND state = $` + strconv.Itoa(len(filterValues))
+	}
+
 	if len(f.States) > 0 {
 		query += ` AND (`
 		for i, v := range f.States {
@@ -55,17 +62,19 @@ func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query strin
 	// The following code will add our pagination.
 	//
 
-	if f.LastSeenId > 0 {
-		filterValues = append(filterValues, f.LastSeenId)
-		query += ` AND id < $` + strconv.Itoa(len(filterValues))
-	}
-	query += ` ORDER BY last_modified_time `
+	query += ` ORDER BY ` + f.SortField + ` ` + f.SortOrder
 	filterValues = append(filterValues, f.Limit)
-	query += ` DESC LIMIT $` + strconv.Itoa(len(filterValues))
+	query += ` LIMIT $` + strconv.Itoa(len(filterValues))
+	filterValues = append(filterValues, f.Offset)
+	query += ` OFFSET $` + strconv.Itoa(len(filterValues))
 
 	//
 	// Execute our custom built SQL query to the database.
 	//
+
+	// For debugging purposes only.
+	// log.Println("LiteCustomerRepo | query:", query, "\n")
+	// log.Println("LiteCustomerRepo | filterValues:", filterValues, "\n")
 
 	return s.db.QueryContext(ctx, query, filterValues...)
 }
@@ -140,6 +149,12 @@ func (s *LiteWorkOrderRepo) CountByFilter(ctx context.Context, f *models.LiteWor
 	if !f.LastModifiedById.IsZero() {
 		filterValues = append(filterValues, f.LastModifiedById)
 		query += `AND last_modified_by_id = $` + strconv.Itoa(len(filterValues))
+	}
+
+	if !f.Search.IsZero() {
+		log.Fatal("TODO: PLEASE IMPLEMENT")
+		// filterValues = append(filterValues, f.Search)
+		// query += `AND state = $` + strconv.Itoa(len(filterValues))
 	}
 
 	if len(f.States) > 0 {

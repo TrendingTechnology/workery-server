@@ -92,6 +92,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
     case n == 2 && p[0] == "v1" && p[1] == "customers" && r.Method == http.MethodGet:
 		h.customersListEndpoint(w, r)
 
+	// --- WORK ORDERS ---
+    case n == 2 && p[0] == "v1" && p[1] == "orders" && r.Method == http.MethodGet:
+		h.workOrdersListEndpoint(w, r)
+
 	// --- CATCH ALL: D.N.E. ---
 	default:
 		http.NotFound(w, r)
