@@ -36,7 +36,7 @@ func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query strin
 
 	if !f.LastModifiedById.IsZero() {
 		filterValues = append(filterValues, f.LastModifiedById)
-		query += `AND last_modified_by_id = $` + strconv.Itoa(len(filterValues))
+		query += ` AND last_modified_by_id = $` + strconv.Itoa(len(filterValues))
 	}
 
 	if !f.Search.IsZero() {
@@ -74,6 +74,7 @@ func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query strin
 
 	// For debugging purposes only.
 	// log.Println("LiteCustomerRepo | query:", query, "\n")
+	// log.Println("LiteCustomerRepo | SortField:", f.SortField, "SortField" + f.SortOrder + "\n")
 	// log.Println("LiteCustomerRepo | filterValues:", filterValues, "\n")
 
 	return s.db.QueryContext(ctx, query, filterValues...)
@@ -89,7 +90,11 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
 		tenant_id,
 		state,
 		customer_id,
-		associate_id
+		associate_id,
+		assignment_date,
+		start_date,
+		type_of,
+		is_ongoing
     FROM
         work_orders
     `
@@ -109,6 +114,10 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
 			&m.State,
 			&m.CustomerId,
 			&m.AssociateId,
+			&m.AssignmentDate,
+			&m.StartDate,
+			&m.TypeOf,
+			&m.IsOngoing,
 		)
 		if err != nil {
 			return nil, err
@@ -148,7 +157,7 @@ func (s *LiteWorkOrderRepo) CountByFilter(ctx context.Context, f *models.LiteWor
 
 	if !f.LastModifiedById.IsZero() {
 		filterValues = append(filterValues, f.LastModifiedById)
-		query += `AND last_modified_by_id = $` + strconv.Itoa(len(filterValues))
+		query += ` AND last_modified_by_id = $` + strconv.Itoa(len(filterValues))
 	}
 
 	if !f.Search.IsZero() {

@@ -54,6 +54,10 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 				models.WorkOrderOngoingState,
 				models.WorkOrderInProgressState,
 			},
+			SortField:        "last_modified_time",
+			SortOrder:        "ASC",
+			Offset:           0,
+			Limit:            1000,
 		}
 		count, err := h.LiteWorkOrderRepo.CountByFilter(ctx, f)
 		if err != nil {
@@ -130,6 +134,9 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 		f := &models.LiteWorkOrderFilter{
 			TenantId:         tenantId,
 			LastModifiedById: null.IntFrom(int64(userId)),
+			SortField:        "last_modified_time",
+			SortOrder:        "ASC",
+			Offset:           0,
 			Limit:            5,
 		}
 		arr, err := h.LiteWorkOrderRepo.ListByFilter(ctx, f)
@@ -168,6 +175,9 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		f := &models.LiteWorkOrderFilter{
 			TenantId: tenantId,
+			SortField:        "last_modified_time",
+			SortOrder:        "ASC",
+			Offset:           0,
 			Limit:    10,
 		}
 		arr, err := h.LiteWorkOrderRepo.ListByFilter(ctx, f)

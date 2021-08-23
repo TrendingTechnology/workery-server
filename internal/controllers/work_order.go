@@ -37,7 +37,7 @@ func (h *Controller) workOrdersListEndpoint(w http.ResponseWriter, r *http.Reque
 
 	// Start by defining our base listing filter and then append depending on
 	// different cases.
-	f := models.LiteCustomerFilter{
+	f := models.LiteWorkOrderFilter{
 		TenantId:   tenantId,
 		SortField:  sortFieldString,
 		SortOrder:  sortOrderString,
@@ -54,11 +54,11 @@ func (h *Controller) workOrdersListEndpoint(w http.ResponseWriter, r *http.Reque
 	// log.Println("SortOrder", f.SortOrder)
 	// log.Println("SortField", f.SortField)
 
-	arrCh := make(chan []*models.LiteCustomer)
+	arrCh := make(chan []*models.LiteWorkOrder)
 	countCh := make(chan uint64)
 
 	go func() {
-		arr, err := h.LiteCustomerRepo.ListByFilter(ctx, &f)
+		arr, err := h.LiteWorkOrderRepo.ListByFilter(ctx, &f)
 		if err != nil {
 			log.Println("WARNING: workOrdersListEndpoint|ListByFilter|err:", err.Error())
 			return
@@ -67,7 +67,7 @@ func (h *Controller) workOrdersListEndpoint(w http.ResponseWriter, r *http.Reque
 	}()
 
 	go func() {
-		count, err := h.LiteCustomerRepo.CountByFilter(ctx, &f)
+		count, err := h.LiteWorkOrderRepo.CountByFilter(ctx, &f)
 		if err != nil {
 			log.Println("WARNING: workOrdersListEndpoint|CountByFilter|err:", err.Error())
 			return
@@ -77,7 +77,7 @@ func (h *Controller) workOrdersListEndpoint(w http.ResponseWriter, r *http.Reque
 
 	arr, count := <- arrCh, <- countCh
 
-	res := idos.NewLiteCustomerListResponseIDO(arr, count)
+	res := idos.NewLiteWorkOrderListResponseIDO(arr, count)
 
 	if err := json.NewEncoder(w).Encode(&res); err != nil { // [2]
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"time"
 
 	null "gopkg.in/guregu/null.v4"
 )
@@ -26,13 +27,13 @@ type LiteWorkOrder struct {
 	CustomerId  uint64   `json:"customer_id"`
 	AssociateId null.Int `json:"associate_id"`
 	// Description                       string      `json:"description"`
-	// AssignmentDate                    null.Time   `json:"assignment_date"`
-	// IsOngoing                         bool        `json:"is_ongoing"`
+	AssignmentDate null.Time   `json:"assignment_date"`
+	IsOngoing                         bool        `json:"is_ongoing"`
 	// IsHomeSupportService              bool        `json:"is_home_support_service"`
-	// StartDate                         time.Time   `json:"start_date"`
+	StartDate                         time.Time   `json:"start_date"`
 	// CompletionDate                    null.Time   `json:"completion_date"`
 	// Hours                             float64     `json:"hours"`
-	// TypeOf                            int8        `json:"type_of"`
+	TypeOf                            int8        `json:"type_of"`
 	// IndexedText                       string      `json:"indexed_text"`
 	// ClosingReason                     int8        `json:"closing_reason"`
 	// ClosingReasonOther                null.String `json:"closing_reason_other"`
