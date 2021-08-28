@@ -87,7 +87,8 @@ func (s *LiteCustomerRepo) ListByFilter(ctx context.Context, filter *models.Lite
 		last_name,
 		telephone,
 		email,
-		join_date
+		join_date,
+		type_of
     FROM
         customers
     `
@@ -110,6 +111,7 @@ func (s *LiteCustomerRepo) ListByFilter(ctx context.Context, filter *models.Lite
 			&m.Telephone,
 			&m.Email,
 			&m.JoinDate,
+			&m.TypeOf,
 		)
 		if err != nil {
 			return nil, err

@@ -27,6 +27,7 @@ type LiteCustomer struct {
 	Telephone  string `json:"telephone"`
 	Email      string `json:"email"`
 	JoinDate   null.Time `json:"join_date"`
+	TypeOf      int8 `json:"type_of"`
 }
 
 type LiteCustomerRepository interface {
