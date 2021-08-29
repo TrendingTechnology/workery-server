@@ -24,9 +24,10 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
 
 	query := `
     INSERT INTO users (
-        uuid, tenant_id, email, first_name, last_name, password_algorithm, password_hash, state,
-		role_id, timezone, created_time, modified_time, joined_time, salt, was_email_activated,
-		pr_access_code, pr_expiry_time, old_id, name, lexical_name
+        uuid, tenant_id, email, first_name, last_name, password_algorithm,
+		password_hash, state, role_id, timezone, created_time, modified_time,
+		joined_time, salt, was_email_activated, pr_access_code, pr_expiry_time,
+		old_id, name, lexical_name
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
     )`
@@ -38,9 +39,10 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm, m.PasswordHash, m.State,
-		m.RoleId, m.Timezone, m.CreatedTime, m.ModifiedTime, m.JoinedTime, m.Salt, m.WasEmailActivated,
-		m.PrAccessCode, m.PrExpiryTime, m.OldId, m.Name, m.LexicalName,
+		m.Uuid, m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm,
+		m.PasswordHash, m.State, m.RoleId, m.Timezone, m.CreatedTime, m.ModifiedTime,
+		m.JoinedTime, m.Salt, m.WasEmailActivated, m.PrAccessCode, m.PrExpiryTime,
+		m.OldId, m.Name, m.LexicalName,
 	)
 	return err
 }
@@ -53,11 +55,26 @@ func (r *UserRepo) UpdateById(ctx context.Context, m *models.User) error {
     UPDATE
         users
     SET
-        tenant_id = $1, email = $2, first_name = $3, last_name = $4, password_algorithm = $5, password_hash = $6, state = $7,
-		role_id = $8, timezone = $9, created_time = $10, modified_time = $11, joined_time = $12, salt = $13, was_email_activated = $14,
-		pr_access_code = $15, pr_expiry_time = $16, name = $17, lexical_name = $18
+        tenant_id = $1,
+		email = $2,
+		first_name = $3,
+		last_name = $4,
+		password_algorithm = $5,
+		password_hash = $6,
+		state = $7,
+		role_id = $8,
+		timezone = $9,
+		created_time = $10,
+		modified_time = $11,
+		joined_time = $12,
+		salt = $13,
+		was_email_activated = $14,
+		pr_access_code = $15,
+		pr_expiry_time = $16,
+		name = $17,
+		lexical_name = $18
     WHERE
-        id = $17`
+        id = $19`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -66,10 +83,25 @@ func (r *UserRepo) UpdateById(ctx context.Context, m *models.User) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm,
-		m.PasswordHash, m.State, m.RoleId, m.Timezone, m.CreatedTime, m.ModifiedTime,
-		m.JoinedTime, m.Salt, m.WasEmailActivated, m.PrAccessCode, m.PrExpiryTime,
-		m.Id, m.Name, m.LexicalName,
+		m.TenantId,
+		m.Email,
+		m.FirstName,
+		m.LastName,
+		m.PasswordAlgorithm,
+		m.PasswordHash,
+		m.State,
+		m.RoleId,
+		m.Timezone,
+		m.CreatedTime,
+		m.ModifiedTime,
+		m.JoinedTime,
+		m.Salt,
+		m.WasEmailActivated,
+		m.PrAccessCode,
+		m.PrExpiryTime,
+		m.Name,
+		m.LexicalName,
+		m.Id,
 	)
 	return err
 }
@@ -82,9 +114,24 @@ func (r *UserRepo) UpdateByEmail(ctx context.Context, m *models.User) error {
     UPDATE
         users
     SET
-        tenant_id = $1, email = $2, first_name = $3, last_name = $4, password_algorithm = $5, password_hash = $6, state = $7,
-		role_id = $8, timezone = $9, created_time = $10, modified_time = $11, joined_time = $12, salt = $13, was_email_activated = $14,
-		pr_access_code = $15, pr_expiry_time = $16, name = $17, lexical_name = $18
+        tenant_id = $1,
+		email = $2,
+		first_name = $3,
+		last_name = $4,
+		password_algorithm = $5,
+		password_hash = $6,
+		state = $7,
+		role_id = $8,
+		timezone = $9,
+		created_time = $10,
+		modified_time = $11,
+		joined_time = $12,
+		salt = $13,
+		was_email_activated = $14,
+		pr_access_code = $15,
+		pr_expiry_time = $16,
+		name = $17,
+		lexical_name = $18
     WHERE
         email = $2`
 	stmt, err := r.db.PrepareContext(ctx, query)
@@ -95,10 +142,25 @@ func (r *UserRepo) UpdateByEmail(ctx context.Context, m *models.User) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm,
-		m.PasswordHash, m.State, m.RoleId, m.Timezone, m.CreatedTime, m.ModifiedTime,
-		m.JoinedTime, m.Salt, m.WasEmailActivated, m.PrAccessCode, m.PrExpiryTime,
-		m.Name, m.LexicalName,
+		m.TenantId,
+		m.Email,
+		m.FirstName,
+		m.LastName,
+		m.PasswordAlgorithm,
+		m.PasswordHash,
+		m.State,
+		m.RoleId,
+		m.Timezone,
+		m.CreatedTime,
+		m.ModifiedTime,
+		m.JoinedTime,
+		m.Salt,
+		m.WasEmailActivated,
+		m.PrAccessCode,
+		m.PrExpiryTime,
+		m.Name,
+		m.LexicalName,
+		m.Email,
 	)
 	return err
 }

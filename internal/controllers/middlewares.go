@@ -54,10 +54,10 @@ func (h *Controller) JWTProcessorMiddleware(fn http.HandlerFunc) http.HandlerFun
 			}
 
 			reqToken = splitToken[1]
-			// log.Println(reqToken) // For debugging purposes only.
+			// log.Println("JWTProcessorMiddleware | reqToken:", reqToken) // For debugging purposes only.
 
 			sessionUuid, err := utils.ProcessJWTToken(h.SecretSigningKeyBin, reqToken)
-			// log.Println(sessionUuid) // For debugging purposes only.
+			// log.Println("JWTProcessorMiddleware | sessionUuid:", sessionUuid) // For debugging purposes only.
 
 			if err == nil {
 				// Update our context to save our JWT token content information.
@@ -135,6 +135,13 @@ func (h *Controller) AuthorizationMiddleware(fn http.HandlerFunc) http.HandlerFu
 			// Save our user information to the context.
 			// Save our user.
 			ctx = context.WithValue(ctx, "user", user)
+
+			// // For debugging purposes only.
+			// log.Println("AuthorizationMiddleware | user_tenant_id:", user.TenantId)
+			// log.Println("AuthorizationMiddleware | user_role_id:", user.RoleId)
+			// log.Println("AuthorizationMiddleware | user_id:", user.Id)
+			// log.Println("AuthorizationMiddleware | user_uuid:", user.Uuid)
+			// log.Println("AuthorizationMiddleware | user_timezone:", user.Timezone)
 
 			// Save individual pieces of the user profile.
 			ctx = context.WithValue(ctx, "user_tenant_id", user.TenantId)

@@ -120,7 +120,10 @@ func runUserGroupInsert(ot *OldUserGroup, r *repositories.UserRepo) {
 	}
 	if user != nil {
 		user.RoleId = int8(ot.GroupId)
-		r.UpdateById(ctx, user)
+		err = r.UpdateById(ctx, user)
+		if err != nil {
+			panic(err)
+		}
 		fmt.Println("Processed UserId #", user.Id)
 	} else {
 		fmt.Println("Skipped UserId #", user.Id)

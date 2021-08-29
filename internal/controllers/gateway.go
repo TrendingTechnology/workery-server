@@ -146,8 +146,9 @@ func (h *Controller) loginEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// For debugging purposes only.
-	log.Println("loginEndpoint | Response:", responseData)
+	// // For debugging purposes only.
+	// log.Println("loginEndpoint | Response | AccessToken:", responseData.AccessToken)
+	// log.Println("loginEndpoint | Response | RefreshToken:", responseData.RefreshToken)
 }
 
 // To run this API, try running in your console:
