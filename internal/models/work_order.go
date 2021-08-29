@@ -40,7 +40,11 @@ type WorkOrder struct {
 	Uuid                              string      `json:"uuid"`
 	TenantId                          uint64      `json:"tenant_id"`
 	CustomerId                        uint64      `json:"customer_id"`
+	CustomerName                      string      `json:"customer_name,omitempty"`
+	CustomerLexicalName               string      `json:"customer_lexical_name,omitempty"`
 	AssociateId                       null.Int    `json:"associate_id"`
+	AssociateName                     null.String `json:"associate_name,omitempty"`
+	AssociateLexicalName              null.String `json:"associate_lexical_name,omitempty"`
 	Description                       string      `json:"description"`
 	AssignmentDate                    null.Time   `json:"assignment_date"`
 	IsOngoing                         bool        `json:"is_ongoing"`

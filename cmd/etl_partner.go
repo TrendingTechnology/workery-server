@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -228,6 +229,19 @@ func insertPartnerETL(
 	// Variable used to keep the ID of the user record in our database.
 	userId := uint64(oldPartner.OwnerId.Int64)
 
+	// Generate our full name / lexical full name.
+	var name string
+	var lexicalName string
+	if oldPartner.MiddleName.Valid {
+		name = oldPartner.GivenName.String + " " + oldPartner.MiddleName.String + " " + oldPartner.LastName.String
+		lexicalName = oldPartner.LastName.String + ", " + oldPartner.MiddleName.String + ", " + oldPartner.GivenName.String
+	} else {
+		name = oldPartner.GivenName.String + " " + oldPartner.LastName.String
+		lexicalName = oldPartner.LastName.String + ", " + oldPartner.GivenName.String
+	}
+	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
+	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
+
 	// CASE 1: User record exists in our database.
 	if oldPartner.OwnerId.Valid {
 		// log.Println(oldPartner.Id)
@@ -260,13 +274,15 @@ func insertPartnerETL(
 		}
 		if user == nil {
 			um := &models.User{
-				Uuid:      uuid.NewString(),
-				FirstName: oldPartner.GivenName.String,
-				LastName:  oldPartner.LastName.String,
-				Email:     email,
+				Uuid:             uuid.NewString(),
+				FirstName:        oldPartner.GivenName.String,
+				LastName:         oldPartner.LastName.String,
+				Name:             name,
+				LexicalName:      lexicalName,
+				Email:            email,
 				// JoinedTime:        oldPartner.DateJoined,
-				State:    state,
-				Timezone: "America/Toronto",
+				State:            state,
+				Timezone:         "America/Toronto",
 				// CreatedTime:       oldPartner.DateJoined,
 				// ModifiedTime:      oldPartner.LastModified,
 				Salt:              "",
@@ -317,16 +333,16 @@ func insertPartnerETL(
 	}
 
 	partner := &models.Partner{
-		OldId:    oldPartner.Id,
-		Uuid:     uuid.NewString(),
-		TenantId: tenantId,
-		UserId:   userId,
+		OldId:                   oldPartner.Id,
+		Uuid:                    uuid.NewString(),
+		TenantId:                tenantId,
+		UserId:                  userId,
 		// TypeOf:                  oldPartner.TypeOf,
-		IndexedText: oldPartner.IndexedText.String,
-		IsOkToEmail: oldPartner.IsOkToEmail,
-		IsOkToText:  oldPartner.IsOkToText,
-		HowHearId:   uint64(oldPartner.HowHearId.Int64),
-		HowHearOld:  oldPartner.HowHearOld,
+		IndexedText:             oldPartner.IndexedText.String,
+		IsOkToEmail:             oldPartner.IsOkToEmail,
+		IsOkToText:              oldPartner.IsOkToText,
+		HowHearId:               uint64(oldPartner.HowHearId.Int64),
+		HowHearOld:              oldPartner.HowHearOld,
 		// HowHearOther:            oldPartner.HowHearOther,
 		State:                   state,
 		CreatedTime:             oldPartner.Created,
@@ -346,6 +362,8 @@ func insertPartnerETL(
 		GivenName:               oldPartner.GivenName.String,
 		MiddleName:              oldPartner.MiddleName.String,
 		LastName:                oldPartner.LastName.String,
+		Name:                    name,
+		LexicalName:             lexicalName,
 		Birthdate:               oldPartner.Birthdate,
 		JoinDate:                oldPartner.JoinDate,
 		Nationality:             oldPartner.Nationality.String,

@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -225,6 +226,19 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 	// Variable used to keep the ID of the user record in our database.
 	userId := uint64(om.OwnerId.Int64)
 
+	// Generate our full name / lexical full name.
+	var name string
+	var lexicalName string
+	if om.MiddleName.Valid {
+		name = om.GivenName.String + " " + om.MiddleName.String + " " + om.LastName.String
+		lexicalName = om.LastName.String + ", " + om.MiddleName.String + ", " + om.GivenName.String
+	} else {
+		name = om.GivenName.String + " " + om.LastName.String
+		lexicalName = om.LastName.String + ", " + om.GivenName.String
+	}
+	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
+	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
+
 	// CASE 1: User record exists in our database.
 	if om.OwnerId.Valid {
 		// log.Println(om.Id)
@@ -257,13 +271,15 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 		}
 		if user == nil {
 			um := &models.User{
-				Uuid:      uuid.NewString(),
-				FirstName: om.GivenName.String,
-				LastName:  om.LastName.String,
-				Email:     email,
-				// JoinedTime:        om.DateJoined,
-				State:    state,
-				Timezone: "America/Toronto",
+				Uuid:              uuid.NewString(),
+				FirstName:         om.GivenName.String,
+				LastName:          om.LastName.String,
+				Name:              name,
+				LexicalName:       lexicalName,
+				Email:             email,
+				// JoinedTime:     om.DateJoined,
+				State:             state,
+				Timezone:          "America/Toronto",
 				// CreatedTime:       om.DateJoined,
 				// ModifiedTime:      om.LastModified,
 				Salt:              "",
@@ -349,6 +365,8 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 		GivenName:               om.GivenName.String,
 		MiddleName:              om.MiddleName.String,
 		LastName:                om.LastName.String,
+		Name:                    name,
+		LexicalName:             lexicalName,
 		Birthdate:               om.Birthdate,
 		JoinDate:                om.JoinDate,
 		Nationality:             om.Nationality.String,

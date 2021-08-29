@@ -54,6 +54,8 @@ type Staff struct {
 	GivenName                            null.String `json:"given_name"`
 	MiddleName                           null.String `json:"middle_name"`
 	LastName                             null.String `json:"last_name"`
+	Name                                 string      `json:"name,omitempty"`
+	LexicalName                          string      `json:"lexical_name,omitempty"`
 	Birthdate                            null.Time   `json:"birthdate"`
 	JoinDate                             null.Time   `json:"join_date"`
 	Nationality                          null.String `json:"nationality"`

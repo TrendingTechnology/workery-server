@@ -25,6 +25,8 @@ type User struct {
 	Email             string    `json:"email,omitempty"`
 	FirstName         string    `json:"first_name,omitempty"`
 	LastName          string    `json:"last_name,omitempty"`
+	Name              string    `json:"name,omitempty"`
+	LexicalName       string    `json:"lexical_name,omitempty"`
 	PasswordAlgorithm string    `json:"password_algorithm,omitempty"`
 	PasswordHash      string    `json:"password_hash,omitempty"`
 	State             int8      `json:"state,omitempty"`

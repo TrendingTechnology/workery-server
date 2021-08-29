@@ -37,13 +37,13 @@ func (r *PartnerRepo) Insert(ctx context.Context, m *models.Partner) error {
 		join_date, nationality, gender, tax_id, elevation, latitude, longitude,
 		area_served, available_language, contact_type, email, fax_number,
 		telephone, telephone_type_of, telephone_extension, other_telephone,
-		other_telephone_extension, other_telephone_type_of
+		other_telephone_extension, other_telephone_type_of, name, lexical_name
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 , $11, $12, $13, $14, $15, $16,
 		$17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
 		$31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44,
 		$45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58,
-		$59, $60, $61, $62, $63
+		$59, $60, $61, $62, $63, $64, $65
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -66,7 +66,7 @@ func (r *PartnerRepo) Insert(ctx context.Context, m *models.Partner) error {
 		m.JoinDate, m.Nationality, m.Gender, m.TaxId, m.Elevation, m.Latitude, m.Longitude,
 		m.AreaServed, m.AvailableLanguage, m.ContactType, m.Email, m.FaxNumber,
 		m.Telephone, m.TelephoneTypeOf, m.TelephoneExtension, m.OtherTelephone,
-		m.OtherTelephoneExtension, m.OtherTelephoneTypeOf,
+		m.OtherTelephoneExtension, m.OtherTelephoneTypeOf, m.Name, m.LexicalName,
 	)
 	return err
 }

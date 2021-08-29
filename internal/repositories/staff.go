@@ -36,12 +36,12 @@ func (r *StaffRepo) Insert(ctx context.Context, m *models.Staff) error {
 		user_id, how_hear_other, how_hear_id, avatar_image_id, personal_email,
 		emergency_contact_alternative_telephone, emergency_contact_name,
 		emergency_contact_relationship, emergency_contact_telephone, police_check,
-		uuid, tenant_id, is_ok_to_email, is_ok_to_text
+		uuid, tenant_id, is_ok_to_email, is_ok_to_text, name, lexical_name
 	) VALUES (
 	    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
 		$17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
 		$31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44,
-		$45, $46, $47, $48, $49, $50, $51
+		$45, $46, $47, $48, $49, $50, $51, $52, $53
 	)`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -63,7 +63,7 @@ func (r *StaffRepo) Insert(ctx context.Context, m *models.Staff) error {
 		m.UserId, m.HowHearOther, m.HowHearId, m.AvatarImageId, m.PersonalEmail,
 		m.EmergencyContactAlternativeTelephone, m.EmergencyContactName,
 		m.EmergencyContactRelationship, m.EmergencyContactTelephone, m.PoliceCheck,
-		m.Uuid, m.TenantId, m.IsOkToEmail, m.IsOkToText,
+		m.Uuid, m.TenantId, m.IsOkToEmail, m.IsOkToText, m.Name, m.LexicalName,
 	)
 	return err
 }

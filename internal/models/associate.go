@@ -70,6 +70,8 @@ type Associate struct {
 	GivenName   string       `json:"given_name"`
 	MiddleName  string       `json:"middle_name"`
 	LastName    string       `json:"last_name"`
+	Name        string       `json:"name,omitempty"`
+	LexicalName string       `json:"lexical_name,omitempty"`
 	Birthdate   sql.NullTime `json:"birthdate"`
 	JoinDate    sql.NullTime `json:"join_date"`
 	Nationality string       `json:"nationality"`

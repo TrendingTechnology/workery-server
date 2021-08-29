@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -133,7 +134,7 @@ type OldUAssociate struct {
 	OrganizationName         sql.NullString  `json:"organization_name"`
 	OrganizationTypeOf       int8            `json:"organization_type_of"`
 	AvatarImageId            sql.NullInt64   `json:"avatar_image_id"`
-	ServiceFeeId             uint64          `json:"service_fee_id"`
+	ServiceFeeId             sql.NullInt64   `json:"service_fee_id"`
 }
 
 func ListAllAssociates(db *sql.DB) ([]*OldUAssociate, error) {
@@ -211,10 +212,44 @@ func runAssociateETL(
 		log.Fatal("runAssociateETL | ListAllAssociates | err:", err)
 	}
 	for _, oldAssociate := range associates {
-		serviceFeeId, err := serviceFeeRepo.GetIdByOldId(ctx, tenantId, oldAssociate.ServiceFeeId)
+		var serviceFeeId uint64
+
+		oldServiceFeeId, err := oldAssociate.ServiceFeeId.Value()
+
 		if err != nil {
-			log.Panic("runAssociateETL | serviceFeeRepo.GetIdByOldId | err", err)
+			log.Panic("runAssociateETL | oldAssociate.ServiceFeeId | err", err)
 		}
+
+		// DEVELOPERS NOTE:
+		// THIS IS TECH DEBT! BUST SINCE WE IMPORT THE DATA, THIS ETL WILL
+		// BE DELETED SO WE ACCEPT THIS TECH DEBT.
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		if oldServiceFeeId == nil {
+			log.Println("runAssociateETL | oldServiceFeeId == nil | oldAssociate.ServiceFeeId", oldAssociate.Id, oldAssociate.ServiceFeeId)
+			if tenantId == 2 {
+				serviceFeeId = 3
+			} else if tenantId == 4 {
+			    serviceFeeId = 11
+			} else {
+
+			}
+		} else {
+			serviceFeeId, err = serviceFeeRepo.GetIdByOldId(ctx, tenantId, serviceFeeId)
+			if err != nil {
+				log.Panic("runAssociateETL | serviceFeeRepo.GetIdByOldId | err", err)
+			}
+		}
+		if serviceFeeId == 0 {
+			if tenantId == 2 {
+				serviceFeeId = 3
+			} else if tenantId == 4 {
+			    serviceFeeId = 11
+			} else {
+				log.Println("runAssociateETL | serviceFeeId", serviceFeeId)
+			}
+		}
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 		insertAssociateETL(ctx, tenantId, serviceFeeId, userRepo, associateRepo, oldAssociate)
 	}
 }
@@ -234,6 +269,19 @@ func insertAssociateETL(
 
 	// Variable used to keep the ID of the user record in our database.
 	userId := uint64(oldAssociate.OwnerId.Int64)
+
+	// Generate our full name / lexical full name.
+	var name string
+	var lexicalName string
+	if oldAssociate.MiddleName.Valid {
+		name = oldAssociate.GivenName.String + " " + oldAssociate.MiddleName.String + " " + oldAssociate.LastName.String
+		lexicalName = oldAssociate.LastName.String + ", " + oldAssociate.MiddleName.String + ", " + oldAssociate.GivenName.String
+	} else {
+		name = oldAssociate.GivenName.String + " " + oldAssociate.LastName.String
+		lexicalName = oldAssociate.LastName.String + ", " + oldAssociate.GivenName.String
+	}
+	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
+	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
 
 	// CASE 1: User record exists in our database.
 	if oldAssociate.OwnerId.Valid {
@@ -267,13 +315,15 @@ func insertAssociateETL(
 		}
 		if user == nil {
 			um := &models.User{
-				Uuid:      uuid.NewString(),
-				FirstName: oldAssociate.GivenName.String,
-				LastName:  oldAssociate.LastName.String,
-				Email:     email,
+				Uuid:              uuid.NewString(),
+				FirstName:         oldAssociate.GivenName.String,
+				LastName:          oldAssociate.LastName.String,
+				Name:              name,
+				LexicalName:       lexicalName,
+				Email:             email,
 				// JoinedTime:        oldAssociate.DateJoined,
-				State:    state,
-				Timezone: "America/Toronto",
+				State:             state,
+				Timezone:          "America/Toronto",
 				// CreatedTime:       oldAssociate.DateJoined,
 				// ModifiedTime:      oldAssociate.LastModified,
 				Salt:              "",
@@ -353,6 +403,8 @@ func insertAssociateETL(
 		StreetAddressExtra:      oldAssociate.StreetAddressExtra.String,
 		GivenName:               oldAssociate.GivenName.String,
 		MiddleName:              oldAssociate.MiddleName.String,
+		Name:                    name,
+		LexicalName:             lexicalName,
 		LastName:                oldAssociate.LastName.String,
 		Birthdate:               oldAssociate.Birthdate,
 		JoinDate:                oldAssociate.JoinDate,

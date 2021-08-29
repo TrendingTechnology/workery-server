@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -239,6 +240,8 @@ func insertWorkOrderETL(
 	oss *OldWorkOrder,
 ) {
 	var associateId null.Int
+	var associateName null.String
+	var associateLexicalName null.String
 	if oss.AssociateId.Valid {
 		associateIdInt64 := oss.AssociateId.ValueOrZero()
 		associateIdUint64, err := ar.GetIdByOldId(ctx, tid, uint64(associateIdInt64))
@@ -248,12 +251,54 @@ func insertWorkOrderETL(
 
 		// Convert from null supported integer times.
 		associateId = null.NewInt(int64(associateIdUint64), associateIdUint64 != 0)
+
+		if associateIdUint64 != 0 {
+			associate, err := ar.GetById(ctx, associateIdUint64)
+			if err != nil {
+				log.Panic("ar.GetById | err", err)
+			}
+
+			// Generate our full name / lexical full name.
+			if associate.MiddleName != "" {
+				associateNameStr := associate.GivenName + " " + associate.MiddleName + " " + associate.LastName
+				associateLexicalNameStr := associate.LastName + ", " + associate.MiddleName + ", " + associate.GivenName
+				associateLexicalNameStr = strings.Replace(associateLexicalNameStr, ", ,", ",", 0)
+				associateLexicalNameStr = strings.Replace(associateLexicalNameStr, "  ", " ", 0)
+
+				associateName = null.NewString(associateNameStr, true)
+				associateLexicalName = null.NewString(associateLexicalNameStr, true)
+			} else {
+				associateNameStr := associate.GivenName + " " + associate.LastName
+				associateLexicalNameStr := associate.LastName + ", " + associate.GivenName
+				associateLexicalNameStr = strings.Replace(associateLexicalNameStr, ", ,", ",", 0)
+				associateLexicalNameStr = strings.Replace(associateLexicalNameStr, "  ", " ", 0)
+
+				associateName = null.NewString(associateNameStr, true)
+				associateLexicalName = null.NewString(associateLexicalNameStr, true)
+			}
+		}
 	}
 
 	customerId, err := cr.GetIdByOldId(ctx, tid, oss.CustomerId)
 	if err != nil {
 		log.Panic("cr.GetIdByOldId | err", err)
 	}
+
+    // Lookup our customer record so we can generate the full name / lexical full name.
+	customer, err := cr.GetById(ctx, customerId)
+
+	// Generate our full name / lexical full name.
+	var customerName string
+	var customerLexicalName string
+	if customer.MiddleName != "" {
+		customerName = customer.GivenName + " " + customer.MiddleName + " " + customer.LastName
+		customerLexicalName = customer.LastName + ", " + customer.MiddleName + ", " + customer.GivenName
+	} else {
+		customerName = customer.GivenName + " " + customer.LastName
+		customerLexicalName = customer.LastName + ", " + customer.GivenName
+	}
+	customerLexicalName = strings.Replace(customerLexicalName, ", ,", ",", 0)
+	customerLexicalName = strings.Replace(customerLexicalName, "  ", " ", 0)
 
 	var state int8
 	switch s := oss.State; s {
@@ -324,7 +369,11 @@ func insertWorkOrderETL(
 		TenantId:                          tid,
 		Uuid:                              uuid.NewString(),
 		CustomerId:                        customerId,
+		CustomerName:                      customerName,
+		CustomerLexicalName:               customerLexicalName,
 		AssociateId:                       associateId,
+		AssociateName:                     associateName,
+		AssociateLexicalName:              associateLexicalName,
 		Description:                       oss.Description,
 		AssignmentDate:                    oss.AssignmentDate,
 		IsOngoing:                         oss.IsOngoing,

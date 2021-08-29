@@ -26,9 +26,9 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
     INSERT INTO users (
         uuid, tenant_id, email, first_name, last_name, password_algorithm, password_hash, state,
 		role_id, timezone, created_time, modified_time, joined_time, salt, was_email_activated,
-		pr_access_code, pr_expiry_time, old_id
+		pr_access_code, pr_expiry_time, old_id, name, lexical_name
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -40,7 +40,7 @@ func (r *UserRepo) Insert(ctx context.Context, m *models.User) error {
 		ctx,
 		m.Uuid, m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm, m.PasswordHash, m.State,
 		m.RoleId, m.Timezone, m.CreatedTime, m.ModifiedTime, m.JoinedTime, m.Salt, m.WasEmailActivated,
-		m.PrAccessCode, m.PrExpiryTime, m.OldId,
+		m.PrAccessCode, m.PrExpiryTime, m.OldId, m.Name, m.LexicalName,
 	)
 	return err
 }
@@ -55,7 +55,7 @@ func (r *UserRepo) UpdateById(ctx context.Context, m *models.User) error {
     SET
         tenant_id = $1, email = $2, first_name = $3, last_name = $4, password_algorithm = $5, password_hash = $6, state = $7,
 		role_id = $8, timezone = $9, created_time = $10, modified_time = $11, joined_time = $12, salt = $13, was_email_activated = $14,
-		pr_access_code = $15, pr_expiry_time = $16
+		pr_access_code = $15, pr_expiry_time = $16, name = $17, lexical_name = $18
     WHERE
         id = $17`
 	stmt, err := r.db.PrepareContext(ctx, query)
@@ -69,7 +69,7 @@ func (r *UserRepo) UpdateById(ctx context.Context, m *models.User) error {
 		m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm,
 		m.PasswordHash, m.State, m.RoleId, m.Timezone, m.CreatedTime, m.ModifiedTime,
 		m.JoinedTime, m.Salt, m.WasEmailActivated, m.PrAccessCode, m.PrExpiryTime,
-		m.Id,
+		m.Id, m.Name, m.LexicalName,
 	)
 	return err
 }
@@ -84,7 +84,7 @@ func (r *UserRepo) UpdateByEmail(ctx context.Context, m *models.User) error {
     SET
         tenant_id = $1, email = $2, first_name = $3, last_name = $4, password_algorithm = $5, password_hash = $6, state = $7,
 		role_id = $8, timezone = $9, created_time = $10, modified_time = $11, joined_time = $12, salt = $13, was_email_activated = $14,
-		pr_access_code = $15, pr_expiry_time = $16
+		pr_access_code = $15, pr_expiry_time = $16, name = $17, lexical_name = $18
     WHERE
         email = $2`
 	stmt, err := r.db.PrepareContext(ctx, query)
@@ -98,6 +98,7 @@ func (r *UserRepo) UpdateByEmail(ctx context.Context, m *models.User) error {
 		m.TenantId, m.Email, m.FirstName, m.LastName, m.PasswordAlgorithm,
 		m.PasswordHash, m.State, m.RoleId, m.Timezone, m.CreatedTime, m.ModifiedTime,
 		m.JoinedTime, m.Salt, m.WasEmailActivated, m.PrAccessCode, m.PrExpiryTime,
+		m.Name, m.LexicalName,
 	)
 	return err
 }
@@ -111,7 +112,8 @@ func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error)
 	query := `
     SELECT
         id, uuid, tenant_id, email, first_name, last_name, password_algorithm, password_hash, state,
-		role_id, timezone, created_time, modified_time, joined_time, salt, was_email_activated, pr_access_code, pr_expiry_time
+		role_id, timezone, created_time, modified_time, joined_time, salt, was_email_activated, pr_access_code, pr_expiry_time,
+		name, lexical_name
     FROM
         users
     WHERE
@@ -119,7 +121,7 @@ func (r *UserRepo) GetById(ctx context.Context, id uint64) (*models.User, error)
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordAlgorithm, &m.PasswordHash, &m.State,
 		&m.RoleId, &m.Timezone, &m.CreatedTime, &m.ModifiedTime, &m.JoinedTime, &m.Salt, &m.WasEmailActivated, &m.PrAccessCode,
-		&m.PrExpiryTime,
+		&m.PrExpiryTime, &m.Name, &m.LexicalName,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -141,7 +143,8 @@ func (r *UserRepo) GetByOldId(ctx context.Context, oldId uint64) (*models.User, 
 	query := `
     SELECT
         id, uuid, tenant_id, email, first_name, last_name, password_algorithm, password_hash, state,
-		role_id, timezone, created_time, modified_time, joined_time, salt, was_email_activated, pr_access_code, pr_expiry_time
+		role_id, timezone, created_time, modified_time, joined_time, salt, was_email_activated, pr_access_code, pr_expiry_time,
+		name, lexical_name
     FROM
         users
     WHERE
@@ -149,7 +152,7 @@ func (r *UserRepo) GetByOldId(ctx context.Context, oldId uint64) (*models.User, 
 	err := r.db.QueryRowContext(ctx, query, oldId).Scan(
 		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordAlgorithm, &m.PasswordHash, &m.State,
 		&m.RoleId, &m.Timezone, &m.CreatedTime, &m.ModifiedTime, &m.JoinedTime, &m.Salt, &m.WasEmailActivated, &m.PrAccessCode,
-		&m.PrExpiryTime,
+		&m.PrExpiryTime, &m.Name, &m.LexicalName,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
@@ -197,7 +200,8 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, 
 	query := `
     SELECT
         id, uuid, tenant_id, email, first_name, last_name, password_algorithm, password_hash, state,
-		role_id, timezone, created_time, modified_time, joined_time, salt, was_email_activated, pr_access_code, pr_expiry_time
+		role_id, timezone, created_time, modified_time, joined_time, salt, was_email_activated, pr_access_code, pr_expiry_time,
+		name, lexical_name
     FROM
         users
     WHERE
@@ -205,7 +209,7 @@ func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, 
 	err := r.db.QueryRowContext(ctx, query, email).Scan(
 		&m.Id, &m.Uuid, &m.TenantId, &m.Email, &m.FirstName, &m.LastName, &m.PasswordAlgorithm, &m.PasswordHash, &m.State,
 		&m.RoleId, &m.Timezone, &m.CreatedTime, &m.ModifiedTime, &m.JoinedTime, &m.Salt, &m.WasEmailActivated, &m.PrAccessCode,
-		&m.PrExpiryTime,
+		&m.PrExpiryTime, &m.Name, &m.LexicalName,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.
