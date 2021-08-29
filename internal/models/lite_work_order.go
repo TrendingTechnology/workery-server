@@ -10,22 +10,28 @@ import (
 // Structure used to encapsulate the various filters we want to apply when we
 // perform our `listing` functionality for the `LiteWorkOrder` model.
 type LiteWorkOrderFilter struct {
-	TenantId         uint64   `json:"tenant_id"`
-	States           []int8   `json:"states"`
-	LastModifiedById null.Int `json:"last_modified_by_id"`
-	SortOrder        string      `json:"sort_order"`
-	SortField        string      `json:"sort_field"`
-	Search           null.String `json:"search"`
-	Offset           uint64      `json:"offset"`
-	Limit            uint64   `json:"limit"`
+	TenantId             uint64   `json:"tenant_id"`
+	States               []int8   `json:"states"`
+	LastModifiedById     null.Int `json:"last_modified_by_id"`
+	AssociateName        null.String `json:"associate_name"`
+	AssociateLexicalName null.String `json:"associate_lexical_name"`
+	CustomerName         null.String `json:"customer_name"`
+	CustomerLexicalName  null.String `json:"customer_lexical_name"`
+	SortOrder            string      `json:"sort_order"`
+	SortField            string      `json:"sort_field"`
+	Search               null.String `json:"search"`
+	Offset               uint64      `json:"offset"`
+	Limit                uint64   `json:"limit"`
 }
 
 type LiteWorkOrder struct {
-	Id uint64 `json:"id"`
+	Id            uint64 `json:"id"`
 	// Uuid                              string      `json:"uuid"`
-	TenantId    uint64   `json:"tenant_id"`
-	CustomerId  uint64   `json:"customer_id"`
-	AssociateId null.Int `json:"associate_id"`
+	TenantId      uint64      `json:"tenant_id"`
+	CustomerId    uint64      `json:"customer_id"`
+	CustomerName  string      `json:"customer_name"`
+	AssociateId   null.Int    `json:"associate_id"`
+	AssociateName null.String `json:"associate_name"`
 	// Description                       string      `json:"description"`
 	AssignmentDate null.Time   `json:"assignment_date"`
 	IsOngoing                         bool        `json:"is_ongoing"`

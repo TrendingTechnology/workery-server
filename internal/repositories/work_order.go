@@ -39,12 +39,14 @@ func (r *WorkOrderRepo) Insert(ctx context.Context, m *models.WorkOrder) error {
 		invoice_total_quote_amount, visits, invoice_ids, no_survey_conducted_reason,
 		no_survey_conducted_reason_other, cloned_from_id, invoice_deposit_amount,
 		invoice_other_costs_amount, invoice_quoted_other_costs_amount, invoice_paid_to,
-		invoice_amount_due, invoice_sub_total_amount, closing_reason_comment, type_of
+		invoice_amount_due, invoice_sub_total_amount, closing_reason_comment, type_of,
+		customer_name, customer_lexical_name, associate_name, associate_lexical_name
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
 		$18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32,
 		$33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47,
-		$48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60
+		$48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62,
+		$63, $64
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -70,6 +72,7 @@ func (r *WorkOrderRepo) Insert(ctx context.Context, m *models.WorkOrder) error {
 		m.NoSurveyConductedReasonOther, m.ClonedFromId, m.InvoiceDepositAmount,
 		m.InvoiceOtherCostsAmount, m.InvoiceQuotedOtherCostsAmount, m.InvoicePaidTo,
 		m.InvoiceAmountDue, m.InvoiceSubTotalAmount, m.ClosingReasonComment, m.TypeOf,
+		m.CustomerName, m.CustomerLexicalName, m.AssociateName, m.AssociateLexicalName,
 	)
 	return err
 }

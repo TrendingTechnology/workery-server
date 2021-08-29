@@ -39,6 +39,26 @@ func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query strin
 		query += ` AND last_modified_by_id = $` + strconv.Itoa(len(filterValues))
 	}
 
+	if !f.AssociateName.IsZero() {
+		filterValues = append(filterValues, f.AssociateLexicalName)
+		query += ` AND associate_name = $` + strconv.Itoa(len(filterValues))
+	}
+
+	if !f.AssociateLexicalName.IsZero() {
+		filterValues = append(filterValues, f.AssociateLexicalName)
+		query += ` AND associate_lexical_name = $` + strconv.Itoa(len(filterValues))
+	}
+
+	if !f.CustomerName.IsZero() {
+		filterValues = append(filterValues, f.CustomerLexicalName)
+		query += ` AND customer_name = $` + strconv.Itoa(len(filterValues))
+	}
+
+	if !f.CustomerLexicalName.IsZero() {
+		filterValues = append(filterValues, f.CustomerLexicalName)
+		query += ` AND customer_lexical_name = $` + strconv.Itoa(len(filterValues))
+	}
+
 	if !f.Search.IsZero() {
 		log.Fatal("TODO: PLEASE IMPLEMENT")
 		// filterValues = append(filterValues, f.Search)
@@ -90,7 +110,9 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
 		tenant_id,
 		state,
 		customer_id,
+		customer_name,
 		associate_id,
+		associate_name,
 		assignment_date,
 		start_date,
 		type_of,
@@ -113,7 +135,9 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
 			&m.TenantId,
 			&m.State,
 			&m.CustomerId,
+			&m.CustomerName,
 			&m.AssociateId,
+			&m.AssociateName,
 			&m.AssignmentDate,
 			&m.StartDate,
 			&m.TypeOf,
