@@ -69,7 +69,7 @@ func runServeCmd() {
 	irr := repo.NewInsuranceRequirementRepo(db)
 	lar := repo.NewLiteAssociateRepo(db)
 	lcr := repo.NewLiteCustomerRepo(db)
-	ltar := repo.NewLiteTaskRepo(db)
+	ltar := repo.NewLiteTaskItemRepo(db)
 	ltr := repo.NewLiteTenantRepo(db)
 	lwor := repo.NewLiteWorkOrderRepo(db)
 	owor := repo.NewOngoingWorkOrderRepo(db)
@@ -120,14 +120,14 @@ func runServeCmd() {
 		InsuranceRequirementRepo:          irr,
 		LiteAssociateRepo:                 lar,
 		LiteCustomerRepo:                  lcr,
-		LiteTaskRepo:                      ltar,
+		LiteTaskItemRepo:                  ltar,
 		LiteTenantRepo:                    ltr,
 		LiteWorkOrderRepo:                 lwor,
 		OngoingWorkOrderRepo:              owor,
 		PartnerCommentRepo:                pcr,
 		PartnerRepo:                       pr,
 		PrivateFileRepo:                   pfr,
-		// PublicImageUploadRepo:               piur,
+		// PublicImageUploadRepo:          piur,
 		SkillSetInsuranceRequirementRepo: skillsirr,
 		SkillSetRepo:                     skillsr,
 		StaffCommentRepo:                 staffcr,

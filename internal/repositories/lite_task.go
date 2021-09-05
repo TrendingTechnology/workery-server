@@ -5,21 +5,22 @@ import (
 	"database/sql"
 	"strconv"
 	"time"
+	"log"
 
 	"github.com/over55/workery-server/internal/models"
 )
 
-type LiteTaskRepo struct {
+type LiteTaskItemRepo struct {
 	db *sql.DB
 }
 
-func NewLiteTaskRepo(db *sql.DB) *LiteTaskRepo {
-	return &LiteTaskRepo{
+func NewLiteTaskItemRepo(db *sql.DB) *LiteTaskItemRepo {
+	return &LiteTaskItemRepo{
 		db: db,
 	}
 }
 
-func (s *LiteTaskRepo) queryRowsWithFilter(ctx context.Context, query string, f *models.LiteTaskFilter) (*sql.Rows, error) {
+func (s *LiteTaskItemRepo) queryRowsWithFilter(ctx context.Context, query string, f *models.LiteTaskItemFilter) (*sql.Rows, error) {
 	// Array will hold all the unique values we want to add into the query.
 	var filterValues []interface{}
 
@@ -32,6 +33,12 @@ func (s *LiteTaskRepo) queryRowsWithFilter(ctx context.Context, query string, f 
 	//
 	// The following code will add our filters
 	//
+
+	if !f.Search.IsZero() {
+		log.Fatal("TODO: PLEASE IMPLEMENT")
+		// filterValues = append(filterValues, f.Search)
+		// query += `AND state = $` + strconv.Itoa(len(filterValues))
+	}
 
 	if len(f.States) > 0 {
 		query += ` AND (`
@@ -50,22 +57,22 @@ func (s *LiteTaskRepo) queryRowsWithFilter(ctx context.Context, query string, f 
 	// The following code will add our pagination.
 	//
 
-	if f.LastSeenId > 0 {
-		filterValues = append(filterValues, f.LastSeenId)
-		query += ` AND id < $` + strconv.Itoa(len(filterValues))
-	}
-	query += ` ORDER BY id `
+	query += ` ORDER BY ` + f.SortField + ` ` + f.SortOrder
 	filterValues = append(filterValues, f.Limit)
-	query += ` DESC LIMIT $` + strconv.Itoa(len(filterValues))
+	query += ` LIMIT $` + strconv.Itoa(len(filterValues))
+	filterValues = append(filterValues, f.Offset)
+	query += ` OFFSET $` + strconv.Itoa(len(filterValues))
 
 	//
 	// Execute our custom built SQL query to the database.
 	//
 
+    // log.Println("QUERY:", query)
+	// log.Println("VALUES:", filterValues)
 	return s.db.QueryContext(ctx, query, filterValues...)
 }
 
-func (s *LiteTaskRepo) ListByFilter(ctx context.Context, filter *models.LiteTaskFilter) ([]*models.LiteTask, error) {
+func (s *LiteTaskItemRepo) ListByFilter(ctx context.Context, filter *models.LiteTaskItemFilter) ([]*models.LiteTaskItem, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -73,9 +80,11 @@ func (s *LiteTaskRepo) ListByFilter(ctx context.Context, filter *models.LiteTask
     SELECT
         id,
 		tenant_id,
-		state
+		state,
+		due_date,
+		type_of
     FROM
-        work_orders
+        task_items
     `
 
 	rows, err := s.queryRowsWithFilter(ctx, querySelect, filter)
@@ -83,14 +92,16 @@ func (s *LiteTaskRepo) ListByFilter(ctx context.Context, filter *models.LiteTask
 		return nil, err
 	}
 
-	var arr []*models.LiteTask
+	var arr []*models.LiteTaskItem
 	defer rows.Close()
 	for rows.Next() {
-		m := new(models.LiteTask)
+		m := new(models.LiteTaskItem)
 		err := rows.Scan(
 			&m.Id,
 			&m.TenantId,
 			&m.State,
+			&m.DueDate,
+			&m.TypeOf,
 		)
 		if err != nil {
 			return nil, err
@@ -104,7 +115,7 @@ func (s *LiteTaskRepo) ListByFilter(ctx context.Context, filter *models.LiteTask
 	return arr, err
 }
 
-func (s *LiteTaskRepo) CountByFilter(ctx context.Context, f *models.LiteTaskFilter) (uint64, error) {
+func (s *LiteTaskItemRepo) CountByFilter(ctx context.Context, f *models.LiteTaskItemFilter) (uint64, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -120,7 +131,7 @@ func (s *LiteTaskRepo) CountByFilter(ctx context.Context, f *models.LiteTaskFilt
 	filterValues = append(filterValues, f.TenantId)
 	query := `
 	SELECT COUNT(id) FROM
-	    work_orders
+	    task_items
 	WHERE
 		tenant_id = $` + strconv.Itoa(len(filterValues))
 
@@ -147,6 +158,6 @@ func (s *LiteTaskRepo) CountByFilter(ctx context.Context, f *models.LiteTaskFilt
 
 	err := s.db.QueryRowContext(ctx, query, filterValues...).Scan(&count)
 
-	// Return our values.
+	// log.Println("QUERY:", query)
 	return count, err
 }

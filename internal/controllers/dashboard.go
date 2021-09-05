@@ -93,13 +93,13 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	tasksCountCh := make(chan uint64)
 	go func() {
-		f := &models.LiteTaskFilter{
+		f := &models.LiteTaskItemFilter{
 			TenantId: tenantId,
 			IsClosed: null.BoolFrom(false),
 		}
-		count, err := h.LiteTaskRepo.CountByFilter(ctx, f)
+		count, err := h.LiteTaskItemRepo.CountByFilter(ctx, f)
 		if err != nil {
-			log.Println("WARNING | dashboardEndpoint | LiteTaskRepo.CountByFilter|err:", err)
+			log.Println("WARNING | dashboardEndpoint | LiteTaskItemRepo.CountByFilter|err:", err)
 			tasksCountCh <- 0
 		} else {
 			tasksCountCh <- count
