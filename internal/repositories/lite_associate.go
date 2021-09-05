@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"strconv"
 	"time"
+	"log"
 
 	"github.com/over55/workery-server/internal/models"
 )
@@ -33,6 +34,12 @@ func (s *LiteAssociateRepo) queryRowsWithFilter(ctx context.Context, query strin
 	// The following code will add our filters
 	//
 
+	if !f.Search.IsZero() {
+		log.Fatal("TODO: PLEASE IMPLEMENT")
+		// filterValues = append(filterValues, f.Search)
+		// query += `AND state = $` + strconv.Itoa(len(filterValues))
+	}
+
 	if len(f.States) > 0 {
 		query += ` AND (`
 		for i, v := range f.States {
@@ -50,18 +57,18 @@ func (s *LiteAssociateRepo) queryRowsWithFilter(ctx context.Context, query strin
 	// The following code will add our pagination.
 	//
 
-	if f.LastSeenId > 0 {
-		filterValues = append(filterValues, f.LastSeenId)
-		query += ` AND id < $` + strconv.Itoa(len(filterValues))
-	}
-	query += ` ORDER BY id `
+	query += ` ORDER BY ` + f.SortField + ` ` + f.SortOrder
 	filterValues = append(filterValues, f.Limit)
-	query += ` DESC LIMIT $` + strconv.Itoa(len(filterValues))
+	query += ` LIMIT $` + strconv.Itoa(len(filterValues))
+	filterValues = append(filterValues, f.Offset)
+	query += ` OFFSET $` + strconv.Itoa(len(filterValues))
 
 	//
 	// Execute our custom built SQL query to the database.
 	//
 
+    // log.Println("QUERY:", query)
+	// log.Println("VALUES:", filterValues)
 	return s.db.QueryContext(ctx, query, filterValues...)
 }
 
@@ -73,9 +80,16 @@ func (s *LiteAssociateRepo) ListByFilter(ctx context.Context, filter *models.Lit
     SELECT
         id,
 		tenant_id,
-		state
+		state,
+		given_name,
+		last_name,
+		telephone,
+		telephone_type_of,
+		telephone_extension,
+		email,
+		join_date
     FROM
-        work_orders
+        associates
     `
 
 	rows, err := s.queryRowsWithFilter(ctx, querySelect, filter)
@@ -91,6 +105,13 @@ func (s *LiteAssociateRepo) ListByFilter(ctx context.Context, filter *models.Lit
 			&m.Id,
 			&m.TenantId,
 			&m.State,
+			&m.GivenName,
+			&m.LastName,
+			&m.Telephone,
+			&m.TelephoneTypeOf,
+			&m.TelephoneExtension,
+			&m.Email,
+			&m.JoinDate,
 		)
 		if err != nil {
 			return nil, err
@@ -120,7 +141,7 @@ func (s *LiteAssociateRepo) CountByFilter(ctx context.Context, f *models.LiteAss
 	filterValues = append(filterValues, f.TenantId)
 	query := `
 	SELECT COUNT(id) FROM
-	    work_orders
+	    associates
 	WHERE
 		tenant_id = $` + strconv.Itoa(len(filterValues))
 
@@ -147,6 +168,6 @@ func (s *LiteAssociateRepo) CountByFilter(ctx context.Context, f *models.LiteAss
 
 	err := s.db.QueryRowContext(ctx, query, filterValues...).Scan(&count)
 
-	// Return our values.
+	// log.Println("QUERY:", query)
 	return count, err
 }
