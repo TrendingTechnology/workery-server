@@ -82,7 +82,13 @@ func (s *LiteTaskItemRepo) ListByFilter(ctx context.Context, filter *models.Lite
 		tenant_id,
 		state,
 		due_date,
-		type_of
+		type_of,
+		customer_id,
+		customer_name,
+		customer_lexical_name,
+		associate_id,
+		associate_name,
+		associate_lexical_name,
     FROM
         task_items
     `
@@ -102,6 +108,12 @@ func (s *LiteTaskItemRepo) ListByFilter(ctx context.Context, filter *models.Lite
 			&m.State,
 			&m.DueDate,
 			&m.TypeOf,
+			&m.CustomerId,
+			&m.CustomerName,
+			&m.CustomerLexicalName,
+			&m.AssociateId,
+			&m.AssociateName,
+			&m.AssociateLexicalName,
 		)
 		if err != nil {
 			return nil, err

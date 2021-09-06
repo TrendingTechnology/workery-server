@@ -28,10 +28,11 @@ func (r *TaskItemRepo) Insert(ctx context.Context, m *models.TaskItem) error {
 		was_postponed, closing_reason, closing_reason_other, created_time,
 		created_from_ip, created_by_id, last_modified_time,
 		last_modified_from_ip, last_modified_by_id, order_id, ongoing_order_id,
-		state, old_id
+		state, customer_id, customer_name, customer_lexical_name,
+		associate_id, associate_name, associate_lexical_name, old_id
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-		$17, $18, $19, $20
+		$17, $18, $19, $20, $21, $22, $23, $24, $25, $26
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -44,7 +45,9 @@ func (r *TaskItemRepo) Insert(ctx context.Context, m *models.TaskItem) error {
 		m.Uuid, m.TenantId, m.TypeOf, m.Title, m.Description, m.DueDate, m.IsClosed,
 		m.WasPostponed, m.ClosingReason, m.ClosingReasonOther, m.CreatedTime,
 		m.CreatedFromIP, m.CreatedById, m.LastModifiedTime, m.LastModifiedFromIP,
-		m.LastModifiedById, m.OrderId, m.OngoingOrderId, m.State, m.OldId,
+		m.LastModifiedById, m.OrderId, m.OngoingOrderId,
+		m.State, m.CustomerId, m.CustomerName, m.CustomerLexicalName,
+		m.AssociateId, m.AssociateName, m.AssociateLexicalName, m.OldId,
 	)
 	return err
 }

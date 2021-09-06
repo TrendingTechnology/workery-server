@@ -65,6 +65,8 @@ func doRunImportTaskItem() {
 	wor := repositories.NewWorkOrderRepo(db)
 	owor := repositories.NewOngoingWorkOrderRepo(db)
 	ur := repositories.NewUserRepo(db)
+	ar := repositories.NewAssociateRepo(db)
+	cr := repositories.NewCustomerRepo(db)
 
 	// Lookup the tenant.
 	tenant, err := tr.GetBySchemaName(ctx, taskItemETLSchemaName)
@@ -75,7 +77,7 @@ func doRunImportTaskItem() {
 		log.Fatal("Tenant does not exist!")
 	}
 
-	runTaskItemETL(ctx, tenant.Id, tir, wor, owor, ur, oldDb)
+	runTaskItemETL(ctx, tenant.Id, tir, wor, owor, ur, ar, cr, oldDb)
 }
 
 type OldUTaskItem struct {
@@ -171,6 +173,8 @@ func runTaskItemETL(
 	wor *repositories.WorkOrderRepo,
 	owor *repositories.OngoingWorkOrderRepo,
 	ur *repositories.UserRepo,
+	ar *repositories.AssociateRepo,
+	cr *repositories.CustomerRepo,
 	oldDb *sql.DB,
 ) {
 	oldTaskItems, err := ListAllTaskItems(oldDb)
@@ -178,7 +182,7 @@ func runTaskItemETL(
 		log.Fatal(err)
 	}
 	for _, oti := range oldTaskItems {
-		insertTaskItemETL(ctx, tenantId, tir, wor, owor, ur, oti)
+		insertTaskItemETL(ctx, tenantId, tir, wor, owor, ur, ar, cr, oti)
 	}
 }
 
@@ -189,6 +193,8 @@ func insertTaskItemETL(
 	wor *repositories.WorkOrderRepo,
 	owor *repositories.OngoingWorkOrderRepo,
 	ur *repositories.UserRepo,
+	ar *repositories.AssociateRepo,
+	cr *repositories.CustomerRepo,
 	oti *OldUTaskItem,
 ) {
 	var state int8 = 1
@@ -199,6 +205,7 @@ func insertTaskItemETL(
 	// log.Println("LastModifiedById --->>", oti.LastModifiedById)
 
 	orderId, _ := wor.GetIdByOldId(ctx, tid, oti.JobId)
+	order, _ := wor.GetById(ctx, orderId)
 
 	var createdById null.Int
 	if oti.CreatedById.Valid {
@@ -222,26 +229,32 @@ func insertTaskItemETL(
 	}
 
 	m := &models.TaskItem{
-		TenantId:           tid,
-		Uuid:               uuid.NewString(),
-		TypeOf:             oti.TypeOf,
-		Title:              oti.Title,
-		Description:        oti.Description,
-		DueDate:            oti.DueDate,
-		IsClosed:           oti.IsClosed,
-		WasPostponed:       oti.WasPostponed,
-		ClosingReason:      oti.ClosingReason,
-		ClosingReasonOther: oti.ClosingReasonOther,
-		OrderId:            orderId,
-		OngoingOrderId:     ongoingJobId,
-		CreatedTime:        oti.CreatedAt,
-		CreatedFromIP:      oti.CreatedFrom,
-		CreatedById:        createdById,
-		LastModifiedTime:   oti.LastModifiedAt,
-		LastModifiedFromIP: oti.LastModifiedFrom,
-		LastModifiedById:   lastModifiedById,
-		State:              state,
-		OldId:              oti.Id,
+		TenantId:             tid,
+		Uuid:                 uuid.NewString(),
+		TypeOf:               oti.TypeOf,
+		Title:                oti.Title,
+		Description:          oti.Description,
+		DueDate:              oti.DueDate,
+		IsClosed:             oti.IsClosed,
+		WasPostponed:         oti.WasPostponed,
+		ClosingReason:        oti.ClosingReason,
+		ClosingReasonOther:   oti.ClosingReasonOther,
+		OrderId:              orderId,
+		OngoingOrderId:       ongoingJobId,
+		CreatedTime:          oti.CreatedAt,
+		CreatedFromIP:        oti.CreatedFrom,
+		CreatedById:          createdById,
+		LastModifiedTime:     oti.LastModifiedAt,
+		LastModifiedFromIP:   oti.LastModifiedFrom,
+		LastModifiedById:     lastModifiedById,
+		State:                state,
+		OldId:                oti.Id,
+		AssociateId:          order.AssociateId,
+		AssociateName:        order.AssociateName,
+		AssociateLexicalName: order.AssociateLexicalName,
+		CustomerId:           null.NewInt(int64(order.CustomerId), order.CustomerId != 0),
+		CustomerName:         null.NewString(order.CustomerName, order.CustomerName != ""),
+		CustomerLexicalName:  null.NewString(order.CustomerLexicalName, order.CustomerLexicalName != ""),
 	}
 	err := tir.Insert(ctx, m)
 	if err != nil {

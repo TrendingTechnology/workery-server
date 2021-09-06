@@ -956,11 +956,19 @@ CREATE TABLE task_items (
     last_modified_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     old_id BIGINT NOT NULL DEFAULT 0,
     state SMALLINT NOT NULL DEFAULT 0,
+    customer_id BIGINT NULL,
+    customer_name VARCHAR (255) NULL DEFAULT '',
+    customer_lexical_name VARCHAR (255) NULL DEFAULT '',
+    associate_id BIGINT NULL,
+    associate_name VARCHAR (255) NULL DEFAULT '',
+    associate_lexical_name VARCHAR (255) NULL DEFAULT '',
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (order_id) REFERENCES work_orders(id),
     FOREIGN KEY (ongoing_order_id) REFERENCES ongoing_work_orders(id),
     FOREIGN KEY (created_by_id) REFERENCES users(id),
-    FOREIGN KEY (last_modified_by_id) REFERENCES users(id)
+    FOREIGN KEY (last_modified_by_id) REFERENCES users(id),
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    FOREIGN KEY (associate_id) REFERENCES associates(id)
 );
 CREATE INDEX idx_task_item_tenant_id
 ON task_items (tenant_id);
@@ -974,6 +982,10 @@ CREATE INDEX idx_task_item_last_modified_by_id
 ON task_items (last_modified_by_id);
 CREATE UNIQUE INDEX idx_task_item_uuid
 ON task_items (uuid);
+CREATE INDEX idx_task_item_customer_id
+ON task_items (customer_id);
+CREATE INDEX idx_task_item_associate_id
+ON task_items (associate_id);
 
 CREATE TABLE customers (
     -- customer.py
