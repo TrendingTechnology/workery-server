@@ -40,7 +40,7 @@ func (h *Controller) taskItemsListEndpoint(w http.ResponseWriter, r *http.Reques
 
     // DEVELOPERS NOTE:
 	// - Write code to handle filtering by states.
-	var states []int8 = []int8{1}
+	var states []int8 = []int8{1} // TECHDEBT
 
 	// Start by defining our base listing filter and then append depending on
 	// different cases.
@@ -52,6 +52,7 @@ func (h *Controller) taskItemsListEndpoint(w http.ResponseWriter, r *http.Reques
 		States:     states,
 		Offset:     offsetParam,
 		Limit:      limitParam,
+		IsClosed:   null.BoolFrom(false), // TECHDEBT
 	}
 
     // // For debugging purposes only.
