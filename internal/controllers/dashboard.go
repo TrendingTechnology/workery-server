@@ -237,12 +237,33 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Controller) navigationEndpoint(w http.ResponseWriter, r *http.Request) {
-	// ctx := r.Context()
-	// tenantId := uint64(ctx.Value("user_tenant_id").(uint64))
+	ctx := r.Context()
+	tenantId := uint64(ctx.Value("user_tenant_id").(uint64))
 	// userId := uint64(ctx.Value("user_id").(uint64))
 
+	//
+	// Find "tasks_count".
+	//
+
+	tasksCountCh := make(chan uint64)
+	go func() {
+		f := &models.LiteTaskItemFilter{
+			TenantId: tenantId,
+			IsClosed: null.BoolFrom(false),
+		}
+		count, err := h.LiteTaskItemRepo.CountByFilter(ctx, f)
+		if err != nil {
+			log.Println("WARNING | dashboardEndpoint | LiteTaskItemRepo.CountByFilter|err:", err)
+			tasksCountCh <- 0
+		} else {
+			tasksCountCh <- count
+		}
+	}()
+
+	tc := <-tasksCountCh
+
 	res := &idos.NavigationIDO{
-		TasksCount: 123,
+		TasksCount: tc,
 	}
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

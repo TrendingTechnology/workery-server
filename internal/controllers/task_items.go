@@ -31,11 +31,11 @@ func (h *Controller) taskItemsListEndpoint(w http.ResponseWriter, r *http.Reques
 	searchString := r.FormValue("search")
 	sortOrderString := r.FormValue("sort_order")
 	if sortOrderString == "" {
-		sortOrderString = "ASC"
+		sortOrderString = "DESC"
 	}
 	sortFieldString := r.FormValue("sort_field")
 	if sortFieldString == "" {
-		sortFieldString = "id"
+		sortFieldString = "due_date"
 	}
 
     // DEVELOPERS NOTE:

@@ -34,6 +34,11 @@ func (s *LiteTaskItemRepo) queryRowsWithFilter(ctx context.Context, query string
 	// The following code will add our filters
 	//
 
+	if !f.IsClosed.IsZero() {
+		filterValues = append(filterValues, f.IsClosed.ValueOrZero())
+		query += ` AND is_closed = $` + strconv.Itoa(len(filterValues))
+	}
+
 	if !f.Search.IsZero() {
 		log.Fatal("TODO: PLEASE IMPLEMENT")
 		// filterValues = append(filterValues, f.Search)
@@ -88,7 +93,7 @@ func (s *LiteTaskItemRepo) ListByFilter(ctx context.Context, filter *models.Lite
 		customer_lexical_name,
 		associate_id,
 		associate_name,
-		associate_lexical_name,
+		associate_lexical_name
     FROM
         task_items
     `
@@ -151,6 +156,17 @@ func (s *LiteTaskItemRepo) CountByFilter(ctx context.Context, f *models.LiteTask
 	// The following code will add our filters
 	//
 
+	if !f.IsClosed.IsZero() {
+		filterValues = append(filterValues, f.IsClosed.ValueOrZero())
+		query += ` AND is_closed = $` + strconv.Itoa(len(filterValues))
+	}
+
+	if !f.Search.IsZero() {
+		log.Fatal("TODO: PLEASE IMPLEMENT")
+		// filterValues = append(filterValues, f.Search)
+		// query += `AND state = $` + strconv.Itoa(len(filterValues))
+	}
+
 	if len(f.States) > 0 {
 		query += ` AND (`
 		for i, v := range f.States {
@@ -171,5 +187,6 @@ func (s *LiteTaskItemRepo) CountByFilter(ctx context.Context, f *models.LiteTask
 	err := s.db.QueryRowContext(ctx, query, filterValues...).Scan(&count)
 
 	// log.Println("QUERY:", query)
+	// log.Println("VALUES:", filterValues)
 	return count, err
 }
