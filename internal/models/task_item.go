@@ -45,6 +45,7 @@ type TaskItem struct {
 	AssociateId          null.Int    `json:"associate_id"`                     // 25
 	AssociateName        null.String `json:"associate_name,omitempty"`         // 26
 	AssociateLexicalName null.String `json:"associate_lexical_name,omitempty"` // 27
+	OrderTypeOf          int8        `json:"order_type_of"`                    // 28
 }
 
 type TaskItemRepository interface {

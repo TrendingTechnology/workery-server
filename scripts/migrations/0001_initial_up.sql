@@ -947,6 +947,7 @@ CREATE TABLE task_items (
     closing_reason SMALLINT NOT NULL DEFAULT 0,
     closing_reason_other VARCHAR (1024) NOT NULL DEFAULT '',
     order_id BIGINT NOT NULL,
+    order_type_of SMALLINT NOT NULL DEFAULT 0,
     ongoing_order_id BIGINT NULL,
     created_time TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     created_from_ip VARCHAR (50) NULL DEFAULT '',

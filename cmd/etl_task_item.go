@@ -240,6 +240,7 @@ func insertTaskItemETL(
 		ClosingReason:        oti.ClosingReason,
 		ClosingReasonOther:   oti.ClosingReasonOther,
 		OrderId:              orderId,
+		OrderTypeOf:          order.TypeOf,
 		OngoingOrderId:       ongoingJobId,
 		CreatedTime:          oti.CreatedAt,
 		CreatedFromIP:        oti.CreatedFrom,
