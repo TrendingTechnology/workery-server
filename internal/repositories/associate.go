@@ -121,7 +121,7 @@ func (r *AssociateRepo) GetById(ctx context.Context, id uint64) (*models.Associa
         associates
     WHERE
         id = $1`
-		
+
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&m.Id, &m.Uuid, &m.TenantId, &m.UserId, &m.TypeOf, &m.OrganizationName, &m.OrganizationTypeOf,
 		&m.Business, &m.IndexedText, &m.IsOkToEmail, &m.IsOkToText, &m.HourlySalaryDesired,

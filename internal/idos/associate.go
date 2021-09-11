@@ -7,19 +7,19 @@ import (
 )
 
 type LiteAssociateFilterIDO struct {
-	TenantId   uint64      `json:"tenant_id"`
-	States     []int8      `json:"states"`
-	SortOrder  null.String `json:"sort_order"`
-	SortField  null.String `json:"sort_field"`
-	Search     null.String `json:"search"`
-	Offset     uint64      `json:"last_seen_id"`
-	Limit      uint64      `json:"limit"`
+	TenantId  uint64      `json:"tenant_id"`
+	States    []int8      `json:"states"`
+	SortOrder null.String `json:"sort_order"`
+	SortField null.String `json:"sort_field"`
+	Search    null.String `json:"search"`
+	Offset    uint64      `json:"last_seen_id"`
+	Limit     uint64      `json:"limit"`
 }
 
 type LiteAssociateListResponseIDO struct {
-	NextId        uint64             `json:"next_id,omitempty"`
-	Count         uint64             `json:"count"`
-	Results       []*models.LiteAssociate `json:"results"`
+	NextId  uint64                  `json:"next_id,omitempty"`
+	Count   uint64                  `json:"count"`
+	Results []*models.LiteAssociate `json:"results"`
 }
 
 func NewLiteAssociateListResponseIDO(arr []*models.LiteAssociate, count uint64) *LiteAssociateListResponseIDO {
@@ -31,9 +31,9 @@ func NewLiteAssociateListResponseIDO(arr []*models.LiteAssociate, count uint64) 
 	}
 
 	res := &LiteAssociateListResponseIDO{ // Return through HTTP.
-		Count:     count,
-		Results:       arr,
-		NextId: nextId,
+		Count:   count,
+		Results: arr,
+		NextId:  nextId,
 	}
 
 	return res

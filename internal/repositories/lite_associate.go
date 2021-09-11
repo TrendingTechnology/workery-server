@@ -3,9 +3,9 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"log"
 	"strconv"
 	"time"
-	"log"
 
 	"github.com/over55/workery-server/internal/models"
 )
@@ -67,7 +67,7 @@ func (s *LiteAssociateRepo) queryRowsWithFilter(ctx context.Context, query strin
 	// Execute our custom built SQL query to the database.
 	//
 
-    // log.Println("QUERY:", query)
+	// log.Println("QUERY:", query)
 	// log.Println("VALUES:", filterValues)
 	return s.db.QueryContext(ctx, query, filterValues...)
 }

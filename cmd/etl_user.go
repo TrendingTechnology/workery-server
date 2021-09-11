@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -155,7 +155,7 @@ func runUserInsert(ou *OldUser, tr *repositories.TenantRepo, ur *repositories.Us
 		log.Fatal(err)
 	}
 
-    lexicalName := ou.LastName + ", " + ou.FirstName
+	lexicalName := ou.LastName + ", " + ou.FirstName
 	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
 	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
 

@@ -6,7 +6,7 @@ import (
 	"github.com/over55/workery-server/internal/models"
 )
 
-type LiteTaskItemFilterIDO struct {
+type LiteOngoingWorkOrderFilterIDO struct {
 	TenantId  uint64      `json:"tenant_id"`
 	States    []int8      `json:"states"`
 	SortOrder null.String `json:"sort_order"`
@@ -16,13 +16,13 @@ type LiteTaskItemFilterIDO struct {
 	Limit     uint64      `json:"limit"`
 }
 
-type LiteTaskItemListResponseIDO struct {
-	NextId  uint64                 `json:"next_id,omitempty"`
-	Count   uint64                 `json:"count"`
-	Results []*models.LiteTaskItem `json:"results"`
+type LiteOngoingWorkOrderListResponseIDO struct {
+	NextId  uint64                         `json:"next_id,omitempty"`
+	Count   uint64                         `json:"count"`
+	Results []*models.LiteOngoingWorkOrder `json:"results"`
 }
 
-func NewLiteTaskItemListResponseIDO(arr []*models.LiteTaskItem, count uint64) *LiteTaskItemListResponseIDO {
+func NewLiteOngoingWorkOrderListResponseIDO(arr []*models.LiteOngoingWorkOrder, count uint64) *LiteOngoingWorkOrderListResponseIDO {
 	// Calculate next id.
 	var nextId uint64
 	if len(arr) > 0 {
@@ -30,7 +30,7 @@ func NewLiteTaskItemListResponseIDO(arr []*models.LiteTaskItem, count uint64) *L
 		nextId = lastRecord.Id
 	}
 
-	res := &LiteTaskItemListResponseIDO{ // Return through HTTP.
+	res := &LiteOngoingWorkOrderListResponseIDO{ // Return through HTTP.
 		Count:   count,
 		Results: arr,
 		NextId:  nextId,

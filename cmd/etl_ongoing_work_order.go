@@ -155,6 +155,8 @@ func insertOngoingWorkOrderETL(
 	oss *OldOngoingWorkOrder,
 ) {
 	var associateId null.Int
+	var associateName null.String
+	var associateLexicalName null.String
 	if oss.AssociateId.Valid {
 		associateIdInt64 := oss.AssociateId.ValueOrZero()
 		associateIdUint64, err := ar.GetIdByOldId(ctx, tid, uint64(associateIdInt64))
@@ -164,9 +166,19 @@ func insertOngoingWorkOrderETL(
 
 		// Convert from null supported integer times.
 		associateId = null.NewInt(int64(associateIdUint64), associateIdUint64 != 0)
+
+		associate, err := ar.GetById(ctx, associateIdUint64)
+		if err != nil {
+			log.Panic("ar.GetById | err", err)
+		}
+		if associate != nil {
+			associateName = null.NewString(associate.Name, associate.Name != "")
+			associateLexicalName = null.NewString(associate.LexicalName, associate.LexicalName != "")
+		}
 	}
 
 	customerId, err := cr.GetIdByOldId(ctx, tid, oss.CustomerId)
+    customer, err := cr.GetById(ctx, customerId)
 
 	var state int8 = 1 // Running
 	if oss.State == "terminated" {
@@ -174,18 +186,22 @@ func insertOngoingWorkOrderETL(
 	}
 
 	m := &models.OngoingWorkOrder{
-		OldId:              oss.Id,
-		TenantId:           tid,
-		Uuid:               uuid.NewString(),
-		CustomerId:         customerId,
-		AssociateId:        associateId,
-		State:              state,
-		CreatedTime:        oss.CreatedAt,
-		CreatedById:        oss.CreatedById,
-		CreatedFromIP:      oss.CreatedFrom,
-		LastModifiedTime:   oss.LastModifiedAt,
-		LastModifiedById:   oss.LastModifiedById,
-		LastModifiedFromIP: oss.LastModifiedFrom,
+		OldId:                oss.Id,
+		TenantId:             tid,
+		Uuid:                 uuid.NewString(),
+		CustomerId:           customerId,
+		CustomerName:         null.NewString(customer.Name, customer.Name != ""),
+		CustomerLexicalName:  null.NewString(customer.LexicalName, customer.LexicalName != ""),
+		AssociateId:          associateId,
+		AssociateName:        associateName,
+		AssociateLexicalName: associateLexicalName,
+		State:                state,
+		CreatedTime:          oss.CreatedAt,
+		CreatedById:          oss.CreatedById,
+		CreatedFromIP:        oss.CreatedFrom,
+		LastModifiedTime:     oss.LastModifiedAt,
+		LastModifiedById:     oss.LastModifiedById,
+		LastModifiedFromIP:   oss.LastModifiedFrom,
 	}
 	err = asr.Insert(ctx, m)
 	if err != nil {

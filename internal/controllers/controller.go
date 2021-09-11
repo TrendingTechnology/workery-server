@@ -30,6 +30,7 @@ type Controller struct {
 	LiteTaskItemRepo                  models.LiteTaskItemRepository
 	LiteTenantRepo                    models.LiteTenantRepository
 	LiteWorkOrderRepo                 models.LiteWorkOrderRepository
+	LiteOngoingWorkOrderRepo          models.LiteOngoingWorkOrderRepository
 	OngoingWorkOrderRepo              models.OngoingWorkOrderRepository
 	PartnerCommentRepo                models.PartnerCommentRepository
 	PartnerRepo                       models.PartnerRepository
@@ -88,21 +89,25 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	case n == 2 && p[0] == "v1" && p[1] == "navigation" && r.Method == http.MethodGet:
 		h.navigationEndpoint(w, r)
 
-	// --- CUSTOMERS ---
-    case n == 2 && p[0] == "v1" && p[1] == "customers" && r.Method == http.MethodGet:
+		// --- CUSTOMERS ---
+	case n == 2 && p[0] == "v1" && p[1] == "customers" && r.Method == http.MethodGet:
 		h.customersListEndpoint(w, r)
 
-	// --- WORK ORDERS ---
-    case n == 2 && p[0] == "v1" && p[1] == "orders" && r.Method == http.MethodGet:
+		// --- WORK ORDERS ---
+	case n == 2 && p[0] == "v1" && p[1] == "orders" && r.Method == http.MethodGet:
 		h.workOrdersListEndpoint(w, r)
 
-	// --- ASSOCIATES ---
-    case n == 2 && p[0] == "v1" && p[1] == "associates" && r.Method == http.MethodGet:
+		// --- ASSOCIATES ---
+	case n == 2 && p[0] == "v1" && p[1] == "associates" && r.Method == http.MethodGet:
 		h.associatesListEndpoint(w, r)
 
-	// --- TASKS ---
-    case n == 2 && p[0] == "v1" && p[1] == "tasks" && r.Method == http.MethodGet:
+		// --- TASKS ---
+	case n == 2 && p[0] == "v1" && p[1] == "tasks" && r.Method == http.MethodGet:
 		h.taskItemsListEndpoint(w, r)
+
+		// --- ONGOING WORK ORDERS ---
+	case n == 2 && p[0] == "v1" && p[1] == "ongoing-orders" && r.Method == http.MethodGet:
+		h.ongoingWorkOrdersListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:

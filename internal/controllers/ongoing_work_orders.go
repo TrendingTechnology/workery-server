@@ -15,7 +15,7 @@ import (
 	"github.com/over55/workery-server/internal/models"
 )
 
-func (h *Controller) workOrdersListEndpoint(w http.ResponseWriter, r *http.Request) {
+func (h *Controller) ongoingWorkOrdersListEndpoint(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	tenantId := uint64(ctx.Value("user_tenant_id").(uint64))
 	// userId := uint64(ctx.Value("user_id").(uint64))
@@ -31,22 +31,25 @@ func (h *Controller) workOrdersListEndpoint(w http.ResponseWriter, r *http.Reque
 	searchString := r.FormValue("search")
 	sortOrderString := r.FormValue("sort_order")
 	if sortOrderString == "" {
-		sortOrderString = "ASC"
+		sortOrderString = "DESC"
 	}
 	sortFieldString := r.FormValue("sort_field")
 	if sortFieldString == "" {
-		sortFieldString = "last_name"
+		sortFieldString = "id"
 	}
+	stateParamString := r.FormValue("state")
+	stateParam, _ := strconv.ParseUint(stateParamString, 10, 64)
 
 	// Start by defining our base listing filter and then append depending on
 	// different cases.
-	f := models.LiteWorkOrderFilter{
+	f := models.LiteOngoingWorkOrderFilter{
 		TenantId:  tenantId,
 		SortField: sortFieldString,
 		SortOrder: sortOrderString,
 		Search:    null.NewString(searchString, searchString != ""),
 		Offset:    offsetParam,
 		Limit:     limitParam,
+		States:    []int8{int8(stateParam),},
 	}
 
 	// // For debugging purposes only.
@@ -57,13 +60,13 @@ func (h *Controller) workOrdersListEndpoint(w http.ResponseWriter, r *http.Reque
 	// log.Println("SortOrder", f.SortOrder)
 	// log.Println("SortField", f.SortField)
 
-	arrCh := make(chan []*models.LiteWorkOrder)
+	arrCh := make(chan []*models.LiteOngoingWorkOrder)
 	countCh := make(chan uint64)
 
 	go func() {
-		arr, err := h.LiteWorkOrderRepo.ListByFilter(ctx, &f)
+		arr, err := h.LiteOngoingWorkOrderRepo.ListByFilter(ctx, &f)
 		if err != nil {
-			log.Println("WARNING: workOrdersListEndpoint|ListByFilter|err:", err.Error())
+			log.Println("WARNING: ongoingWorkOrdersListEndpoint|ListByFilter|err:", err.Error())
 			arrCh <- nil
 			return
 		}
@@ -71,9 +74,9 @@ func (h *Controller) workOrdersListEndpoint(w http.ResponseWriter, r *http.Reque
 	}()
 
 	go func() {
-		count, err := h.LiteWorkOrderRepo.CountByFilter(ctx, &f)
+		count, err := h.LiteOngoingWorkOrderRepo.CountByFilter(ctx, &f)
 		if err != nil {
-			log.Println("WARNING: workOrdersListEndpoint|CountByFilter|err:", err.Error())
+			log.Println("WARNING: ongoingWorkOrdersListEndpoint|CountByFilter|err:", err.Error())
 			countCh <- 0
 			return
 		}
@@ -82,7 +85,7 @@ func (h *Controller) workOrdersListEndpoint(w http.ResponseWriter, r *http.Reque
 
 	arr, count := <-arrCh, <-countCh
 
-	res := idos.NewLiteWorkOrderListResponseIDO(arr, count)
+	res := idos.NewLiteOngoingWorkOrderListResponseIDO(arr, count)
 
 	if err := json.NewEncoder(w).Encode(&res); err != nil { // [2]
 		http.Error(w, err.Error(), http.StatusInternalServerError)

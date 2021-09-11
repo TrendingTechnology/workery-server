@@ -11,8 +11,8 @@ import (
 	// "github.com/google/uuid"
 	null "gopkg.in/guregu/null.v4"
 
-	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/idos"
+	"github.com/over55/workery-server/internal/models"
 )
 
 func (h *Controller) associatesListEndpoint(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +25,7 @@ func (h *Controller) associatesListEndpoint(w http.ResponseWriter, r *http.Reque
 	offsetParam, _ := strconv.ParseUint(offsetParamString, 10, 64)
 	limitParamString := r.FormValue("limit")
 	limitParam, _ := strconv.ParseUint(limitParamString, 10, 64)
-	if limitParam == 0 {
+	if limitParam == 0 || limitParam > 500 {
 		limitParam = 25
 	}
 	searchString := r.FormValue("search")
@@ -38,23 +38,23 @@ func (h *Controller) associatesListEndpoint(w http.ResponseWriter, r *http.Reque
 		sortFieldString = "lexical_name"
 	}
 
-    // DEVELOPERS NOTE:
+	// DEVELOPERS NOTE:
 	// - Write code to handle filtering by states.
 	var states []int8 = []int8{1}
 
 	// Start by defining our base listing filter and then append depending on
 	// different cases.
 	f := models.LiteAssociateFilter{
-		TenantId:   tenantId,
-		SortField:  sortFieldString,
-		SortOrder:  sortOrderString,
-		Search:     null.NewString(searchString, searchString != ""),
-		States:     states,
-		Offset:     offsetParam,
-		Limit:      limitParam,
+		TenantId:  tenantId,
+		SortField: sortFieldString,
+		SortOrder: sortOrderString,
+		Search:    null.NewString(searchString, searchString != ""),
+		States:    states,
+		Offset:    offsetParam,
+		Limit:     limitParam,
 	}
 
-    // // For debugging purposes only.
+	// // For debugging purposes only.
 	// log.Println("TenantId", f.TenantId)
 	// log.Println("Search", f.Search)
 	// log.Println("Offset", f.Offset)
@@ -85,7 +85,7 @@ func (h *Controller) associatesListEndpoint(w http.ResponseWriter, r *http.Reque
 		countCh <- count
 	}()
 
-	arr, count := <- arrCh, <- countCh
+	arr, count := <-arrCh, <-countCh
 
 	res := idos.NewLiteAssociateListResponseIDO(arr, count)
 

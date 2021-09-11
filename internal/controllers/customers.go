@@ -11,8 +11,8 @@ import (
 	// "github.com/google/uuid"
 	null "gopkg.in/guregu/null.v4"
 
-	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/idos"
+	"github.com/over55/workery-server/internal/models"
 )
 
 func (h *Controller) customersListEndpoint(w http.ResponseWriter, r *http.Request) {
@@ -25,6 +25,9 @@ func (h *Controller) customersListEndpoint(w http.ResponseWriter, r *http.Reques
 	offsetParam, _ := strconv.ParseUint(offsetParamString, 10, 64)
 	limitParamString := r.FormValue("limit")
 	limitParam, _ := strconv.ParseUint(limitParamString, 10, 64)
+	if limitParam == 0 || limitParam > 500 {
+		limitParam = 100
+	}
 	searchString := r.FormValue("search")
 	sortOrderString := r.FormValue("sort_order")
 	if sortOrderString == "" {
@@ -38,15 +41,15 @@ func (h *Controller) customersListEndpoint(w http.ResponseWriter, r *http.Reques
 	// Start by defining our base listing filter and then append depending on
 	// different cases.
 	f := models.LiteCustomerFilter{
-		TenantId:   tenantId,
-		SortField:  sortFieldString,
-		SortOrder:  sortOrderString,
-		Search:     null.NewString(searchString, searchString != ""),
-		Offset:     offsetParam,
-		Limit:      limitParam,
+		TenantId:  tenantId,
+		SortField: sortFieldString,
+		SortOrder: sortOrderString,
+		Search:    null.NewString(searchString, searchString != ""),
+		Offset:    offsetParam,
+		Limit:     limitParam,
 	}
 
-    // // For debugging purposes only.
+	// // For debugging purposes only.
 	// log.Println("TenantId", f.TenantId)
 	// log.Println("Search", f.Search)
 	// log.Println("Offset", f.Offset)
@@ -61,6 +64,7 @@ func (h *Controller) customersListEndpoint(w http.ResponseWriter, r *http.Reques
 		arr, err := h.LiteCustomerRepo.ListByFilter(ctx, &f)
 		if err != nil {
 			log.Println("WARNING: customersListEndpoint|ListByFilter|err:", err.Error())
+			arrCh <- nil
 			return
 		}
 		arrCh <- arr[:]
@@ -70,12 +74,13 @@ func (h *Controller) customersListEndpoint(w http.ResponseWriter, r *http.Reques
 		count, err := h.LiteCustomerRepo.CountByFilter(ctx, &f)
 		if err != nil {
 			log.Println("WARNING: customersListEndpoint|CountByFilter|err:", err.Error())
+			countCh <- 0
 			return
 		}
 		countCh <- count
 	}()
 
-	arr, count := <- arrCh, <- countCh
+	arr, count := <-arrCh, <-countCh
 
 	res := idos.NewLiteCustomerListResponseIDO(arr, count)
 

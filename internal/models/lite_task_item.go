@@ -10,14 +10,14 @@ import (
 // Structure used to encapsulate the various filters we want to apply when we
 // perform our `listing` functionality for the `LiteTaskItem` model.
 type LiteTaskItemFilter struct {
-	TenantId   uint64      `json:"tenant_id"`
-	States     []int8      `json:"states"`
-	SortOrder  string      `json:"sort_order"`
-	SortField  string      `json:"sort_field"`
-	IsClosed   null.Bool   `json:"is_closed"`
-	Search     null.String `json:"search"`
-	Offset     uint64      `json:"offset"`
-	Limit      uint64      `json:"limit"`
+	TenantId  uint64      `json:"tenant_id"`
+	States    []int8      `json:"states"`
+	SortOrder string      `json:"sort_order"`
+	SortField string      `json:"sort_field"`
+	IsClosed  null.Bool   `json:"is_closed"`
+	Search    null.String `json:"search"`
+	Offset    uint64      `json:"offset"`
+	Limit     uint64      `json:"limit"`
 }
 
 type LiteTaskItem struct {

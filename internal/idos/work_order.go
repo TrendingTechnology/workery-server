@@ -7,19 +7,19 @@ import (
 )
 
 type LiteWorkOrderFilterIDO struct {
-	TenantId   uint64      `json:"tenant_id"`
-	States     []int8      `json:"states"`
-	SortOrder  null.String `json:"sort_order"`
-	SortField  null.String `json:"sort_field"`
-	Search     null.String `json:"search"`
-	Offset     uint64      `json:"last_seen_id"`
-	Limit      uint64      `json:"limit"`
+	TenantId  uint64      `json:"tenant_id"`
+	States    []int8      `json:"states"`
+	SortOrder null.String `json:"sort_order"`
+	SortField null.String `json:"sort_field"`
+	Search    null.String `json:"search"`
+	Offset    uint64      `json:"last_seen_id"`
+	Limit     uint64      `json:"limit"`
 }
 
 type LiteWorkOrderListResponseIDO struct {
-	NextId        uint64                  `json:"next_id,omitempty"`
-	Count         uint64                  `json:"count"`
-	Results       []*models.LiteWorkOrder `json:"results"`
+	NextId  uint64                  `json:"next_id,omitempty"`
+	Count   uint64                  `json:"count"`
+	Results []*models.LiteWorkOrder `json:"results"`
 }
 
 func NewLiteWorkOrderListResponseIDO(arr []*models.LiteWorkOrder, count uint64) *LiteWorkOrderListResponseIDO {
@@ -31,9 +31,9 @@ func NewLiteWorkOrderListResponseIDO(arr []*models.LiteWorkOrder, count uint64) 
 	}
 
 	res := &LiteWorkOrderListResponseIDO{ // Return through HTTP.
-		Count:     count,
-		Results:       arr,
-		NextId: nextId,
+		Count:   count,
+		Results: arr,
+		NextId:  nextId,
 	}
 
 	return res

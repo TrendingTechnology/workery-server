@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -275,8 +275,8 @@ func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, 
 				LexicalName: lexicalName,
 				Email:       email,
 				// JoinedTime:        om.DateJoined,
-				State:       state,
-				Timezone:    "America/Toronto",
+				State:    state,
+				Timezone: "America/Toronto",
 				// CreatedTime:       om.DateJoined,
 				// ModifiedTime:      om.LastModified,
 				Salt:              "",

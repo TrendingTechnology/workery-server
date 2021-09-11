@@ -54,10 +54,10 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 				models.WorkOrderOngoingState,
 				models.WorkOrderInProgressState,
 			},
-			SortField:        "last_modified_time",
-			SortOrder:        "ASC",
-			Offset:           0,
-			Limit:            1000,
+			SortField: "last_modified_time",
+			SortOrder: "ASC",
+			Offset:    0,
+			Limit:     1000,
 		}
 		count, err := h.LiteWorkOrderRepo.CountByFilter(ctx, f)
 		if err != nil {
@@ -174,11 +174,11 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 	lmbtCh := make(chan []*models.LiteWorkOrder)
 	go func() {
 		f := &models.LiteWorkOrderFilter{
-			TenantId: tenantId,
-			SortField:        "last_modified_time",
-			SortOrder:        "ASC",
-			Offset:           0,
-			Limit:    10,
+			TenantId:  tenantId,
+			SortField: "last_modified_time",
+			SortOrder: "ASC",
+			Offset:    0,
+			Limit:     10,
 		}
 		arr, err := h.LiteWorkOrderRepo.ListByFilter(ctx, f)
 		if err != nil {
@@ -197,9 +197,9 @@ func (h *Controller) dashboardEndpoint(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		// sevenDaysAgoTime := null.TimeFrom(time.Now().Add(-7*24*time.Hour)) // 7 days ago //TODO: UNCOMMENT WHEN READY!
 		f := &models.WorkOrderCommentFilter{
-			TenantId:    tenantId,
+			TenantId: tenantId,
 			// CreatedTime: null.TimeFrom(sevenDaysAgoTime), //TODO: UNCOMMENT WHEN READY!
-			Limit:       10,
+			Limit: 10,
 		}
 		arr, err := h.WorkOrderCommentRepo.ListByFilter(ctx, f)
 		if err != nil {

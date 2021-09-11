@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -274,15 +274,15 @@ func insertPartnerETL(
 		}
 		if user == nil {
 			um := &models.User{
-				Uuid:             uuid.NewString(),
-				FirstName:        oldPartner.GivenName.String,
-				LastName:         oldPartner.LastName.String,
-				Name:             name,
-				LexicalName:      lexicalName,
-				Email:            email,
+				Uuid:        uuid.NewString(),
+				FirstName:   oldPartner.GivenName.String,
+				LastName:    oldPartner.LastName.String,
+				Name:        name,
+				LexicalName: lexicalName,
+				Email:       email,
 				// JoinedTime:        oldPartner.DateJoined,
-				State:            state,
-				Timezone:         "America/Toronto",
+				State:    state,
+				Timezone: "America/Toronto",
 				// CreatedTime:       oldPartner.DateJoined,
 				// ModifiedTime:      oldPartner.LastModified,
 				Salt:              "",
@@ -333,16 +333,16 @@ func insertPartnerETL(
 	}
 
 	partner := &models.Partner{
-		OldId:                   oldPartner.Id,
-		Uuid:                    uuid.NewString(),
-		TenantId:                tenantId,
-		UserId:                  userId,
+		OldId:    oldPartner.Id,
+		Uuid:     uuid.NewString(),
+		TenantId: tenantId,
+		UserId:   userId,
 		// TypeOf:                  oldPartner.TypeOf,
-		IndexedText:             oldPartner.IndexedText.String,
-		IsOkToEmail:             oldPartner.IsOkToEmail,
-		IsOkToText:              oldPartner.IsOkToText,
-		HowHearId:               uint64(oldPartner.HowHearId.Int64),
-		HowHearOld:              oldPartner.HowHearOld,
+		IndexedText: oldPartner.IndexedText.String,
+		IsOkToEmail: oldPartner.IsOkToEmail,
+		IsOkToText:  oldPartner.IsOkToText,
+		HowHearId:   uint64(oldPartner.HowHearId.Int64),
+		HowHearOld:  oldPartner.HowHearOld,
 		// HowHearOther:            oldPartner.HowHearOther,
 		State:                   state,
 		CreatedTime:             oldPartner.Created,

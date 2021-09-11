@@ -11,8 +11,8 @@ import (
 	// "github.com/google/uuid"
 	null "gopkg.in/guregu/null.v4"
 
-	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/idos"
+	"github.com/over55/workery-server/internal/models"
 )
 
 func (h *Controller) taskItemsListEndpoint(w http.ResponseWriter, r *http.Request) {
@@ -25,8 +25,8 @@ func (h *Controller) taskItemsListEndpoint(w http.ResponseWriter, r *http.Reques
 	offsetParam, _ := strconv.ParseUint(offsetParamString, 10, 64)
 	limitParamString := r.FormValue("limit")
 	limitParam, _ := strconv.ParseUint(limitParamString, 10, 64)
-	if limitParam == 0 {
-		limitParam = 25
+	if limitParam == 0 || limitParam > 500 {
+		limitParam = 100
 	}
 	searchString := r.FormValue("search")
 	sortOrderString := r.FormValue("sort_order")
@@ -38,24 +38,24 @@ func (h *Controller) taskItemsListEndpoint(w http.ResponseWriter, r *http.Reques
 		sortFieldString = "due_date"
 	}
 
-    // DEVELOPERS NOTE:
+	// DEVELOPERS NOTE:
 	// - Write code to handle filtering by states.
 	var states []int8 = []int8{1} // TECHDEBT
 
 	// Start by defining our base listing filter and then append depending on
 	// different cases.
 	f := models.LiteTaskItemFilter{
-		TenantId:   tenantId,
-		SortField:  sortFieldString,
-		SortOrder:  sortOrderString,
-		Search:     null.NewString(searchString, searchString != ""),
-		States:     states,
-		Offset:     offsetParam,
-		Limit:      limitParam,
-		IsClosed:   null.BoolFrom(false), // TECHDEBT
+		TenantId:  tenantId,
+		SortField: sortFieldString,
+		SortOrder: sortOrderString,
+		Search:    null.NewString(searchString, searchString != ""),
+		States:    states,
+		Offset:    offsetParam,
+		Limit:     limitParam,
+		IsClosed:  null.BoolFrom(false), // TECHDEBT
 	}
 
-    // // For debugging purposes only.
+	// // For debugging purposes only.
 	// log.Println("TenantId", f.TenantId)
 	// log.Println("Search", f.Search)
 	// log.Println("Offset", f.Offset)
@@ -86,7 +86,7 @@ func (h *Controller) taskItemsListEndpoint(w http.ResponseWriter, r *http.Reques
 		countCh <- count
 	}()
 
-	arr, count := <- arrCh, <- countCh
+	arr, count := <-arrCh, <-countCh
 
 	res := idos.NewLiteTaskItemListResponseIDO(arr, count)
 

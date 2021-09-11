@@ -24,11 +24,23 @@ func (r *OngoingWorkOrderRepo) Insert(ctx context.Context, m *models.OngoingWork
 
 	query := `
     INSERT INTO ongoing_work_orders (
-        uuid, tenant_id, customer_id, associate_id, state,
-		created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip, old_id
+        uuid,
+		tenant_id,
+		customer_id,
+		customer_name,
+		customer_lexical_name,
+		associate_id,
+		associate_name,
+		associate_lexical_name,
+		state,
+		created_time,
+		created_by_id,
+		created_from_ip,
+		last_modified_time,
+		last_modified_by_id,
+		last_modified_from_ip, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -38,9 +50,22 @@ func (r *OngoingWorkOrderRepo) Insert(ctx context.Context, m *models.OngoingWork
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.CustomerId, m.AssociateId, m.State,
-		m.CreatedTime, m.CreatedById, m.CreatedFromIP,
-		m.LastModifiedTime, m.LastModifiedById, m.LastModifiedFromIP, m.OldId,
+		m.Uuid,
+		m.TenantId,
+		m.CustomerId,
+		m.CustomerName,
+		m.CustomerLexicalName,
+		m.AssociateId,
+		m.AssociateName,
+		m.AssociateLexicalName,
+		m.State,
+		m.CreatedTime,
+		m.CreatedById,
+		m.CreatedFromIP,
+		m.LastModifiedTime,
+		m.LastModifiedById,
+		m.LastModifiedFromIP,
+		m.OldId,
 	)
 	return err
 }
@@ -53,8 +78,13 @@ func (r *OngoingWorkOrderRepo) UpdateById(ctx context.Context, m *models.Ongoing
     UPDATE
         ongoing_work_orders
     SET
-        tenant_id = $1, customer_id = $2, associate_id = $3, state = $4,
-		last_modified_time = $5, last_modified_by_id = $6, last_modified_from_ip = $7
+        tenant_id = $1,
+		customer_id = $2,
+		associate_id = $3,
+		state = $4,
+		last_modified_time = $5,
+		last_modified_by_id = $6,
+		last_modified_from_ip = $7
     WHERE
         id = $8`
 	stmt, err := r.db.PrepareContext(ctx, query)
@@ -65,8 +95,14 @@ func (r *OngoingWorkOrderRepo) UpdateById(ctx context.Context, m *models.Ongoing
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.TenantId, m.CustomerId, m.AssociateId, m.State, m.LastModifiedTime,
-		m.LastModifiedById, m.LastModifiedFromIP, m.Id,
+		m.TenantId,
+		m.CustomerId,
+		m.AssociateId,
+		m.State,
+		m.LastModifiedTime,
+		m.LastModifiedById,
+		m.LastModifiedFromIP,
+		m.Id,
 	)
 	return err
 }
@@ -79,17 +115,43 @@ func (r *OngoingWorkOrderRepo) GetById(ctx context.Context, id uint64) (*models.
 
 	query := `
     SELECT
-        id, uuid, tenant_id, customer_id, associate_id, state,
-		created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip
+        id,
+		uuid,
+		tenant_id,
+		customer_id,
+		customer_name,
+		customer_lexical_name,
+		associate_id,
+		associate_name,
+		associate_lexical_name,
+		state,
+		created_time,
+		created_by_id,
+		created_from_ip,
+		last_modified_time,
+		last_modified_by_id,
+		last_modified_from_ip
 	FROM
         ongoing_work_orders
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.CustomerId, &m.AssociateId,
-		&m.State, &m.CreatedTime, &m.CreatedById, &m.CreatedFromIP, &m.LastModifiedTime,
-		&m.LastModifiedById, &m.LastModifiedFromIP,
+		&m.Id,
+		&m.Uuid,
+		&m.TenantId,
+		&m.CustomerId,
+		&m.CustomerName,
+		&m.CustomerLexicalName,
+		&m.AssociateId,
+		&m.AssociateName,
+		&m.AssociateLexicalName,
+		&m.State,
+		&m.CreatedTime,
+		&m.CreatedById,
+		&m.CreatedFromIP,
+		&m.LastModifiedTime,
+		&m.LastModifiedById,
+		&m.LastModifiedFromIP,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.

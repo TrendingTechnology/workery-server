@@ -3,9 +3,9 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"log"
 	"strconv"
 	"time"
-	"log"
 
 	"github.com/over55/workery-server/internal/models"
 )

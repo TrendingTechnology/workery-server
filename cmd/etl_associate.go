@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -229,7 +229,7 @@ func runAssociateETL(
 			if tenantId == 2 {
 				serviceFeeId = 3
 			} else if tenantId == 4 {
-			    serviceFeeId = 11
+				serviceFeeId = 11
 			} else {
 
 			}
@@ -243,7 +243,7 @@ func runAssociateETL(
 			if tenantId == 2 {
 				serviceFeeId = 3
 			} else if tenantId == 4 {
-			    serviceFeeId = 11
+				serviceFeeId = 11
 			} else {
 				log.Println("runAssociateETL | serviceFeeId", serviceFeeId)
 			}
@@ -315,15 +315,15 @@ func insertAssociateETL(
 		}
 		if user == nil {
 			um := &models.User{
-				Uuid:              uuid.NewString(),
-				FirstName:         oldAssociate.GivenName.String,
-				LastName:          oldAssociate.LastName.String,
-				Name:              name,
-				LexicalName:       lexicalName,
-				Email:             email,
+				Uuid:        uuid.NewString(),
+				FirstName:   oldAssociate.GivenName.String,
+				LastName:    oldAssociate.LastName.String,
+				Name:        name,
+				LexicalName: lexicalName,
+				Email:       email,
 				// JoinedTime:        oldAssociate.DateJoined,
-				State:             state,
-				Timezone:          "America/Toronto",
+				State:    state,
+				Timezone: "America/Toronto",
 				// CreatedTime:       oldAssociate.DateJoined,
 				// ModifiedTime:      oldAssociate.LastModified,
 				Salt:              "",

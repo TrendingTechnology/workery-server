@@ -10,9 +10,9 @@ import (
 // Structure used to encapsulate the various filters we want to apply when we
 // perform our `listing` functionality for the `LiteWorkOrder` model.
 type LiteWorkOrderFilter struct {
-	TenantId             uint64   `json:"tenant_id"`
-	States               []int8   `json:"states"`
-	LastModifiedById     null.Int `json:"last_modified_by_id"`
+	TenantId             uint64      `json:"tenant_id"`
+	States               []int8      `json:"states"`
+	LastModifiedById     null.Int    `json:"last_modified_by_id"`
 	AssociateName        null.String `json:"associate_name"`
 	AssociateLexicalName null.String `json:"associate_lexical_name"`
 	CustomerName         null.String `json:"customer_name"`
@@ -21,11 +21,11 @@ type LiteWorkOrderFilter struct {
 	SortField            string      `json:"sort_field"`
 	Search               null.String `json:"search"`
 	Offset               uint64      `json:"offset"`
-	Limit                uint64   `json:"limit"`
+	Limit                uint64      `json:"limit"`
 }
 
 type LiteWorkOrder struct {
-	Id            uint64 `json:"id"`
+	Id uint64 `json:"id"`
 	// Uuid                              string      `json:"uuid"`
 	TenantId      uint64      `json:"tenant_id"`
 	CustomerId    uint64      `json:"customer_id"`
@@ -33,13 +33,13 @@ type LiteWorkOrder struct {
 	AssociateId   null.Int    `json:"associate_id"`
 	AssociateName null.String `json:"associate_name"`
 	// Description                       string      `json:"description"`
-	AssignmentDate null.Time   `json:"assignment_date"`
-	IsOngoing                         bool        `json:"is_ongoing"`
+	AssignmentDate null.Time `json:"assignment_date"`
+	IsOngoing      bool      `json:"is_ongoing"`
 	// IsHomeSupportService              bool        `json:"is_home_support_service"`
-	StartDate                         time.Time   `json:"start_date"`
+	StartDate time.Time `json:"start_date"`
 	// CompletionDate                    null.Time   `json:"completion_date"`
 	// Hours                             float64     `json:"hours"`
-	TypeOf                            int8        `json:"type_of"`
+	TypeOf int8 `json:"type_of"`
 	// IndexedText                       string      `json:"indexed_text"`
 	// ClosingReason                     int8        `json:"closing_reason"`
 	// ClosingReasonOther                null.String `json:"closing_reason_other"`

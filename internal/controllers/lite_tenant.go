@@ -27,6 +27,9 @@ func (h *Controller) liteTenantsListEndpoint(w http.ResponseWriter, r *http.Requ
 	// Fetch our URL parameters saved by our "Pagination" middleware.
 	pageToken := ctx.Value("pageTokenParm").(uint64)
 	pageSize := ctx.Value("pageSizeParam").(uint64)
+	if pageSize == 0 || pageSize > 500 {
+		pageSize = 100
+	}
 
 	//
 	// Extract our parameters from the URL and create our filter.

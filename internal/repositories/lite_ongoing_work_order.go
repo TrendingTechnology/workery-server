@@ -10,17 +10,17 @@ import (
 	"github.com/over55/workery-server/internal/models"
 )
 
-type LiteWorkOrderRepo struct {
+type LiteOngoingWorkOrderRepo struct {
 	db *sql.DB
 }
 
-func NewLiteWorkOrderRepo(db *sql.DB) *LiteWorkOrderRepo {
-	return &LiteWorkOrderRepo{
+func NewLiteOngoingWorkOrderRepo(db *sql.DB) *LiteOngoingWorkOrderRepo {
+	return &LiteOngoingWorkOrderRepo{
 		db: db,
 	}
 }
 
-func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query string, f *models.LiteWorkOrderFilter) (*sql.Rows, error) {
+func (s *LiteOngoingWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query string, f *models.LiteOngoingWorkOrderFilter) (*sql.Rows, error) {
 	// Array will hold all the unique values we want to add into the query.
 	var filterValues []interface{}
 
@@ -93,14 +93,15 @@ func (s *LiteWorkOrderRepo) queryRowsWithFilter(ctx context.Context, query strin
 	//
 
 	// For debugging purposes only.
-	// log.Println("LiteCustomerRepo | query:", query, "\n")
-	// log.Println("LiteCustomerRepo | SortField:", f.SortField, "SortField" + f.SortOrder + "\n")
-	// log.Println("LiteCustomerRepo | filterValues:", filterValues, "\n")
+	// log.Println("LiteOngoingWorkOrderRepo | query:", query, "\n")
+	// log.Println("LiteOngoingWorkOrderRepo | SortField:", f.SortField, "SortField" + f.SortOrder + "\n")
+	// log.Println("LiteOngoingWorkOrderRepo | Limit:", f.Limit)
+	// log.Println("LiteOngoingWorkOrderRepo | filterValues:", filterValues, "\n")
 
 	return s.db.QueryContext(ctx, query, filterValues...)
 }
 
-func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.LiteWorkOrderFilter) ([]*models.LiteWorkOrder, error) {
+func (s *LiteOngoingWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.LiteOngoingWorkOrderFilter) ([]*models.LiteOngoingWorkOrder, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -111,14 +112,12 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
 		state,
 		customer_id,
 		customer_name,
+		customer_lexical_name,
 		associate_id,
 		associate_name,
-		assignment_date,
-		start_date,
-		type_of,
-		is_ongoing
+		associate_lexical_name
     FROM
-        work_orders
+        ongoing_work_orders
     `
 
 	rows, err := s.queryRowsWithFilter(ctx, querySelect, filter)
@@ -126,22 +125,20 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
 		return nil, err
 	}
 
-	var arr []*models.LiteWorkOrder
+	var arr []*models.LiteOngoingWorkOrder
 	defer rows.Close()
 	for rows.Next() {
-		m := new(models.LiteWorkOrder)
+		m := new(models.LiteOngoingWorkOrder)
 		err := rows.Scan(
 			&m.Id,
 			&m.TenantId,
 			&m.State,
 			&m.CustomerId,
 			&m.CustomerName,
+			&m.CustomerLexicalName,
 			&m.AssociateId,
 			&m.AssociateName,
-			&m.AssignmentDate,
-			&m.StartDate,
-			&m.TypeOf,
-			&m.IsOngoing,
+			&m.AssociateLexicalName,
 		)
 		if err != nil {
 			return nil, err
@@ -155,7 +152,7 @@ func (s *LiteWorkOrderRepo) ListByFilter(ctx context.Context, filter *models.Lit
 	return arr, err
 }
 
-func (s *LiteWorkOrderRepo) CountByFilter(ctx context.Context, f *models.LiteWorkOrderFilter) (uint64, error) {
+func (s *LiteOngoingWorkOrderRepo) CountByFilter(ctx context.Context, f *models.LiteOngoingWorkOrderFilter) (uint64, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -171,7 +168,7 @@ func (s *LiteWorkOrderRepo) CountByFilter(ctx context.Context, f *models.LiteWor
 	filterValues = append(filterValues, f.TenantId)
 	query := `
 	SELECT COUNT(id) FROM
-	    work_orders
+	    ongoing_work_orders
 	WHERE
 		tenant_id = $` + strconv.Itoa(len(filterValues))
 

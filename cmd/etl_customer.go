@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -271,15 +271,15 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 		}
 		if user == nil {
 			um := &models.User{
-				Uuid:              uuid.NewString(),
-				FirstName:         om.GivenName.String,
-				LastName:          om.LastName.String,
-				Name:              name,
-				LexicalName:       lexicalName,
-				Email:             email,
+				Uuid:        uuid.NewString(),
+				FirstName:   om.GivenName.String,
+				LastName:    om.LastName.String,
+				Name:        name,
+				LexicalName: lexicalName,
+				Email:       email,
 				// JoinedTime:     om.DateJoined,
-				State:             state,
-				Timezone:          "America/Toronto",
+				State:    state,
+				Timezone: "America/Toronto",
 				// CreatedTime:       om.DateJoined,
 				// ModifiedTime:      om.LastModified,
 				Salt:              "",

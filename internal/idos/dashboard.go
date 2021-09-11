@@ -19,5 +19,5 @@ type DashboardIDO struct {
 }
 
 type NavigationIDO struct {
-	TasksCount               uint64                      `json:"tasks_count"`
+	TasksCount uint64 `json:"tasks_count"`
 }

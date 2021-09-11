@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
@@ -284,7 +284,7 @@ func insertWorkOrderETL(
 		log.Panic("cr.GetIdByOldId | err", err)
 	}
 
-    // Lookup our customer record so we can generate the full name / lexical full name.
+	// Lookup our customer record so we can generate the full name / lexical full name.
 	customer, err := cr.GetById(ctx, customerId)
 
 	// Generate our full name / lexical full name.
