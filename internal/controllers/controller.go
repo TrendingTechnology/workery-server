@@ -28,6 +28,7 @@ type Controller struct {
 	LiteAssociateRepo                 models.LiteAssociateRepository
 	LiteCustomerRepo                  models.LiteCustomerRepository
 	LitePartnerRepo                   models.LitePartnerRepository
+	LiteStaffRepo                     models.LiteStaffRepository
 	LiteTaskItemRepo                  models.LiteTaskItemRepository
 	LiteTenantRepo                    models.LiteTenantRepository
 	LiteWorkOrderRepo                 models.LiteWorkOrderRepository
@@ -113,6 +114,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// --- PARTNERS ---
     case n == 2 && p[0] == "v1" && p[1] == "partners" && r.Method == http.MethodGet:
 		h.partnersListEndpoint(w, r)
+
+	// --- STAFF ---
+    case n == 2 && p[0] == "v1" && p[1] == "staff" && r.Method == http.MethodGet:
+		h.staffListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:
