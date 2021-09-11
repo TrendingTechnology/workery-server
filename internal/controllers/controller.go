@@ -27,6 +27,7 @@ type Controller struct {
 	InsuranceRequirementRepo          models.InsuranceRequirementRepository
 	LiteAssociateRepo                 models.LiteAssociateRepository
 	LiteCustomerRepo                  models.LiteCustomerRepository
+	LitePartnerRepo                   models.LitePartnerRepository
 	LiteTaskItemRepo                  models.LiteTaskItemRepository
 	LiteTenantRepo                    models.LiteTenantRepository
 	LiteWorkOrderRepo                 models.LiteWorkOrderRepository
@@ -89,25 +90,29 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	case n == 2 && p[0] == "v1" && p[1] == "navigation" && r.Method == http.MethodGet:
 		h.navigationEndpoint(w, r)
 
-		// --- CUSTOMERS ---
+	// --- CUSTOMERS ---
 	case n == 2 && p[0] == "v1" && p[1] == "customers" && r.Method == http.MethodGet:
 		h.customersListEndpoint(w, r)
 
-		// --- WORK ORDERS ---
+	// --- WORK ORDERS ---
 	case n == 2 && p[0] == "v1" && p[1] == "orders" && r.Method == http.MethodGet:
 		h.workOrdersListEndpoint(w, r)
 
-		// --- ASSOCIATES ---
+	// --- ASSOCIATES ---
 	case n == 2 && p[0] == "v1" && p[1] == "associates" && r.Method == http.MethodGet:
 		h.associatesListEndpoint(w, r)
 
-		// --- TASKS ---
+	// --- TASKS ---
 	case n == 2 && p[0] == "v1" && p[1] == "tasks" && r.Method == http.MethodGet:
 		h.taskItemsListEndpoint(w, r)
 
-		// --- ONGOING WORK ORDERS ---
+	// --- ONGOING WORK ORDERS ---
 	case n == 2 && p[0] == "v1" && p[1] == "ongoing-orders" && r.Method == http.MethodGet:
 		h.ongoingWorkOrdersListEndpoint(w, r)
+
+	// --- PARTNERS ---
+    case n == 2 && p[0] == "v1" && p[1] == "partners" && r.Method == http.MethodGet:
+		h.partnersListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:

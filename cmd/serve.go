@@ -72,6 +72,7 @@ func runServeCmd() {
 	ltar := repo.NewLiteTaskItemRepo(db)
 	ltr := repo.NewLiteTenantRepo(db)
 	lwor := repo.NewLiteWorkOrderRepo(db)
+	lpr := repo.NewLitePartnerRepo(db)
 	lowor := repo.NewLiteOngoingWorkOrderRepo(db)
 	owor := repo.NewOngoingWorkOrderRepo(db)
 	pcr := repo.NewPartnerCommentRepo(db)
@@ -124,6 +125,7 @@ func runServeCmd() {
 		LiteTaskItemRepo:                  ltar,
 		LiteTenantRepo:                    ltr,
 		LiteWorkOrderRepo:                 lwor,
+		LitePartnerRepo:                   lpr,
 		LiteOngoingWorkOrderRepo:          lowor,
 		OngoingWorkOrderRepo:              owor,
 		PartnerCommentRepo:                pcr,
