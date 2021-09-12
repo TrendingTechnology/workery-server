@@ -26,6 +26,7 @@ type Controller struct {
 	HowHearAboutUsItemRepo            models.HowHearAboutUsItemRepository
 	InsuranceRequirementRepo          models.InsuranceRequirementRepository
 	LiteAssociateRepo                 models.LiteAssociateRepository
+	LiteBulletinBoardItemRepo         models.LiteBulletinBoardItemRepository
 	LiteCustomerRepo                  models.LiteCustomerRepository
 	LiteFinancialRepo                 models.LiteFinancialRepository
 	LitePartnerRepo                   models.LitePartnerRepository
@@ -123,6 +124,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// --- FINANCIALS ---
     case n == 2 && p[0] == "v1" && p[1] == "financials" && r.Method == http.MethodGet:
 		h.financialsListEndpoint(w, r)
+
+	// --- BULLETIN BOARD ITEMS ---
+    case n == 2 && p[0] == "v1" && p[1] == "bulletin-board-items" && r.Method == http.MethodGet:
+		h.bulletinBoardItemsListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:
