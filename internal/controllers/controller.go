@@ -30,6 +30,7 @@ type Controller struct {
 	LiteBulletinBoardItemRepo         models.LiteBulletinBoardItemRepository
 	LiteCustomerRepo                  models.LiteCustomerRepository
 	LiteFinancialRepo                 models.LiteFinancialRepository
+	LiteInsuranceRequirementRepo      models.LiteInsuranceRequirementRepository
 	LitePartnerRepo                   models.LitePartnerRepository
 	LiteSkillSetRepo                  models.LiteSkillSetRepository
 	LiteStaffRepo                     models.LiteStaffRepository
@@ -143,6 +144,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
     // --- ASSOCIATE AWAY LOGS ---
     case n == 2 && p[0] == "v1" && p[1] == "associate-away-logs" && r.Method == http.MethodGet:
 		h.associateAwayLogsListEndpoint(w, r)
+
+	// --- INSURANCE REQUIREMENTS ---
+	case n == 2 && p[0] == "v1" && p[1] == "insurance-requirements" && r.Method == http.MethodGet:
+		h.insuranceRequirementsListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:
