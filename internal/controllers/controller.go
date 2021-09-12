@@ -27,6 +27,7 @@ type Controller struct {
 	InsuranceRequirementRepo          models.InsuranceRequirementRepository
 	LiteAssociateRepo                 models.LiteAssociateRepository
 	LiteCustomerRepo                  models.LiteCustomerRepository
+	LiteFinancialRepo                 models.LiteFinancialRepository
 	LitePartnerRepo                   models.LitePartnerRepository
 	LiteStaffRepo                     models.LiteStaffRepository
 	LiteTaskItemRepo                  models.LiteTaskItemRepository
@@ -118,6 +119,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// --- STAFF ---
     case n == 2 && p[0] == "v1" && p[1] == "staff" && r.Method == http.MethodGet:
 		h.staffListEndpoint(w, r)
+
+	// --- FINANCIALS ---
+    case n == 2 && p[0] == "v1" && p[1] == "financials" && r.Method == http.MethodGet:
+		h.financialsListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:
