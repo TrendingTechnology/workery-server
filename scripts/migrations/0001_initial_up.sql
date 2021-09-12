@@ -536,6 +536,8 @@ CREATE TABLE associate_away_logs (
     uuid VARCHAR (36) UNIQUE NOT NULL,
     tenant_id BIGINT NOT NULL,
     associate_id BIGINT NOT NULL,
+    associate_name VARCHAR (255) NOT NULL,
+    associate_lexical_name VARCHAR (255) NOT NULL,
     reason SMALLINT NOT NULL DEFAULT 0,
     reason_other VARCHAR (511) NULL,
     until_further_notice BOOLEAN NOT NULL DEFAULT FALSE,

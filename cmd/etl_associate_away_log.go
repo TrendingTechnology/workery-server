@@ -168,6 +168,11 @@ func insertAssociateAwayLogETL(
 		log.Panic("ar.GetIdByOldId | err", err)
 	}
 
+	associate, err := ar.GetById(ctx, associateId)
+	if err != nil {
+		log.Panic("ar.GetById | err", err)
+	}
+
 	var state int8 = 1
 	if oss.WasDeleted == true {
 		state = 0
@@ -203,7 +208,9 @@ func insertAssociateAwayLogETL(
 			TenantId:           tid,
 			Uuid:               uuid.NewString(),
 			AssociateId:        associateId,
-			Reason:             oss.Reason,
+			AssociateName:        associate.Name,
+			AssociateLexicalName: associate.LexicalName,
+			Reason:               oss.Reason,
 			ReasonOther:        oss.ReasonOther,
 			UntilFurtherNotice: oss.UntilFurtherNotice,
 			UntilDate:          oss.UntilDate,

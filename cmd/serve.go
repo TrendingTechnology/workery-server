@@ -101,6 +101,7 @@ func runServeCmd() {
 	wossr := repo.NewWorkOrderSkillSetRepo(db)
 	wotr := repo.NewWorkOrderTagRepo(db)
 	wor := repo.NewWorkOrderRepo(db)
+	laalr := repo.NewLiteAssociateAwayLogRepo(db)
 
 	// Open up our session handler, powered by redis and let's save the user
 	// account with our ID
@@ -125,6 +126,7 @@ func runServeCmd() {
 		CustomerRepo:                      cr,
 		HowHearAboutUsItemRepo:            hhauir,
 		InsuranceRequirementRepo:          irr,
+		LiteAssociateAwayLogRepo:          laalr,
 		LiteAssociateRepo:                 lar,
 		LiteBulletinBoardItemRepo:         lbbir,
 		LiteCustomerRepo:                  lcr,

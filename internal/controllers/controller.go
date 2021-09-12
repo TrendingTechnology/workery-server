@@ -25,6 +25,7 @@ type Controller struct {
 	CustomerRepo                      models.CustomerRepository
 	HowHearAboutUsItemRepo            models.HowHearAboutUsItemRepository
 	InsuranceRequirementRepo          models.InsuranceRequirementRepository
+	LiteAssociateAwayLogRepo          models.LiteAssociateAwayLogRepository
 	LiteAssociateRepo                 models.LiteAssociateRepository
 	LiteBulletinBoardItemRepo         models.LiteBulletinBoardItemRepository
 	LiteCustomerRepo                  models.LiteCustomerRepository
@@ -138,6 +139,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// --- TAGS ---
     case n == 2 && p[0] == "v1" && p[1] == "tags" && r.Method == http.MethodGet:
 		h.tagsListEndpoint(w, r)
+
+    // --- ASSOCIATE AWAY LOGS ---
+    case n == 2 && p[0] == "v1" && p[1] == "associate-away-logs" && r.Method == http.MethodGet:
+		h.associateAwayLogsListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:

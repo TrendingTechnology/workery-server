@@ -280,8 +280,11 @@ func insertAssociateETL(
 		name = oldAssociate.GivenName.String + " " + oldAssociate.LastName.String
 		lexicalName = oldAssociate.LastName.String + ", " + oldAssociate.GivenName.String
 	}
+
 	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
 	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
+	lexicalName = strings.Replace(lexicalName, ", , ", ", ", 0)
+	name = strings.Replace(name, "  ", " ", 0)
 
 	// CASE 1: User record exists in our database.
 	if oldAssociate.OwnerId.Valid {

@@ -15,10 +15,12 @@ const (
 type AssociateAwayLog struct {
 	Id                 uint64      `json:"id"`
 	Uuid               string      `json:"uuid"`
-	TenantId           uint64      `json:"tenant_id"`
-	AssociateId        uint64      `json:"associate_id"`
-	Reason             int8        `json:"reason"`
-	ReasonOther        null.String `json:"reason_other"`
+	TenantId             uint64      `json:"tenant_id"`
+	AssociateId          uint64      `json:"associate_id"`
+	AssociateName        string       `json:"associate_name,omitempty"`
+	AssociateLexicalName string       `json:"associate_lexical_name,omitempty"`
+	Reason               int8        `json:"reason"`
+	ReasonOther          null.String `json:"reason_other"`
 	UntilFurtherNotice bool        `json:"until_further_notice"`
 	UntilDate          null.Time   `json:"until_date"`
 	StartDate          null.Time   `json:"start_date"`

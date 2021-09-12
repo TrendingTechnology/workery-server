@@ -238,6 +238,8 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 	}
 	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
 	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
+	lexicalName = strings.Replace(lexicalName, ", , ", ", ", 0)
+	name = strings.Replace(name, "  ", " ", 0)
 
 	// CASE 1: User record exists in our database.
 	if om.OwnerId.Valid {
