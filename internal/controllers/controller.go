@@ -30,6 +30,7 @@ type Controller struct {
 	LiteCustomerRepo                  models.LiteCustomerRepository
 	LiteFinancialRepo                 models.LiteFinancialRepository
 	LitePartnerRepo                   models.LitePartnerRepository
+	LiteSkillSetRepo                  models.LiteSkillSetRepository
 	LiteStaffRepo                     models.LiteStaffRepository
 	LiteTaskItemRepo                  models.LiteTaskItemRepository
 	LiteTenantRepo                    models.LiteTenantRepository
@@ -128,6 +129,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// --- BULLETIN BOARD ITEMS ---
     case n == 2 && p[0] == "v1" && p[1] == "bulletin-board-items" && r.Method == http.MethodGet:
 		h.bulletinBoardItemsListEndpoint(w, r)
+
+	// --- SKILL SETS ---
+    case n == 2 && p[0] == "v1" && p[1] == "skill-sets" && r.Method == http.MethodGet:
+		h.skillSetsListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:
