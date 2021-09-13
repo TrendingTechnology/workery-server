@@ -29,6 +29,7 @@ type Controller struct {
 	LiteAssociateRepo                 models.LiteAssociateRepository
 	LiteBulletinBoardItemRepo         models.LiteBulletinBoardItemRepository
 	LiteCustomerRepo                  models.LiteCustomerRepository
+    LiteDeactivatedCustomerRepo       models.LiteDeactivatedCustomerRepository
 	LiteFinancialRepo                 models.LiteFinancialRepository
 	LiteInsuranceRequirementRepo      models.LiteInsuranceRequirementRepository
 	LitePartnerRepo                   models.LitePartnerRepository
@@ -153,6 +154,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// --- WORK ORDER SERVICE FEES ---
 	case n == 2 && p[0] == "v1" && p[1] == "order-service-fees" && r.Method == http.MethodGet:
 		h.workOrderServiceFeesListEndpoint(w, r)
+
+	// --- DEACTIVATED CUSTOMER ---
+	case n == 2 && p[0] == "v1" && p[1] == "deactivated-customers" && r.Method == http.MethodGet:
+		h.deactivatedCustomersListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:
