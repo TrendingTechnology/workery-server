@@ -38,6 +38,7 @@ type Controller struct {
 	LiteTaskItemRepo                  models.LiteTaskItemRepository
 	LiteTenantRepo                    models.LiteTenantRepository
 	LiteWorkOrderRepo                 models.LiteWorkOrderRepository
+	LiteWorkOrderServiceFeeRepo       models.LiteWorkOrderServiceFeeRepository
 	LiteOngoingWorkOrderRepo          models.LiteOngoingWorkOrderRepository
 	OngoingWorkOrderRepo              models.OngoingWorkOrderRepository
 	PartnerCommentRepo                models.PartnerCommentRepository
@@ -148,6 +149,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// --- INSURANCE REQUIREMENTS ---
 	case n == 2 && p[0] == "v1" && p[1] == "insurance-requirements" && r.Method == http.MethodGet:
 		h.insuranceRequirementsListEndpoint(w, r)
+
+	// --- WORK ORDER SERVICE FEES ---
+	case n == 2 && p[0] == "v1" && p[1] == "order-service-fees" && r.Method == http.MethodGet:
+		h.workOrderServiceFeesListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:
