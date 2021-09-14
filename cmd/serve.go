@@ -77,6 +77,7 @@ func runServeCmd() {
 	ltagr := repo.NewLiteTagRepo(db)
 	ltar := repo.NewLiteTaskItemRepo(db)
 	ltr := repo.NewLiteTenantRepo(db)
+	lvtr := repo.NewLiteVehicleTypeRepo(db)
 	lwor := repo.NewLiteWorkOrderRepo(db)
 	lwosfr := repo.NewLiteWorkOrderServiceFeeRepo(db)
 	lssr := repo.NewLiteSkillSetRepo(db)
@@ -139,6 +140,7 @@ func runServeCmd() {
 		LiteTagRepo:                       ltagr,
 		LiteTaskItemRepo:                  ltar,
 		LiteTenantRepo:                    ltr,
+		LiteVehicleTypeRepo:               lvtr,
 		LiteSkillSetRepo:                  lssr,
 		LiteWorkOrderRepo:                 lwor,
 		LiteWorkOrderServiceFeeRepo:       lwosfr,

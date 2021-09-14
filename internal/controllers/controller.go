@@ -38,6 +38,7 @@ type Controller struct {
 	LiteTagRepo                       models.LiteTagRepository
 	LiteTaskItemRepo                  models.LiteTaskItemRepository
 	LiteTenantRepo                    models.LiteTenantRepository
+	LiteVehicleTypeRepo               models.LiteVehicleTypeRepository
 	LiteWorkOrderRepo                 models.LiteWorkOrderRepository
 	LiteWorkOrderServiceFeeRepo       models.LiteWorkOrderServiceFeeRepository
 	LiteOngoingWorkOrderRepo          models.LiteOngoingWorkOrderRepository
@@ -158,6 +159,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// --- DEACTIVATED CUSTOMER ---
 	case n == 2 && p[0] == "v1" && p[1] == "deactivated-customers" && r.Method == http.MethodGet:
 		h.deactivatedCustomersListEndpoint(w, r)
+
+	// --- DEACTIVATED CUSTOMER ---
+	case n == 2 && p[0] == "v1" && p[1] == "vehicle-types" && r.Method == http.MethodGet:
+		h.vehicleTypesListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:
