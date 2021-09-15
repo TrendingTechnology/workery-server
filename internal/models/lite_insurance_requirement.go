@@ -19,11 +19,11 @@ type LiteInsuranceRequirementFilter struct {
 }
 
 type LiteInsuranceRequirement struct {
-	Id        uint64    `json:"id"`
-	TenantId  uint64    `json:"tenant_id"`
-	Text string    `json:"text"`
-	Description  string `json:"description"`
-	State     int8      `json:"state"`
+	Id          uint64 `json:"id"`
+	TenantId    uint64 `json:"tenant_id"`
+	Text        string `json:"text"`
+	Description string `json:"description"`
+	State       int8   `json:"state"`
 }
 
 type LiteInsuranceRequirementRepository interface {

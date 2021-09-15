@@ -178,7 +178,7 @@ func insertOngoingWorkOrderETL(
 	}
 
 	customerId, err := cr.GetIdByOldId(ctx, tid, oss.CustomerId)
-    customer, err := cr.GetById(ctx, customerId)
+	customer, err := cr.GetById(ctx, customerId)
 
 	var state int8 = 1 // Running
 	if oss.State == "terminated" {

@@ -13,25 +13,25 @@ const (
 )
 
 type AssociateAwayLog struct {
-	Id                 uint64      `json:"id"`
-	Uuid               string      `json:"uuid"`
+	Id                   uint64      `json:"id"`
+	Uuid                 string      `json:"uuid"`
 	TenantId             uint64      `json:"tenant_id"`
 	AssociateId          uint64      `json:"associate_id"`
-	AssociateName        string       `json:"associate_name,omitempty"`
-	AssociateLexicalName string       `json:"associate_lexical_name,omitempty"`
+	AssociateName        string      `json:"associate_name,omitempty"`
+	AssociateLexicalName string      `json:"associate_lexical_name,omitempty"`
 	Reason               int8        `json:"reason"`
 	ReasonOther          null.String `json:"reason_other"`
-	UntilFurtherNotice bool        `json:"until_further_notice"`
-	UntilDate          null.Time   `json:"until_date"`
-	StartDate          null.Time   `json:"start_date"`
-	State              int8        `json:"state"`
-	CreatedTime        time.Time   `json:"created_time"`
-	CreatedById        null.Int    `json:"created_by_id"`
-	CreatedFromIP      string      `json:"created_from_ip"`
-	LastModifiedTime   time.Time   `json:"last_modified_time"`
-	LastModifiedById   null.Int    `json:"last_modified_by_id"`
-	LastModifiedFromIP string      `json:"last_modified_from_ip"`
-	OldId              uint64      `json:"old_id"`
+	UntilFurtherNotice   bool        `json:"until_further_notice"`
+	UntilDate            null.Time   `json:"until_date"`
+	StartDate            null.Time   `json:"start_date"`
+	State                int8        `json:"state"`
+	CreatedTime          time.Time   `json:"created_time"`
+	CreatedById          null.Int    `json:"created_by_id"`
+	CreatedFromIP        string      `json:"created_from_ip"`
+	LastModifiedTime     time.Time   `json:"last_modified_time"`
+	LastModifiedById     null.Int    `json:"last_modified_by_id"`
+	LastModifiedFromIP   string      `json:"last_modified_from_ip"`
+	OldId                uint64      `json:"old_id"`
 }
 
 // Structure used to encapsulate the various filters we want to apply when we

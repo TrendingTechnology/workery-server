@@ -82,16 +82,16 @@ type Customer struct {
 	StreetAddressExtra  string `json:"street_address_extra"`
 
 	// -- abstract_person.py
-	GivenName   string       `json:"given_name"`
-	MiddleName  string       `json:"middle_name"`
-	LastName    string       `json:"last_name"`
-	Name        string       `json:"name,omitempty"`
-	LexicalName string       `json:"lexical_name,omitempty"`
+	GivenName   string    `json:"given_name"`
+	MiddleName  string    `json:"middle_name"`
+	LastName    string    `json:"last_name"`
+	Name        string    `json:"name,omitempty"`
+	LexicalName string    `json:"lexical_name,omitempty"`
 	Birthdate   null.Time `json:"birthdate"`
 	JoinDate    null.Time `json:"join_date"`
-	Nationality string       `json:"nationality"`
-	Gender      string       `json:"gender"`
-	TaxId       string       `json:"tax_id"`
+	Nationality string    `json:"nationality"`
+	Gender      string    `json:"gender"`
+	TaxId       string    `json:"tax_id"`
 
 	// -- abstract_geo_coorindate.py
 	Elevation float64 `json:"elevation"`

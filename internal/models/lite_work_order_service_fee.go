@@ -19,12 +19,12 @@ type LiteWorkOrderServiceFeeFilter struct {
 }
 
 type LiteWorkOrderServiceFee struct {
-	Id          uint64    `json:"id"`
-	TenantId    uint64    `json:"tenant_id"`
-	Title       string        `json:"title"`
-	Percentage  float64       `json:"percentage"`
-	Description string        `json:"description"`
-	State       int8      `json:"state"`
+	Id          uint64  `json:"id"`
+	TenantId    uint64  `json:"tenant_id"`
+	Title       string  `json:"title"`
+	Percentage  float64 `json:"percentage"`
+	Description string  `json:"description"`
+	State       int8    `json:"state"`
 }
 
 type LiteWorkOrderServiceFeeRepository interface {

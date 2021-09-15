@@ -2,7 +2,7 @@ package idos
 
 import (
 	"time"
-	
+
 	null "gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-server/internal/models"
@@ -40,7 +40,6 @@ func NewLiteCustomerListResponseIDO(arr []*models.LiteCustomer, count uint64) *L
 
 	return res
 }
-
 
 type CustomerIDO struct {
 	// -- customer.py
@@ -82,16 +81,16 @@ type CustomerIDO struct {
 	StreetAddressExtra  string `json:"street_address_extra"`
 
 	// -- abstract_person.py
-	GivenName   string       `json:"given_name"`
-	MiddleName  string       `json:"middle_name"`
-	LastName    string       `json:"last_name"`
-	Name        string       `json:"name,omitempty"`
-	LexicalName string       `json:"lexical_name,omitempty"`
+	GivenName   string    `json:"given_name"`
+	MiddleName  string    `json:"middle_name"`
+	LastName    string    `json:"last_name"`
+	Name        string    `json:"name,omitempty"`
+	LexicalName string    `json:"lexical_name,omitempty"`
 	Birthdate   null.Time `json:"birthdate"`
 	JoinDate    null.Time `json:"join_date"`
-	Nationality string       `json:"nationality"`
-	Gender      string       `json:"gender"`
-	TaxId       string       `json:"tax_id"`
+	Nationality string    `json:"nationality"`
+	Gender      string    `json:"gender"`
+	TaxId       string    `json:"tax_id"`
 
 	// -- abstract_geo_coorindate.py
 	Elevation float64 `json:"elevation"`
@@ -150,30 +149,30 @@ func NewCustomerIDO(m *models.Customer) *CustomerIDO {
 		OrganizationTypeOf:      m.OrganizationTypeOf,
 
 		// -- abstract_postal_address.py
-		AddressCountry:          m.AddressCountry,
-		AddressRegion:           m.AddressRegion,
-		AddressLocality:         m.AddressLocality,
-		PostOfficeBoxNumber:     m.PostOfficeBoxNumber,
-		PostalCode:              m.PostalCode,
-		StreetAddress:           m.StreetAddress,
-		StreetAddressExtra:      m.StreetAddressExtra,
+		AddressCountry:      m.AddressCountry,
+		AddressRegion:       m.AddressRegion,
+		AddressLocality:     m.AddressLocality,
+		PostOfficeBoxNumber: m.PostOfficeBoxNumber,
+		PostalCode:          m.PostalCode,
+		StreetAddress:       m.StreetAddress,
+		StreetAddressExtra:  m.StreetAddressExtra,
 
 		// -- abstract_person.py
-		GivenName:               m.GivenName,
-		MiddleName:              m.MiddleName,
-		LastName:                m.LastName,
-		Name:                    m.Name,
-		LexicalName:             m.LexicalName,
-		Birthdate:               m.Birthdate,
-		JoinDate:                m.JoinDate,
-		Nationality:             m.Nationality,
-		Gender:                  m.Gender,
-		TaxId:                   m.TaxId,
+		GivenName:   m.GivenName,
+		MiddleName:  m.MiddleName,
+		LastName:    m.LastName,
+		Name:        m.Name,
+		LexicalName: m.LexicalName,
+		Birthdate:   m.Birthdate,
+		JoinDate:    m.JoinDate,
+		Nationality: m.Nationality,
+		Gender:      m.Gender,
+		TaxId:       m.TaxId,
 
 		// -- abstract_geo_coorindate.py
-		Elevation:               m.Elevation,
-		Latitude:                m.Latitude,
-		Longitude:               m.Longitude,
+		Elevation: m.Elevation,
+		Latitude:  m.Latitude,
+		Longitude: m.Longitude,
 
 		// -- abstract_contact_point.py
 		AreaServed:              m.AreaServed,

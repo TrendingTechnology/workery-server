@@ -47,7 +47,7 @@ func (h *Controller) financialsListEndpoint(w http.ResponseWriter, r *http.Reque
 		Search:    null.NewString(searchString, searchString != ""),
 		Offset:    offsetParam,
 		Limit:     limitParam,
-		States:    []int8{7,8,}, //TECHDEBT
+		States:    []int8{7, 8}, //TECHDEBT
 	}
 
 	// // For debugging purposes only.

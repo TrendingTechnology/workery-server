@@ -19,11 +19,11 @@ type LiteSkillSetFilter struct {
 }
 
 type LiteSkillSet struct {
-	Id          uint64    `json:"id"`
-	TenantId    uint64    `json:"tenant_id"`
+	Id          uint64 `json:"id"`
+	TenantId    uint64 `json:"tenant_id"`
 	Category    string `json:"category"`
 	SubCategory string `json:"sub_category"`
-	State       int8      `json:"state"`
+	State       int8   `json:"state"`
 }
 
 type LiteSkillSetRepository interface {

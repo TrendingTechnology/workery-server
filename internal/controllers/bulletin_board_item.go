@@ -49,7 +49,7 @@ func (h *Controller) bulletinBoardItemsListEndpoint(w http.ResponseWriter, r *ht
 		Search:    null.NewString(searchString, searchString != ""),
 		Offset:    offsetParam,
 		Limit:     limitParam,
-		States:    []int8{int8(stateParam),},
+		States:    []int8{int8(stateParam)},
 	}
 
 	// // For debugging purposes only.

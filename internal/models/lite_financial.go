@@ -24,15 +24,15 @@ type LiteFinancialFilter struct {
 }
 
 type LiteFinancial struct {
-	Id             uint64 `json:"id"`
-	TenantId       uint64      `json:"tenant_id"`
-	CustomerId     uint64      `json:"customer_id"`
-	CustomerName   string      `json:"customer_name"`
-	AssociateId    null.Int    `json:"associate_id"`
-	AssociateName  null.String `json:"associate_name"`
-	InvoiceServiceFeePaymentDate      null.Time   `json:"invoice_service_fee_payment_date"`
-	TypeOf         int8 `json:"type_of"`
-	State          int8 `json:"state"`
+	Id                           uint64      `json:"id"`
+	TenantId                     uint64      `json:"tenant_id"`
+	CustomerId                   uint64      `json:"customer_id"`
+	CustomerName                 string      `json:"customer_name"`
+	AssociateId                  null.Int    `json:"associate_id"`
+	AssociateName                null.String `json:"associate_name"`
+	InvoiceServiceFeePaymentDate null.Time   `json:"invoice_service_fee_payment_date"`
+	TypeOf                       int8        `json:"type_of"`
+	State                        int8        `json:"state"`
 }
 
 type LiteFinancialRepository interface {

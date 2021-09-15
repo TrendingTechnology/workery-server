@@ -19,15 +19,15 @@ type LiteAssociateAwayLogFilter struct {
 }
 
 type LiteAssociateAwayLog struct {
-	Id        uint64    `json:"id"`
-	TenantId  uint64    `json:"tenant_id"`
-	AssociateId          uint64      `json:"associate_id"`
-	AssociateName        string       `json:"associate_name"`
-	AssociateLexicalName string       `json:"associate_lexical_name"`
-	StartDate          null.Time   `json:"start_date"`
-	UntilFurtherNotice bool        `json:"until_further_notice"`
-	UntilDate          null.Time   `json:"until_date"`
-	State     int8      `json:"state"`
+	Id                   uint64    `json:"id"`
+	TenantId             uint64    `json:"tenant_id"`
+	AssociateId          uint64    `json:"associate_id"`
+	AssociateName        string    `json:"associate_name"`
+	AssociateLexicalName string    `json:"associate_lexical_name"`
+	StartDate            null.Time `json:"start_date"`
+	UntilFurtherNotice   bool      `json:"until_further_notice"`
+	UntilDate            null.Time `json:"until_date"`
+	State                int8      `json:"state"`
 }
 
 type LiteAssociateAwayLogRepository interface {

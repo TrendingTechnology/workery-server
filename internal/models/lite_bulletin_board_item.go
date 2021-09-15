@@ -20,11 +20,11 @@ type LiteBulletinBoardItemFilter struct {
 }
 
 type LiteBulletinBoardItem struct {
-	Id        uint64    `json:"id"`
-	TenantId  uint64    `json:"tenant_id"`
-	Text               string        `json:"text"`
-	CreatedTime        time.Time     `json:"created_time"`
-	State     int8      `json:"state"`
+	Id          uint64    `json:"id"`
+	TenantId    uint64    `json:"tenant_id"`
+	Text        string    `json:"text"`
+	CreatedTime time.Time `json:"created_time"`
+	State       int8      `json:"state"`
 }
 
 type LiteBulletinBoardItemRepository interface {

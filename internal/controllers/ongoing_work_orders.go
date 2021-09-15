@@ -49,7 +49,7 @@ func (h *Controller) ongoingWorkOrdersListEndpoint(w http.ResponseWriter, r *htt
 		Search:    null.NewString(searchString, searchString != ""),
 		Offset:    offsetParam,
 		Limit:     limitParam,
-		States:    []int8{int8(stateParam),},
+		States:    []int8{int8(stateParam)},
 	}
 
 	// // For debugging purposes only.

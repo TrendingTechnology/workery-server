@@ -17,8 +17,8 @@ type LiteWorkOrderServiceFeeFilterIDO struct {
 }
 
 type LiteWorkOrderServiceFeeListResponseIDO struct {
-	NextId  uint64                 `json:"next_id,omitempty"`
-	Count   uint64                 `json:"count"`
+	NextId  uint64                            `json:"next_id,omitempty"`
+	Count   uint64                            `json:"count"`
 	Results []*models.LiteWorkOrderServiceFee `json:"results"`
 }
 

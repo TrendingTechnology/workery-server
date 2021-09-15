@@ -29,9 +29,9 @@ type Controller struct {
 	LiteAssociateRepo                 models.LiteAssociateRepository
 	LiteBulletinBoardItemRepo         models.LiteBulletinBoardItemRepository
 	LiteCustomerRepo                  models.LiteCustomerRepository
-    LiteDeactivatedCustomerRepo       models.LiteDeactivatedCustomerRepository
+	LiteDeactivatedCustomerRepo       models.LiteDeactivatedCustomerRepository
 	LiteFinancialRepo                 models.LiteFinancialRepository
-    LiteHowHearAboutUsItemRepo        models.LiteHowHearAboutUsItemRepository
+	LiteHowHearAboutUsItemRepo        models.LiteHowHearAboutUsItemRepository
 	LiteInsuranceRequirementRepo      models.LiteInsuranceRequirementRepository
 	LitePartnerRepo                   models.LitePartnerRepository
 	LiteSkillSetRepo                  models.LiteSkillSetRepository
@@ -123,32 +123,32 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	case n == 2 && p[0] == "v1" && p[1] == "ongoing-orders" && r.Method == http.MethodGet:
 		h.ongoingWorkOrdersListEndpoint(w, r)
 
-	// --- PARTNERS ---
-    case n == 2 && p[0] == "v1" && p[1] == "partners" && r.Method == http.MethodGet:
+		// --- PARTNERS ---
+	case n == 2 && p[0] == "v1" && p[1] == "partners" && r.Method == http.MethodGet:
 		h.partnersListEndpoint(w, r)
 
-	// --- STAFF ---
-    case n == 2 && p[0] == "v1" && p[1] == "staff" && r.Method == http.MethodGet:
+		// --- STAFF ---
+	case n == 2 && p[0] == "v1" && p[1] == "staff" && r.Method == http.MethodGet:
 		h.staffListEndpoint(w, r)
 
-	// --- FINANCIALS ---
-    case n == 2 && p[0] == "v1" && p[1] == "financials" && r.Method == http.MethodGet:
+		// --- FINANCIALS ---
+	case n == 2 && p[0] == "v1" && p[1] == "financials" && r.Method == http.MethodGet:
 		h.financialsListEndpoint(w, r)
 
-	// --- BULLETIN BOARD ITEMS ---
-    case n == 2 && p[0] == "v1" && p[1] == "bulletin-board-items" && r.Method == http.MethodGet:
+		// --- BULLETIN BOARD ITEMS ---
+	case n == 2 && p[0] == "v1" && p[1] == "bulletin-board-items" && r.Method == http.MethodGet:
 		h.bulletinBoardItemsListEndpoint(w, r)
 
-	// --- SKILL SETS ---
-    case n == 2 && p[0] == "v1" && p[1] == "skill-sets" && r.Method == http.MethodGet:
+		// --- SKILL SETS ---
+	case n == 2 && p[0] == "v1" && p[1] == "skill-sets" && r.Method == http.MethodGet:
 		h.skillSetsListEndpoint(w, r)
 
-	// --- TAGS ---
-    case n == 2 && p[0] == "v1" && p[1] == "tags" && r.Method == http.MethodGet:
+		// --- TAGS ---
+	case n == 2 && p[0] == "v1" && p[1] == "tags" && r.Method == http.MethodGet:
 		h.tagsListEndpoint(w, r)
 
-    // --- ASSOCIATE AWAY LOGS ---
-    case n == 2 && p[0] == "v1" && p[1] == "associate-away-logs" && r.Method == http.MethodGet:
+	// --- ASSOCIATE AWAY LOGS ---
+	case n == 2 && p[0] == "v1" && p[1] == "associate-away-logs" && r.Method == http.MethodGet:
 		h.associateAwayLogsListEndpoint(w, r)
 
 	// --- INSURANCE REQUIREMENTS ---
@@ -167,8 +167,8 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	case n == 2 && p[0] == "v1" && p[1] == "vehicle-types" && r.Method == http.MethodGet:
 		h.vehicleTypesListEndpoint(w, r)
 
-	// --- HOW HEAR ABOUT US ITEM ---
-    case n == 2 && p[0] == "v1" && p[1] == "how-hears" && r.Method == http.MethodGet:
+		// --- HOW HEAR ABOUT US ITEM ---
+	case n == 2 && p[0] == "v1" && p[1] == "how-hears" && r.Method == http.MethodGet:
 		h.howHearAboutUsItemsListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---

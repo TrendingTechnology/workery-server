@@ -19,13 +19,13 @@ type LiteDeactivatedCustomerFilter struct {
 }
 
 type LiteDeactivatedCustomer struct {
-	Id                      uint64    `json:"id"`
-	TenantId                uint64    `json:"tenant_id"`
-	Name                    string    `json:"name,omitempty"`
-	LexicalName             string    `json:"lexical_name,omitempty"`
-	DeactivationReason      int8      `json:"deactivation_reason"`
-	DeactivationReasonOther string    `json:"deactivation_reason_other"`
-	State                   int8      `json:"state"`
+	Id                      uint64 `json:"id"`
+	TenantId                uint64 `json:"tenant_id"`
+	Name                    string `json:"name,omitempty"`
+	LexicalName             string `json:"lexical_name,omitempty"`
+	DeactivationReason      int8   `json:"deactivation_reason"`
+	DeactivationReasonOther string `json:"deactivation_reason_other"`
+	State                   int8   `json:"state"`
 }
 
 type LiteDeactivatedCustomerRepository interface {

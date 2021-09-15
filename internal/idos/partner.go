@@ -17,8 +17,8 @@ type LitePartnerFilterIDO struct {
 }
 
 type LitePartnerListResponseIDO struct {
-	NextId  uint64                 `json:"next_id,omitempty"`
-	Count   uint64                 `json:"count"`
+	NextId  uint64                `json:"next_id,omitempty"`
+	Count   uint64                `json:"count"`
 	Results []*models.LitePartner `json:"results"`
 }
 

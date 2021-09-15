@@ -19,8 +19,8 @@ type LiteHowHearAboutUsItemFilter struct {
 }
 
 type LiteHowHearAboutUsItem struct {
-	Id        uint64    `json:"id"`
-	TenantId  uint64    `json:"tenant_id"`
+	Id             uint64 `json:"id"`
+	TenantId       uint64 `json:"tenant_id"`
 	Text           string `json:"text"`
 	SortNumber     int8   `json:"sort_number"`
 	IsForAssociate bool   `json:"is_for_associate"`

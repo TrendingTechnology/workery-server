@@ -53,7 +53,7 @@ func (s *LiteDeactivatedCustomerRepo) queryRowsWithFilter(ctx context.Context, q
 	// 	query += ` )`
 	// }
 
-    // Deactivated
+	// Deactivated
 	query += ` AND state = 0` // query += ` state = $` + strconv.Itoa(len(filterValues))
 
 	//

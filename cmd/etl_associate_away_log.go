@@ -204,22 +204,22 @@ func insertAssociateAwayLogETL(
 
 	if associateId != 0 {
 		m := &models.AssociateAwayLog{
-			OldId:              oss.Id,
-			TenantId:           tid,
-			Uuid:               uuid.NewString(),
-			AssociateId:        associateId,
+			OldId:                oss.Id,
+			TenantId:             tid,
+			Uuid:                 uuid.NewString(),
+			AssociateId:          associateId,
 			AssociateName:        associate.Name,
 			AssociateLexicalName: associate.LexicalName,
 			Reason:               oss.Reason,
-			ReasonOther:        oss.ReasonOther,
-			UntilFurtherNotice: oss.UntilFurtherNotice,
-			UntilDate:          oss.UntilDate,
-			StartDate:          oss.StartDate,
-			State:              state,
-			CreatedTime:        oss.CreatedTime,
-			CreatedById:        createdById,
-			LastModifiedTime:   oss.LastModifiedTime,
-			LastModifiedById:   lastModifiedById,
+			ReasonOther:          oss.ReasonOther,
+			UntilFurtherNotice:   oss.UntilFurtherNotice,
+			UntilDate:            oss.UntilDate,
+			StartDate:            oss.StartDate,
+			State:                state,
+			CreatedTime:          oss.CreatedTime,
+			CreatedById:          createdById,
+			LastModifiedTime:     oss.LastModifiedTime,
+			LastModifiedById:     lastModifiedById,
 		}
 		err = asr.Insert(ctx, m)
 		if err != nil {
