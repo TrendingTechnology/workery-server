@@ -88,3 +88,34 @@ func (h *Controller) customersListEndpoint(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
+func (h *Controller) customerGetEndpoint(w http.ResponseWriter, r *http.Request, idStr string) {
+	defer r.Body.Close()
+
+	// Extract the session details from our "Session" middleware.
+	ctx := r.Context()
+	role_id := uint64(ctx.Value("user_role_id").(int8))
+
+	// Permission handling - If use is not administrator then error.
+	if role_id != 1 {
+		http.Error(w, "Forbidden - You are not an administrator", http.StatusForbidden)
+		return
+	}
+
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	m, err := h.CustomerRepo.GetById(ctx, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ido := idos.NewCustomerIDO(m)
+	if err := json.NewEncoder(w).Encode(&ido); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}

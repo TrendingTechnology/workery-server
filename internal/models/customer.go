@@ -2,8 +2,9 @@ package models
 
 import (
 	"context"
-	"database/sql"
 	"time"
+
+	null "gopkg.in/guregu/null.v4"
 )
 
 const (
@@ -86,8 +87,8 @@ type Customer struct {
 	LastName    string       `json:"last_name"`
 	Name        string       `json:"name,omitempty"`
 	LexicalName string       `json:"lexical_name,omitempty"`
-	Birthdate   sql.NullTime `json:"birthdate"`
-	JoinDate    sql.NullTime `json:"join_date"`
+	Birthdate   null.Time `json:"birthdate"`
+	JoinDate    null.Time `json:"join_date"`
 	Nationality string       `json:"nationality"`
 	Gender      string       `json:"gender"`
 	TaxId       string       `json:"tax_id"`

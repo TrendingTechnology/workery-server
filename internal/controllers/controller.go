@@ -104,6 +104,8 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// --- CUSTOMERS ---
 	case n == 2 && p[0] == "v1" && p[1] == "customers" && r.Method == http.MethodGet:
 		h.customersListEndpoint(w, r)
+	case n == 3 && p[0] == "v1" && p[1] == "customer" && r.Method == http.MethodGet:
+		h.customerGetEndpoint(w, r, p[2])
 
 	// --- WORK ORDERS ---
 	case n == 2 && p[0] == "v1" && p[1] == "orders" && r.Method == http.MethodGet:
