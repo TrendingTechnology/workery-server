@@ -31,6 +31,7 @@ type Controller struct {
 	LiteCustomerRepo                  models.LiteCustomerRepository
     LiteDeactivatedCustomerRepo       models.LiteDeactivatedCustomerRepository
 	LiteFinancialRepo                 models.LiteFinancialRepository
+    LiteHowHearAboutUsItemRepo        models.LiteHowHearAboutUsItemRepository
 	LiteInsuranceRequirementRepo      models.LiteInsuranceRequirementRepository
 	LitePartnerRepo                   models.LitePartnerRepository
 	LiteSkillSetRepo                  models.LiteSkillSetRepository
@@ -163,6 +164,10 @@ func (h *Controller) HandleRequests(w http.ResponseWriter, r *http.Request) {
 	// --- DEACTIVATED CUSTOMER ---
 	case n == 2 && p[0] == "v1" && p[1] == "vehicle-types" && r.Method == http.MethodGet:
 		h.vehicleTypesListEndpoint(w, r)
+
+	// --- HOW HEAR ABOUT US ITEM ---
+    case n == 2 && p[0] == "v1" && p[1] == "how-hears" && r.Method == http.MethodGet:
+		h.howHearAboutUsItemsListEndpoint(w, r)
 
 	// --- CATCH ALL: D.N.E. ---
 	default:
