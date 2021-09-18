@@ -92,6 +92,10 @@ func (h *Controller) customersListEndpoint(w http.ResponseWriter, r *http.Reques
 func (h *Controller) customerGetEndpoint(w http.ResponseWriter, r *http.Request, idStr string) {
 	defer r.Body.Close()
 
+	//
+	// Get the customer based on the primary key.
+	//
+
 	// Extract the session details from our "Session" middleware.
 	ctx := r.Context()
 	role_id := uint64(ctx.Value("user_role_id").(int8))
@@ -113,6 +117,61 @@ func (h *Controller) customerGetEndpoint(w http.ResponseWriter, r *http.Request,
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	//
+	// Get all the tags with this customer.
+	//
+
+	// Lookup the tags that belong to the customer.
+	f := &models.CustomerTagFilter{
+		TenantId:   m.TenantId,
+		SortField:  "tag_id",
+		SortOrder:  "ASC",
+		CustomerId: null.NewInt(int64(m.Id), m.Id != 0),
+		Offset:     0,
+		Limit:      1000,
+	}
+	tags, err := h.CustomerTagRepo.ListByFilter(ctx, f)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	m.Tags = tags
+
+	//
+	// Compile the `how hear` text.
+	//
+
+	// Lookup the `how hear` option.
+	howHear, err := h.HowHearAboutUsItemRepo.GetById(ctx, m.HowHearId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if m.HowHearId == 1 {
+		m.HowHearText = m.HowHearOther
+	} else {
+		m.HowHearText = howHear.Text
+	}
+
+	//
+	// Compile the `full address` and `address url`.
+	//
+
+	address := ""
+	address += m.StreetAddress
+	if m.StreetAddressExtra != "" {
+		address = m.StreetAddressExtra
+	}
+	address += ", " + m.AddressLocality
+	address += ", " + m.AddressRegion
+	address += ", " + m.AddressCountry
+	m.FullAddress = address
+	m.AddressUrl = "https://www.google.com/maps/place/" + address
+
+	//
+	// Serialize the data.
+	//
 
 	ido := idos.NewCustomerIDO(m)
 	if err := json.NewEncoder(w).Encode(&ido); err != nil {

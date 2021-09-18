@@ -58,6 +58,7 @@ type CustomerIDO struct {
 	HowHearId               uint64    `json:"how_hear_id"`
 	HowHearOld              int8      `json:"how_hear_old"`
 	HowHearOther            string    `json:"how_hear_other"`
+	HowHearText             string    `json:"how_hear_text"`
 	State                   int8      `json:"state"`
 	DeactivationReason      int8      `json:"deactivation_reason"`
 	DeactivationReasonOther string    `json:"deactivation_reason_other"`
@@ -79,6 +80,8 @@ type CustomerIDO struct {
 	PostalCode          string `json:"postal_code"`
 	StreetAddress       string `json:"street_address"`
 	StreetAddressExtra  string `json:"street_address_extra"`
+	FullAddress         string `json:"full_address,omitempty"` // API generated
+	AddressUrl          string `json:"address_url,omitempty"`  // API generated
 
 	// -- abstract_person.py
 	GivenName   string    `json:"given_name"`
@@ -116,6 +119,9 @@ type CustomerIDO struct {
 	// OwnerId sql.NullInt64  `json:"owner_id"`
 	// IsBlacklisted bool `json:"is_blacklisted"`
 	// AvatarImageId sql.NullInt64  `json:"avatar_image_id"`
+
+	// -- Reference --
+	Tags []*models.CustomerTag `json:"tags,omitempty"`
 }
 
 func NewCustomerIDO(m *models.Customer) *CustomerIDO {
@@ -156,6 +162,8 @@ func NewCustomerIDO(m *models.Customer) *CustomerIDO {
 		PostalCode:          m.PostalCode,
 		StreetAddress:       m.StreetAddress,
 		StreetAddressExtra:  m.StreetAddressExtra,
+		FullAddress:         m.FullAddress,
+		AddressUrl:          m.AddressUrl,
 
 		// -- abstract_person.py
 		GivenName:   m.GivenName,
@@ -193,5 +201,8 @@ func NewCustomerIDO(m *models.Customer) *CustomerIDO {
 		// OwnerId sql.NullInt64  `json:"owner_id"`
 		// IsBlacklisted bool `json:"is_blacklisted"`
 		// AvatarImageId sql.NullInt64  `json:"avatar_image_id"`
+		// -- Reference --
+		Tags:        m.Tags,
+		HowHearText: m.HowHearText,
 	}
 }

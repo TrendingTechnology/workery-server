@@ -59,6 +59,7 @@ type Customer struct {
 	HowHearId               uint64    `json:"how_hear_id"`
 	HowHearOld              int8      `json:"how_hear_old"`
 	HowHearOther            string    `json:"how_hear_other"`
+	HowHearText             string    `json:"how_hear_text"` // Referenced value
 	State                   int8      `json:"state"`
 	DeactivationReason      int8      `json:"deactivation_reason"`
 	DeactivationReasonOther string    `json:"deactivation_reason_other"`
@@ -80,6 +81,8 @@ type Customer struct {
 	PostalCode          string `json:"postal_code"`
 	StreetAddress       string `json:"street_address"`
 	StreetAddressExtra  string `json:"street_address_extra"`
+	FullAddress         string `json:"full_address,omitempty"` // API generated
+	AddressUrl          string `json:"address_url,omitempty"`  // API generated
 
 	// -- abstract_person.py
 	GivenName   string    `json:"given_name"`
@@ -117,6 +120,9 @@ type Customer struct {
 	// OwnerId sql.NullInt64  `json:"owner_id"`
 	// IsBlacklisted bool `json:"is_blacklisted"`
 	// AvatarImageId sql.NullInt64  `json:"avatar_image_id"`
+
+	// -- Reference --
+	Tags []*CustomerTag `json:"tags,omitempty"`
 }
 
 type CustomerRepository interface {
