@@ -40,8 +40,8 @@ type User struct {
 	PrAccessCode      string    `json:"pr_access_code,omitempty"`
 	PrExpiryTime      time.Time `json:"pr_expiry_time,omitempty"`
 	OldId             uint64    `json:"old_id,omitempty"`
-	AccessToken       string    `json:"pr_access_code,omitempty"`
-	RefreshToken      string    `json:"pr_access_code,omitempty"`
+	AccessToken       string    `json:"access_token,omitempty"`
+	RefreshToken      string    `json:"refresh_token,omitempty"`
 }
 
 type UserRepository interface {
