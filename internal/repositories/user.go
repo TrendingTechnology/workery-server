@@ -133,7 +133,7 @@ func (r *UserRepo) UpdateByEmail(ctx context.Context, m *models.User) error {
 		name = $17,
 		lexical_name = $18
     WHERE
-        email = $2`
+        email = $19`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
