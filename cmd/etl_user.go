@@ -135,8 +135,6 @@ func runUserETL(tr *repositories.TenantRepo, ur *repositories.UserRepo, oldDb *s
 }
 
 func runUserInsert(ou *OldUser, tr *repositories.TenantRepo, ur *repositories.UserRepo) {
-	log.Println(ou, ur, "\n")
-
 	var state int8 = 0
 	if ou.IsActive == true {
 		state = 1

@@ -27,10 +27,10 @@ func (r *AssociateAwayLogRepo) Insert(ctx context.Context, m *models.AssociateAw
     INSERT INTO associate_away_logs (
         uuid, tenant_id, associate_id, associate_name, associate_lexical_name, reason, reason_other,
 		until_further_notice, until_date, start_date, state,
-		created_time, created_by_id, created_from_ip, last_modified_time,
-		last_modified_by_id, last_modified_from_ip, old_id
+		created_time, created_by_id, created_by_name, created_from_ip, last_modified_time,
+		last_modified_by_id, last_modified_by_name, last_modified_from_ip, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -42,8 +42,8 @@ func (r *AssociateAwayLogRepo) Insert(ctx context.Context, m *models.AssociateAw
 		ctx,
 		m.Uuid, m.TenantId, m.AssociateId, m.AssociateName, m.AssociateLexicalName, m.Reason, m.ReasonOther,
 		m.UntilFurtherNotice, m.UntilDate, m.StartDate, m.State,
-		m.CreatedTime, m.CreatedById, m.CreatedFromIP, m.LastModifiedTime,
-		m.LastModifiedById, m.LastModifiedFromIP, m.OldId,
+		m.CreatedTime, m.CreatedById, m.CreatedByName, m.CreatedFromIP, m.LastModifiedTime,
+		m.LastModifiedById, m.LastModifiedByName, m.LastModifiedFromIP, m.OldId,
 	)
 	return err
 }

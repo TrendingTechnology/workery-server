@@ -163,6 +163,6 @@ func insertPartnerCommentETL(
 		}
 		fmt.Println("Imported ID#", oss.Id)
 	} else {
-		fmt.Println("-------------------\nSkipped ID#", oss.Id, "\n-------------------\npartnerId #", partnerId, "\ncommentId #", commentId, "\n\noss", oss, "\n\n")
+		fmt.Println("-------------------\nSkipped ID#", oss.Id, "\n-------------------\npartnerId #", partnerId, "\ncommentId #", commentId, "\n\noss", oss)
 	}
 }

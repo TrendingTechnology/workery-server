@@ -163,6 +163,6 @@ func insertAssociateInsuranceRequirementETL(
 		}
 		fmt.Println("Imported ID#", oss.Id)
 	} else {
-		fmt.Println("-------------------\nSkipped ID#", oss.Id, "\n-------------------\nassociateId #", associateId, "\ncommentId #", commentId, "\n\noss", oss, "\n\n")
+		fmt.Println("-------------------\nSkipped ID#", oss.Id, "\n-------------------\nassociateId #", associateId, "\ncommentId #", commentId, "\n\noss", oss)
 	}
 }

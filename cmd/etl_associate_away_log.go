@@ -163,6 +163,10 @@ func insertAssociateAwayLogETL(
 	ur *repositories.UserRepo,
 	oss *OldAssociateAwayLog,
 ) {
+	//
+	// Get by the `Associate`.
+	//
+
 	associateId, err := ar.GetIdByOldId(ctx, tid, oss.AssociateId)
 	if err != nil {
 		log.Panic("ar.GetIdByOldId | err", err)
@@ -173,34 +177,75 @@ func insertAssociateAwayLogETL(
 		log.Panic("ar.GetById | err", err)
 	}
 
+	//
+	// Set the `state`.
+	//
+
 	var state int8 = 1
 	if oss.WasDeleted == true {
 		state = 0
 	}
 
+	//
+	// Get `createdById` and `createdByName` values.
+	//
+
 	var createdById null.Int
-	if oss.CreatedById.Valid {
-		createdByIdInt64 := oss.CreatedById.ValueOrZero()
-		createdByIdUint64, err := ur.GetIdByOldId(ctx, tid, uint64(createdByIdInt64))
+	var createdByName null.String
+	if oss.CreatedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oss.CreatedById.ValueOrZero()))
+
 		if err != nil {
-			log.Panic("asr.GetIdByOldId | err", err)
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
 		}
 
-		// Convert from null supported integer times.
-		createdById = null.NewInt(int64(createdByIdUint64), createdByIdUint64 != 0)
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
 	}
+
+	//
+	// Get `lastModifiedById` and `lastModifiedByName` values.
+	//
 
 	var lastModifiedById null.Int
-	if oss.LastModifiedById.Valid {
-		lastModifiedByIdInt64 := oss.LastModifiedById.ValueOrZero()
-		lastModifiedByIdUint64, err := ur.GetIdByOldId(ctx, tid, uint64(lastModifiedByIdInt64))
+	var lastModifiedByName null.String
+	if oss.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oss.LastModifiedById.ValueOrZero()))
 		if err != nil {
-			log.Panic("asr.GetIdByOldId | err", err)
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
 		}
 
-		// Convert from null supported integer times.
-		lastModifiedById = null.NewInt(int64(lastModifiedByIdUint64), lastModifiedByIdUint64 != 0)
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
 	}
+
+	//
+	// Insert the `AssociateAwayLog` if it exis.
+	//
 
 	if associateId != 0 {
 		m := &models.AssociateAwayLog{
@@ -218,8 +263,10 @@ func insertAssociateAwayLogETL(
 			State:                state,
 			CreatedTime:          oss.CreatedTime,
 			CreatedById:          createdById,
+			CreatedByName:        createdByName,
 			LastModifiedTime:     oss.LastModifiedTime,
 			LastModifiedById:     lastModifiedById,
+			LastModifiedByName:   lastModifiedByName,
 		}
 		err = asr.Insert(ctx, m)
 		if err != nil {
@@ -227,6 +274,6 @@ func insertAssociateAwayLogETL(
 		}
 		fmt.Println("Imported ID#", oss.Id)
 	} else {
-		fmt.Println("-------------------\nSkipped ID#", oss.Id, "\n-------------------\nassociateId #", associateId, "\n\noss", oss, "\n\n")
+		fmt.Println("-------------------\nSkipped ID#", oss.Id)
 	}
 }
