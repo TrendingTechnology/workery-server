@@ -234,6 +234,10 @@ func insertCustomerETL(
 	r *repositories.HowHearAboutUsItemRepo,
 	om *OldUCustomer,
 ) {
+	//
+	// Set the `state`.
+	//
+
 	var state int8 = 0
 	if om.State == "active" {
 		state = models.CustomerActiveState
@@ -242,7 +246,10 @@ func insertCustomerETL(
 	// Variable used to keep the ID of the user record in our database.
 	userId := uint64(om.OwnerId.Int64)
 
+	//
 	// Generate our full name / lexical full name.
+	//
+
 	var name string
 	var lexicalName string
 	if om.MiddleName.Valid {
@@ -319,32 +326,61 @@ func insertCustomerETL(
 		userId = user.Id
 	}
 
-	var createdById uint64
-	if om.CreatedById.Valid {
-		createdById = uint64(om.CreatedById.Int64)
-		user, err := ur.GetByOldId(ctx, createdById)
+	//
+	// Get `createdById` and `createdByName` values.
+	//
+
+	var createdById null.Int
+	var createdByName null.String
+	if om.CreatedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(om.CreatedById.ValueOrZero()))
+
 		if err != nil {
-			log.Fatal("(F)", err)
+			log.Panic("ur.GetIdByOldId", err)
 		}
-		if user == nil {
-			log.Fatal("(G) User is null")
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
 		}
-	} else {
-		createdById = userId
+
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
 	}
 
-	var lastModifiedById uint64
-	if om.LastModifiedById.Valid {
-		lastModifiedById = uint64(om.LastModifiedById.Int64)
-		user, err := ur.GetByOldId(ctx, lastModifiedById)
+	//
+	// Get `lastModifiedById` and `lastModifiedByName` values.
+	//
+
+	var lastModifiedById null.Int
+	var lastModifiedByName null.String
+	if om.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(om.LastModifiedById.ValueOrZero()))
 		if err != nil {
-			log.Fatal("(F)", err)
+			log.Panic("ur.GetIdByOldId", err)
 		}
-		if user == nil {
-			log.Fatal("(G) User is null")
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
 		}
-	} else {
-		lastModifiedById = userId
+
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
 	}
 
 	//
@@ -421,9 +457,11 @@ func insertCustomerETL(
 		DeactivationReasonOther:      om.DeactivationReasonOther,
 		CreatedTime:                  om.Created,
 		CreatedById:                  createdById,
+		CreatedByName:                createdByName,
 		CreatedFromIP:                om.CreatedFrom.String,
 		LastModifiedTime:             om.LastModified,
 		LastModifiedById:             lastModifiedById,
+		LastModifiedByName:           lastModifiedByName,
 		LastModifiedFromIP:           om.LastModifiedFrom.String,
 		OrganizationName:             om.OrganizationName.String,
 		AddressCountry:               om.AddressCountry,

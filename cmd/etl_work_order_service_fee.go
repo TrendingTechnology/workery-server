@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	null "gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -61,6 +62,7 @@ func doRunImportWorkOrderServiceFee() {
 	// Load up our repositories.
 	tr := repositories.NewTenantRepo(db)
 	irr := repositories.NewWorkOrderServiceFeeRepo(db)
+	ur := repositories.NewUserRepo(db)
 
 	// Lookup the tenant.
 	tenant, err := tr.GetBySchemaName(ctx, workOrderServiceFeeETLSchemaName)
@@ -71,21 +73,19 @@ func doRunImportWorkOrderServiceFee() {
 		log.Fatal("Tenant does not exist!")
 	}
 
-	runWorkOrderServiceFeeETL(ctx, tenant.Id, irr, oldDb)
+	runWorkOrderServiceFeeETL(ctx, tenant.Id, irr, ur, oldDb)
 }
 
 type OldUWorkOrderServiceFee struct {
-	Id          uint64        `json:"id"`
-	Title       string        `json:"title"`
-	Description string        `json:"description"`
-	Percentage  float64       `json:"percentage"`
-	CreatedAt   time.Time     `json:"created_at"`
-	CreatedById sql.NullInt64 `json:"created_by_id,omitempty"`
-	// CreatedFrom       sql.NullString        `json:"created_from"`
-	LastModifiedAt   time.Time     `json:"last_modified_at"`
-	LastModifiedById sql.NullInt64 `json:"last_modified_by_id,omitempty"`
-	// LastModifiedFrom  sql.NullString        `json:"last_modified_from"`
-	IsArchived bool `json:"is_archived"`
+	Id               uint64    `json:"id"`
+	Title            string    `json:"title"`
+	Description      string    `json:"description"`
+	Percentage       float64   `json:"percentage"`
+	CreatedAt        time.Time `json:"created_at"`
+	CreatedById      null.Int  `json:"created_by_id,omitempty"`
+	LastModifiedAt   time.Time `json:"last_modified_at"`
+	LastModifiedById null.Int  `json:"last_modified_by_id,omitempty"`
+	IsArchived       bool      `json:"is_archived"`
 }
 
 func ListAllWorkOrderServiceFees(db *sql.DB) ([]*OldUWorkOrderServiceFee, error) {
@@ -133,34 +133,101 @@ func ListAllWorkOrderServiceFees(db *sql.DB) ([]*OldUWorkOrderServiceFee, error)
 	return arr, err
 }
 
-func runWorkOrderServiceFeeETL(ctx context.Context, tenantId uint64, irr *repositories.WorkOrderServiceFeeRepo, oldDb *sql.DB) {
+func runWorkOrderServiceFeeETL(ctx context.Context, tenantId uint64, irr *repositories.WorkOrderServiceFeeRepo, ur *repositories.UserRepo, oldDb *sql.DB) {
 	workOrderServiceFees, err := ListAllWorkOrderServiceFees(oldDb)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, oir := range workOrderServiceFees {
-		insertWorkOrderServiceFeeETL(ctx, tenantId, irr, oir)
+		insertWorkOrderServiceFeeETL(ctx, tenantId, irr, ur, oir)
 	}
 }
 
-func insertWorkOrderServiceFeeETL(ctx context.Context, tid uint64, irr *repositories.WorkOrderServiceFeeRepo, oir *OldUWorkOrderServiceFee) {
+func insertWorkOrderServiceFeeETL(ctx context.Context, tid uint64, irr *repositories.WorkOrderServiceFeeRepo, ur *repositories.UserRepo, oir *OldUWorkOrderServiceFee) {
+	//
+	// Set the `state`.
+	//
+
 	var state int8 = 1
 	if oir.IsArchived == true {
 		state = 0
 	}
 
+	//
+	// Get `createdById` and `createdByName` values.
+	//
+
+	var createdById null.Int
+	var createdByName null.String
+	if oir.CreatedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oir.CreatedById.ValueOrZero()))
+
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
+	}
+
+	//
+	// Get `lastModifiedById` and `lastModifiedByName` values.
+	//
+
+	var lastModifiedById null.Int
+	var lastModifiedByName null.String
+	if oir.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oir.LastModifiedById.ValueOrZero()))
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
+	}
+
+	//
+	// Insert the `WorkOrderServiceFee`.
+	//
+
 	m := &models.WorkOrderServiceFee{
-		OldId:       oir.Id,
-		TenantId:    tid,
-		Uuid:        uuid.NewString(),
-		Title:       oir.Title,
-		Description: oir.Description,
-		Percentage:  oir.Percentage,
-		CreatedTime: oir.CreatedAt,
-		// CreatedById: oir.CreatedById,
-		LastModifiedTime: oir.LastModifiedAt,
-		LastModifiedById: oir.LastModifiedById,
-		State:            state,
+		OldId:              oir.Id,
+		TenantId:           tid,
+		Uuid:               uuid.NewString(),
+		Title:              oir.Title,
+		Description:        oir.Description,
+		Percentage:         oir.Percentage,
+		CreatedTime:        oir.CreatedAt,
+		CreatedById:        createdById,
+		CreatedByName:      createdByName,
+		LastModifiedTime:   oir.LastModifiedAt,
+		LastModifiedById:   lastModifiedById,
+		LastModifiedByName: lastModifiedByName,
+		State:              state,
 	}
 	err := irr.Insert(ctx, m)
 	if err != nil {

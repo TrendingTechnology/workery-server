@@ -25,10 +25,10 @@ func (r *WorkOrderServiceFeeRepo) Insert(ctx context.Context, m *models.WorkOrde
 	query := `
     INSERT INTO work_order_service_fees (
         uuid, tenant_id, title, description, percentage, created_time,
-		created_by_id, created_from_ip, last_modified_time, last_modified_by_id,
+		created_by_id, created_by_name, created_from_ip, last_modified_time, last_modified_by_id, last_modified_by_name,
 		last_modified_from_ip, state, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -39,8 +39,8 @@ func (r *WorkOrderServiceFeeRepo) Insert(ctx context.Context, m *models.WorkOrde
 	_, err = stmt.ExecContext(
 		ctx,
 		m.Uuid, m.TenantId, m.Title, m.Description, m.Percentage,
-		m.CreatedTime, m.CreatedById, m.CreatedFromIP,
-		m.LastModifiedTime, m.LastModifiedById, m.LastModifiedFromIP,
+		m.CreatedTime, m.CreatedById, m.CreatedByName, m.CreatedFromIP,
+		m.LastModifiedTime, m.LastModifiedById, m.LastModifiedByName, m.LastModifiedFromIP,
 		m.State, m.OldId,
 	)
 	return err

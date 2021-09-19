@@ -43,36 +43,36 @@ func NewLiteCustomerListResponseIDO(arr []*models.LiteCustomer, count uint64) *L
 
 type CustomerIDO struct {
 	// -- customer.py
-	Id                      uint64    `json:"id"`
-	Uuid                    string    `json:"uuid"`
-	TenantId                uint64    `json:"tenant_id"`
-	UserId                  uint64    `json:"user_id"`
-	TypeOf                  int8      `json:"type_of"`
-	IndexedText             string    `json:"indexed_text"`
-	IsOkToEmail             bool      `json:"is_ok_to_email"`
-	IsOkToText              bool      `json:"is_ok_to_text"`
-	IsBusiness              bool      `json:"is_business"`
-	IsSenior                bool      `json:"is_senior"`
-	IsSupport               bool      `json:"is_support"`
-	JobInfoRead             string    `json:"job_info_read"`
-	HowHearId               uint64    `json:"how_hear_id"`
-	HowHearOld              int8      `json:"how_hear_old"`
-	HowHearOther            string    `json:"how_hear_other"`
-	HowHearText             string    `json:"how_hear_text"`
-	State                   int8      `json:"state"`
-	DeactivationReason      int8      `json:"deactivation_reason"`
-	DeactivationReasonOther string    `json:"deactivation_reason_other"`
-	CreatedTime             time.Time `json:"created_time"`
-	CreatedById             uint64    `json:"created_by_id"`
-	CreatedBy               string    `json:"created_by"` // Compiled value
-	CreatedFromIP           string    `json:"created_from_ip"`
-	LastModifiedTime        time.Time `json:"last_modified_time"`
-	LastModifiedById        uint64    `json:"last_modified_by_id"`
-	LastModifiedBy          string    `json:"last_modified_by"` // Compiled value.
-	LastModifiedFromIP      string    `json:"last_modified_from_ip"`
-	OrganizationName        string    `json:"organization_name"`
-	OrganizationTypeOf      int8      `json:"organization_type_of"`
-	OldId                   uint64    `json:"old_id"`
+	Id                      uint64      `json:"id"`
+	Uuid                    string      `json:"uuid"`
+	TenantId                uint64      `json:"tenant_id"`
+	UserId                  uint64      `json:"user_id"`
+	TypeOf                  int8        `json:"type_of"`
+	IndexedText             string      `json:"indexed_text"`
+	IsOkToEmail             bool        `json:"is_ok_to_email"`
+	IsOkToText              bool        `json:"is_ok_to_text"`
+	IsBusiness              bool        `json:"is_business"`
+	IsSenior                bool        `json:"is_senior"`
+	IsSupport               bool        `json:"is_support"`
+	JobInfoRead             string      `json:"job_info_read"`
+	HowHearId               uint64      `json:"how_hear_id"`
+	HowHearOld              int8        `json:"how_hear_old"`
+	HowHearOther            string      `json:"how_hear_other"`
+	HowHearText             string      `json:"how_hear_text"`
+	State                   int8        `json:"state"`
+	DeactivationReason      int8        `json:"deactivation_reason"`
+	DeactivationReasonOther string      `json:"deactivation_reason_other"`
+	CreatedTime             time.Time   `json:"created_time"`
+	CreatedById             null.Int    `json:"created_by_id"`
+	CreatedByName           null.String `json:"created_by_name"` // Compiled value
+	CreatedFromIP           string      `json:"created_from_ip"`
+	LastModifiedTime        time.Time   `json:"last_modified_time"`
+	LastModifiedById        null.Int    `json:"last_modified_by_id"`
+	LastModifiedByName      null.String `json:"last_modified_by_name"` // Compiled value.
+	LastModifiedFromIP      string      `json:"last_modified_from_ip"`
+	OrganizationName        string      `json:"organization_name"`
+	OrganizationTypeOf      int8        `json:"organization_type_of"`
+	OldId                   uint64      `json:"old_id"`
 
 	// -- abstract_postal_address.py
 	AddressCountry               string `json:"address_country"`
@@ -151,9 +151,11 @@ func NewCustomerIDO(m *models.Customer) *CustomerIDO {
 		DeactivationReasonOther: m.DeactivationReasonOther,
 		CreatedTime:             m.CreatedTime,
 		CreatedById:             m.CreatedById,
+		CreatedByName:           m.CreatedByName,
 		CreatedFromIP:           m.CreatedFromIP,
 		LastModifiedTime:        m.LastModifiedTime,
 		LastModifiedById:        m.LastModifiedById,
+		LastModifiedByName:      m.LastModifiedByName,
 		LastModifiedFromIP:      m.LastModifiedFromIP,
 		OrganizationName:        m.OrganizationName,
 		OrganizationTypeOf:      m.OrganizationTypeOf,

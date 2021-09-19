@@ -24,11 +24,11 @@ func (r *CommentRepo) Insert(ctx context.Context, m *models.Comment) error {
 
 	query := `
     INSERT INTO comments (
-        uuid, tenant_id, created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip,
+        uuid, tenant_id, created_time, created_by_id, created_by_name, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_by_name, last_modified_from_ip,
 		text, state, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -38,8 +38,8 @@ func (r *CommentRepo) Insert(ctx context.Context, m *models.Comment) error {
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.CreatedTime, m.CreatedById, m.CreatedFromIP, m.LastModifiedTime,
-		m.LastModifiedById, m.LastModifiedFromIP, m.Text, m.State, m.OldId,
+		m.Uuid, m.TenantId, m.CreatedTime, m.CreatedById, m.CreatedByName, m.CreatedFromIP, m.LastModifiedTime,
+		m.LastModifiedById, m.LastModifiedByName, m.LastModifiedFromIP, m.Text, m.State, m.OldId,
 	)
 	return err
 }

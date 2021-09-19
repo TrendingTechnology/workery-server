@@ -27,8 +27,8 @@ func (r *CustomerRepo) Insert(ctx context.Context, m *models.Customer) error {
         uuid, tenant_id, user_id, type_of, indexed_text, is_ok_to_email,
 		is_ok_to_text, is_business, is_senior, is_support, job_info_read,
 		how_hear_id, how_hear_old, how_hear_other, how_hear_text, state, deactivation_reason,
-		deactivation_reason_other, created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip,
+		deactivation_reason_other, created_time, created_by_id, created_by_name, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_by_name, last_modified_from_ip,
 		organization_name, old_id, address_country, address_region,
 		address_locality, post_office_box_number, postal_code, street_address,
 		street_address_extra, full_address_without_postal_code, full_address_with_postal_code, full_address_url,
@@ -42,7 +42,7 @@ func (r *CustomerRepo) Insert(ctx context.Context, m *models.Customer) error {
 		$17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
 		$31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44,
 		$45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58,
-		$59, $60
+		$59, $60, $61, $62
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -55,8 +55,8 @@ func (r *CustomerRepo) Insert(ctx context.Context, m *models.Customer) error {
 		m.Uuid, m.TenantId, m.UserId, m.TypeOf, m.IndexedText, m.IsOkToEmail,
 		m.IsOkToText, m.IsBusiness, m.IsSenior, m.IsSupport, m.JobInfoRead,
 		m.HowHearId, m.HowHearOld, m.HowHearOther, m.HowHearText, m.State, m.DeactivationReason,
-		m.DeactivationReasonOther, m.CreatedTime, m.CreatedById, m.CreatedFromIP,
-		m.LastModifiedTime, m.LastModifiedById, m.LastModifiedFromIP,
+		m.DeactivationReasonOther, m.CreatedTime, m.CreatedById, m.CreatedByName, m.CreatedFromIP,
+		m.LastModifiedTime, m.LastModifiedById, m.CreatedByName, m.LastModifiedFromIP,
 		m.OrganizationName, m.OldId, m.AddressCountry, m.AddressRegion,
 		m.AddressLocality, m.PostOfficeBoxNumber, m.PostalCode, m.StreetAddress,
 		m.StreetAddressExtra, m.FullAddressWithoutPostalCode, m.FullAddressWithPostalCode, m.FullAddressUrl,
@@ -104,8 +104,8 @@ func (r *CustomerRepo) GetById(ctx context.Context, id uint64) (*models.Customer
         id, uuid, tenant_id, user_id, type_of, indexed_text, is_ok_to_email,
 		is_ok_to_text, is_business, is_senior, is_support, job_info_read,
 		how_hear_id, how_hear_old, how_hear_other, how_hear_text, state, deactivation_reason,
-		deactivation_reason_other, created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip,
+		deactivation_reason_other, created_time, created_by_id, created_by_name, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_by_name, last_modified_from_ip,
 		organization_name, old_id, address_country, address_region,
 		address_locality, post_office_box_number, postal_code, street_address,
 		street_address_extra, full_address_without_postal_code, full_address_with_postal_code, full_address_url,
@@ -122,8 +122,8 @@ func (r *CustomerRepo) GetById(ctx context.Context, id uint64) (*models.Customer
 		&m.Id, &m.Uuid, &m.TenantId, &m.UserId, &m.TypeOf, &m.IndexedText, &m.IsOkToEmail,
 		&m.IsOkToText, &m.IsBusiness, &m.IsSenior, &m.IsSupport, &m.JobInfoRead,
 		&m.HowHearId, &m.HowHearOld, &m.HowHearOther, &m.HowHearText, &m.State, &m.DeactivationReason,
-		&m.DeactivationReasonOther, &m.CreatedTime, &m.CreatedById, &m.CreatedFromIP,
-		&m.LastModifiedTime, &m.LastModifiedById, &m.LastModifiedFromIP,
+		&m.DeactivationReasonOther, &m.CreatedTime, &m.CreatedById, &m.CreatedByName, &m.CreatedFromIP,
+		&m.LastModifiedTime, &m.LastModifiedById, &m.LastModifiedByName, &m.LastModifiedFromIP,
 		&m.OrganizationName, &m.OldId, &m.AddressCountry, &m.AddressRegion,
 		&m.AddressLocality, &m.PostOfficeBoxNumber, &m.PostalCode, &m.StreetAddress,
 		&m.StreetAddressExtra, &m.FullAddressWithoutPostalCode, &m.FullAddressWithPostalCode, &m.FullAddressUrl,

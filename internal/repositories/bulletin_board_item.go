@@ -25,11 +25,11 @@ func (r *BulletinBoardItemRepo) Insert(ctx context.Context, m *models.BulletinBo
 
 	query := `
     INSERT INTO bulletin_board_items (
-        uuid, tenant_id, text, created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip, state,
+        uuid, tenant_id, text, created_time, created_by_id, created_by_name, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_by_name, last_modified_from_ip, state,
 		old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -39,8 +39,8 @@ func (r *BulletinBoardItemRepo) Insert(ctx context.Context, m *models.BulletinBo
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.Text, m.CreatedTime, m.CreatedById,
-		m.CreatedFromIP, m.LastModifiedTime, m.LastModifiedById,
+		m.Uuid, m.TenantId, m.Text, m.CreatedTime, m.CreatedById, m.CreatedByName,
+		m.CreatedFromIP, m.LastModifiedTime, m.LastModifiedById, m.LastModifiedByName,
 		m.LastModifiedFromIP, m.State, m.OldId,
 	)
 	return err
