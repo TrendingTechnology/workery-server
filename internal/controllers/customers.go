@@ -98,6 +98,7 @@ func (h *Controller) customerGetEndpoint(w http.ResponseWriter, r *http.Request,
 
 	// Extract the session details from our "Session" middleware.
 	ctx := r.Context()
+	tenantId := uint64(ctx.Value("user_tenant_id").(uint64))
 	role_id := uint64(ctx.Value("user_role_id").(int8))
 
 	// Permission handling - If use is not administrator then error.
@@ -112,63 +113,48 @@ func (h *Controller) customerGetEndpoint(w http.ResponseWriter, r *http.Request,
 		return
 	}
 
-	m, err := h.CustomerRepo.GetById(ctx, id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	mCh := make(chan *models.Customer)
+
+	go func() {
+		m, err := h.CustomerRepo.GetById(ctx, id)
+		if err != nil {
+			mCh <- nil
+		} else {
+			mCh <- m
+		}
+	}()
 
 	//
 	// Get all the tags with this customer.
 	//
 
-	// Lookup the tags that belong to the customer.
-	f := &models.CustomerTagFilter{
-		TenantId:   m.TenantId,
-		SortField:  "tag_id",
-		SortOrder:  "ASC",
-		CustomerId: null.NewInt(int64(m.Id), m.Id != 0),
-		Offset:     0,
-		Limit:      1000,
-	}
-	tags, err := h.CustomerTagRepo.ListByFilter(ctx, f)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	tCh := make(chan []*models.CustomerTag)
+
+	go func() {
+		// Lookup the tags that belong to the customer.
+		f := &models.CustomerTagFilter{
+			TenantId:   tenantId,
+			SortField:  "tag_id",
+			SortOrder:  "ASC",
+			CustomerId: null.NewInt(int64(id), id != 0),
+			Offset:     0,
+			Limit:      1000,
+		}
+		tags, err := h.CustomerTagRepo.ListByFilter(ctx, f)
+		if err != nil {
+			tCh <- nil
+		} else {
+			tCh <- tags
+		}
+	}()
+
+	//
+	// Wait for all our database requests to finish and then attach the
+	// compiled data.
+	//
+
+	m, tags := <-mCh, <-tCh
 	m.Tags = tags
-
-	//
-	// Compile the `how hear` text.
-	//
-
-	// Lookup the `how hear` option.
-	howHear, err := h.HowHearAboutUsItemRepo.GetById(ctx, m.HowHearId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if m.HowHearId == 1 {
-		m.HowHearText = m.HowHearOther
-	} else {
-		m.HowHearText = howHear.Text
-	}
-
-	//
-	// Compile the `full address` and `address url`.
-	//
-
-	address := ""
-	address += m.StreetAddress
-	if m.StreetAddressExtra != "" {
-		address = m.StreetAddressExtra
-	}
-	address += ", " + m.AddressLocality
-	address += ", " + m.AddressRegion
-	address += ", " + m.AddressCountry
-	m.FullAddressWithoutPostalCode = address
-	m.FullAddressWithPostalCode = address + ", " + m.PostalCode
-	m.FullAddressUrl = "https://www.google.com/maps/place/" + m.FullAddressWithPostalCode
 
 	//
 	// Serialize the data.
