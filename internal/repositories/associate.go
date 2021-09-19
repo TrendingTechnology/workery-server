@@ -29,8 +29,8 @@ func (r *AssociateRepo) Insert(ctx context.Context, m *models.Associate) error {
 		limit_special, dues_date, commercial_insurance_expiry_date, auto_insurance_expiry_date,
 		wsib_number, wsib_insurance_date, police_check, drivers_license_class,
 		how_hear_old, how_hear_id, how_hear_other, how_hear_text, state, deactivation_reason,
-		deactivation_reason_other, created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip, Score,
+		deactivation_reason_other, created_time, created_by_id, created_by_name, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_by_name, last_modified_from_ip, Score,
 		old_id, service_fee_id, address_country, address_region, address_locality,
 		post_office_box_number, postal_code, street_address, street_address_extra,
 		full_address_without_postal_code, full_address_with_postal_code, full_address_url,
@@ -44,7 +44,7 @@ func (r *AssociateRepo) Insert(ctx context.Context, m *models.Associate) error {
 		$17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
 		$31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44,
 		$45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58,
-		$59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69
+		$59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -59,8 +59,8 @@ func (r *AssociateRepo) Insert(ctx context.Context, m *models.Associate) error {
 		m.LimitSpecial, m.DuesDate, m.CommercialInsuranceExpiryDate,
 		m.AutoInsuranceExpiryDate, m.WsibNumber, m.WsibInsuranceDate, m.PoliceCheck,
 		m.DriversLicenseClass, m.HowHearOld, m.HowHearId, m.HowHearOther, m.HowHearText, m.State,
-		m.DeactivationReason, m.DeactivationReasonOther, m.CreatedTime, m.CreatedById,
-		m.CreatedFromIP, m.LastModifiedTime, m.LastModifiedById, m.LastModifiedFromIP,
+		m.DeactivationReason, m.DeactivationReasonOther, m.CreatedTime, m.CreatedById, m.CreatedByName,
+		m.CreatedFromIP, m.LastModifiedTime, m.LastModifiedById, m.LastModifiedByName, m.LastModifiedFromIP,
 		m.Score, m.OldId, m.ServiceFeeId, m.AddressCountry, m.AddressRegion,
 		m.AddressLocality, m.PostOfficeBoxNumber, m.PostalCode, m.StreetAddress,
 		m.StreetAddressExtra, m.FullAddressWithoutPostalCode, m.FullAddressWithPostalCode, m.FullAddressUrl,
@@ -110,8 +110,8 @@ func (r *AssociateRepo) GetById(ctx context.Context, id uint64) (*models.Associa
 		limit_special, dues_date, commercial_insurance_expiry_date, auto_insurance_expiry_date,
 		wsib_number, wsib_insurance_date, police_check, drivers_license_class,
 		how_hear_old, how_hear_id, how_hear_other, how_hear_text, state, deactivation_reason,
-		deactivation_reason_other, created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip, Score,
+		deactivation_reason_other, created_time, created_by_id, created_by_name, created_from_ip,
+		last_modified_time, last_modified_by_id, created_by_name, last_modified_from_ip, Score,
 		old_id, service_fee_id, address_country, address_region, address_locality,
 		post_office_box_number, postal_code, street_address, street_address_extra,
 		full_address_without_postal_code, full_address_with_postal_code, full_address_url,
@@ -131,8 +131,8 @@ func (r *AssociateRepo) GetById(ctx context.Context, id uint64) (*models.Associa
 		&m.LimitSpecial, &m.DuesDate, &m.CommercialInsuranceExpiryDate,
 		&m.AutoInsuranceExpiryDate, &m.WsibNumber, &m.WsibInsuranceDate, &m.PoliceCheck,
 		&m.DriversLicenseClass, &m.HowHearOld, &m.HowHearId, &m.HowHearOther, &m.HowHearText, &m.State,
-		&m.DeactivationReason, &m.DeactivationReasonOther, &m.CreatedTime, &m.CreatedById,
-		&m.CreatedFromIP, &m.LastModifiedTime, &m.LastModifiedById, &m.LastModifiedFromIP,
+		&m.DeactivationReason, &m.DeactivationReasonOther, &m.CreatedTime, &m.CreatedById, &m.CreatedByName,
+		&m.CreatedFromIP, &m.LastModifiedTime, &m.LastModifiedById, &m.CreatedByName, &m.LastModifiedFromIP,
 		&m.Score, &m.OldId, &m.ServiceFeeId, &m.AddressCountry, &m.AddressRegion,
 		&m.AddressLocality, &m.PostOfficeBoxNumber, &m.PostalCode, &m.StreetAddress,
 		&m.StreetAddressExtra, &m.FullAddressWithoutPostalCode, &m.FullAddressWithPostalCode, &m.FullAddressUrl,

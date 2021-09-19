@@ -266,6 +266,10 @@ func insertAssociateETL(
 	r *repositories.HowHearAboutUsItemRepo,
 	oldAssociate *OldUAssociate,
 ) {
+	//
+	// Set the `state`.
+	//
+
 	var state int8 = 1
 	if oldAssociate.IsArchived == true {
 		state = 0
@@ -274,7 +278,10 @@ func insertAssociateETL(
 	// Variable used to keep the ID of the user record in our database.
 	userId := uint64(oldAssociate.OwnerId.Int64)
 
+	//
 	// Generate our full name / lexical full name.
+	//
+
 	var name string
 	var lexicalName string
 	if oldAssociate.MiddleName.Valid {
@@ -352,32 +359,61 @@ func insertAssociateETL(
 		userId = user.Id
 	}
 
-	var createdById uint64
-	if oldAssociate.CreatedById.Valid {
-		createdById = uint64(oldAssociate.CreatedById.Int64)
-		user, err := userRepo.GetByOldId(ctx, createdById)
+	//
+	// Get `createdById` and `createdByName` values.
+	//
+
+	var createdById null.Int
+	var createdByName null.String
+	if oldAssociate.CreatedById.ValueOrZero() > 0 {
+		userId, err := userRepo.GetIdByOldId(ctx, tenantId, uint64(oldAssociate.CreatedById.ValueOrZero()))
+
 		if err != nil {
-			log.Fatal("(F)", err)
+			log.Panic("userRepo.GetIdByOldId", err)
 		}
-		if user == nil {
-			log.Fatal("(G) User is null")
+		user, err := userRepo.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("userRepo.GetById", err)
 		}
-	} else {
-		createdById = userId
+
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E. for Associate Old #", oldAssociate.Id)
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
 	}
 
-	var lastModifiedById uint64
-	if oldAssociate.LastModifiedById.Valid {
-		lastModifiedById = uint64(oldAssociate.LastModifiedById.Int64)
-		user, err := userRepo.GetByOldId(ctx, lastModifiedById)
+	//
+	// Get `lastModifiedById` and `lastModifiedByName` values.
+	//
+
+	var lastModifiedById null.Int
+	var lastModifiedByName null.String
+	if oldAssociate.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := userRepo.GetIdByOldId(ctx, tenantId, uint64(oldAssociate.LastModifiedById.ValueOrZero()))
 		if err != nil {
-			log.Fatal("(F)", err)
+			log.Panic("userRepo.GetIdByOldId", err)
 		}
-		if user == nil {
-			log.Fatal("(G) User is null")
+		user, err := userRepo.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("userRepo.GetById", err)
 		}
-	} else {
-		lastModifiedById = userId
+
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E. for Associate Old #", oldAssociate.Id)
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
 	}
 
 	//
@@ -429,7 +465,7 @@ func insertAssociateETL(
 	}
 
 	//
-	// Insert our `Customer` data.
+	// Insert our `Associate` data.
 	//
 
 	associate := &models.Associate{
@@ -449,9 +485,11 @@ func insertAssociateETL(
 		State:                        state,
 		CreatedTime:                  oldAssociate.Created,
 		CreatedById:                  createdById,
+		CreatedByName:                createdByName,
 		CreatedFromIP:                oldAssociate.CreatedFrom.String,
 		LastModifiedTime:             oldAssociate.LastModified,
 		LastModifiedById:             lastModifiedById,
+		LastModifiedByName:           lastModifiedByName,
 		LastModifiedFromIP:           oldAssociate.LastModifiedFrom.String,
 		OrganizationName:             oldAssociate.OrganizationName.String,
 		AddressCountry:               oldAssociate.AddressCountry,
