@@ -118,6 +118,7 @@ func (h *Controller) customerGetEndpoint(w http.ResponseWriter, r *http.Request,
 	go func() {
 		m, err := h.CustomerRepo.GetById(ctx, id)
 		if err != nil {
+			log.Println("customerGetEndpoint|h.CustomerRepo.GetById|err:", err)
 			mCh <- nil
 		} else {
 			mCh <- m
@@ -142,6 +143,7 @@ func (h *Controller) customerGetEndpoint(w http.ResponseWriter, r *http.Request,
 		}
 		tags, err := h.CustomerTagRepo.ListByFilter(ctx, f)
 		if err != nil {
+			log.Println("customerGetEndpoint|h.CustomerTagRepo.ListByFilter|err:", err)
 			tCh <- nil
 		} else {
 			tCh <- tags
