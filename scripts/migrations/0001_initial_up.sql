@@ -260,6 +260,7 @@ CREATE TABLE customers (
     how_hear_old SMALLINT NOT NULL DEFAULT 0,
     how_hear_id BIGINT NOT NULL,
     how_hear_other VARCHAR (2055) NOT NULL DEFAULT '',
+    how_hear_text VARCHAR (2055) NOT NULL DEFAULT '',
     state SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
@@ -281,6 +282,9 @@ CREATE TABLE customers (
     postal_code VARCHAR (127) NOT NULL DEFAULT '',
     street_address VARCHAR (127) NOT NULL DEFAULT '',
     street_address_extra VARCHAR (127) NOT NULL DEFAULT '',
+    full_address_without_postal_code VARCHAR (1025) NOT NULL DEFAULT '',
+    full_address_with_postal_code VARCHAR (1025) NOT NULL DEFAULT '',
+    full_address_url VARCHAR (2055) NOT NULL DEFAULT '',
 
     -- abstract_person.py
     given_name VARCHAR (63) NOT NULL DEFAULT '',
@@ -384,6 +388,7 @@ CREATE TABLE associates (
     how_hear_old SMALLINT NOT NULL DEFAULT 0,
     how_hear_id BIGINT NOT NULL,
     how_hear_other VARCHAR (2055) NOT NULL DEFAULT '',
+    how_hear_text VARCHAR (2055) NOT NULL DEFAULT '',
     state SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
@@ -405,6 +410,9 @@ CREATE TABLE associates (
     postal_code VARCHAR (127) NOT NULL DEFAULT '',
     street_address VARCHAR (127) NOT NULL DEFAULT '',
     street_address_extra VARCHAR (127) NOT NULL DEFAULT '',
+    full_address_without_postal_code VARCHAR (1025) NOT NULL DEFAULT '',
+    full_address_with_postal_code VARCHAR (1025) NOT NULL DEFAULT '',
+    full_address_url VARCHAR (2055) NOT NULL DEFAULT '',
 
     -- abstract_person.py
     given_name VARCHAR (63) NOT NULL DEFAULT '',
@@ -1011,6 +1019,7 @@ CREATE TABLE customers (
     how_hear_old SMALLINT NOT NULL DEFAULT 0,
     how_hear_id BIGINT NOT NULL,
     how_hear_other VARCHAR (2055) NOT NULL DEFAULT '',
+    how_hear_text VARCHAR (2055) NOT NULL DEFAULT '',
     state SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
@@ -1030,6 +1039,9 @@ CREATE TABLE customers (
     postal_code VARCHAR (127) NOT NULL DEFAULT '',
     street_address VARCHAR (127) NOT NULL DEFAULT '',
     street_address_extra VARCHAR (127) NOT NULL DEFAULT '',
+    full_address_without_postal_code VARCHAR (1025) NOT NULL DEFAULT '',
+    full_address_with_postal_code VARCHAR (1025) NOT NULL DEFAULT '',
+    full_address_url VARCHAR (2055) NOT NULL DEFAULT '',
 
     -- abstract_person.py
     given_name VARCHAR (63) NOT NULL DEFAULT '',
@@ -1110,6 +1122,7 @@ CREATE TABLE staff (
     how_hear_old SMALLINT NOT NULL DEFAULT 0,
     how_hear_id BIGINT NULL,
     how_hear_other VARCHAR (2055) NULL DEFAULT '',
+    how_hear_text VARCHAR (2055) NOT NULL DEFAULT '',
     state SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
@@ -1136,6 +1149,9 @@ CREATE TABLE staff (
     postal_code VARCHAR (127) NOT NULL DEFAULT '',
     street_address VARCHAR (127) NOT NULL DEFAULT '',
     street_address_extra VARCHAR (127) NULL DEFAULT '',
+    full_address_without_postal_code VARCHAR (1025) NOT NULL DEFAULT '',
+    full_address_with_postal_code VARCHAR (1025) NOT NULL DEFAULT '',
+    full_address_url VARCHAR (2055) NOT NULL DEFAULT '',
 
     -- abstract_person.py
     given_name VARCHAR (63) NULL DEFAULT '',
@@ -1237,6 +1253,7 @@ CREATE TABLE partners (
     how_hear_old SMALLINT NOT NULL DEFAULT 0,
     how_hear_id BIGINT NOT NULL,
     how_hear_other VARCHAR (2055) NOT NULL DEFAULT '',
+    how_hear_text VARCHAR (2055) NOT NULL DEFAULT '',
     state SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason SMALLINT NOT NULL DEFAULT 0,
     deactivation_reason_other VARCHAR (2055) NOT NULL DEFAULT '',
@@ -1258,6 +1275,9 @@ CREATE TABLE partners (
     postal_code VARCHAR (127) NOT NULL DEFAULT '',
     street_address VARCHAR (127) NOT NULL DEFAULT '',
     street_address_extra VARCHAR (127) NOT NULL DEFAULT '',
+    full_address_without_postal_code VARCHAR (1025) NOT NULL DEFAULT '',
+    full_address_with_postal_code VARCHAR (1025) NOT NULL DEFAULT '',
+    full_address_url VARCHAR (2055) NOT NULL DEFAULT '',
 
     -- abstract_person.py
     given_name VARCHAR (63) NOT NULL DEFAULT '',

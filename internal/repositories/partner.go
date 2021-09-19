@@ -28,11 +28,12 @@ func (r *PartnerRepo) Insert(ctx context.Context, m *models.Partner) error {
 		business, indexed_text, is_ok_to_email, is_ok_to_text, hourly_salary_desired,
 		limit_special, dues_date, commercial_insurance_expiry_date, auto_insurance_expiry_date,
 		wsib_number, wsib_insurance_date, police_check, drivers_license_class,
-		how_hear_old, how_hear_id, how_hear_other, state, deactivation_reason,
+		how_hear_old, how_hear_id, how_hear_other, how_hear_text, state, deactivation_reason,
 		deactivation_reason_other, created_time, created_by_id, created_from_ip,
 		last_modified_time, last_modified_by_id, last_modified_from_ip, Score,
 		old_id, service_fee_id, address_country, address_region, address_locality,
 		post_office_box_number, postal_code, street_address, street_address_extra,
+		full_address_without_postal_code, full_address_with_postal_code, full_address_url,
 		given_name, middle_name, last_name, birthdate,
 		join_date, nationality, gender, tax_id, elevation, latitude, longitude,
 		area_served, available_language, contact_type, email, fax_number,
@@ -43,7 +44,7 @@ func (r *PartnerRepo) Insert(ctx context.Context, m *models.Partner) error {
 		$17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
 		$31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44,
 		$45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58,
-		$59, $60, $61, $62, $63, $64, $65
+		$59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -57,12 +58,13 @@ func (r *PartnerRepo) Insert(ctx context.Context, m *models.Partner) error {
 		m.Business, m.IndexedText, m.IsOkToEmail, m.IsOkToText, m.HourlySalaryDesired,
 		m.LimitSpecial, m.DuesDate, m.CommercialInsuranceExpiryDate,
 		m.AutoInsuranceExpiryDate, m.WsibNumber, m.WsibInsuranceDate, m.PoliceCheck,
-		m.DriversLicenseClass, m.HowHearOld, m.HowHearId, m.HowHearOther, m.State,
+		m.DriversLicenseClass, m.HowHearOld, m.HowHearId, m.HowHearOther, m.HowHearText, m.State,
 		m.DeactivationReason, m.DeactivationReasonOther, m.CreatedTime, m.CreatedById,
 		m.CreatedFromIP, m.LastModifiedTime, m.LastModifiedById, m.LastModifiedFromIP,
 		m.Score, m.OldId, m.ServiceFeeId, m.AddressCountry, m.AddressRegion,
 		m.AddressLocality, m.PostOfficeBoxNumber, m.PostalCode, m.StreetAddress,
-		m.StreetAddressExtra, m.GivenName, m.MiddleName, m.LastName, m.Birthdate,
+		m.StreetAddressExtra, m.FullAddressWithoutPostalCode, m.FullAddressWithPostalCode, m.FullAddressUrl,
+		m.GivenName, m.MiddleName, m.LastName, m.Birthdate,
 		m.JoinDate, m.Nationality, m.Gender, m.TaxId, m.Elevation, m.Latitude, m.Longitude,
 		m.AreaServed, m.AvailableLanguage, m.ContactType, m.Email, m.FaxNumber,
 		m.Telephone, m.TelephoneTypeOf, m.TelephoneExtension, m.OtherTelephone,

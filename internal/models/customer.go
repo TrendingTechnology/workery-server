@@ -59,30 +59,33 @@ type Customer struct {
 	HowHearId               uint64    `json:"how_hear_id"`
 	HowHearOld              int8      `json:"how_hear_old"`
 	HowHearOther            string    `json:"how_hear_other"`
-	HowHearText             string    `json:"how_hear_text"` // Referenced value
+	HowHearText             string    `json:"how_hear_text"` // Referenced value from `HowHearAboutUsItem`.
 	State                   int8      `json:"state"`
 	DeactivationReason      int8      `json:"deactivation_reason"`
 	DeactivationReasonOther string    `json:"deactivation_reason_other"`
 	CreatedTime             time.Time `json:"created_time"`
 	CreatedById             uint64    `json:"created_by_id"`
+	CreatedBy               string    `json:"created_by"` // Referenced value from `Users`.
 	CreatedFromIP           string    `json:"created_from_ip"`
 	LastModifiedTime        time.Time `json:"last_modified_time"`
 	LastModifiedById        uint64    `json:"last_modified_by_id"`
+	LastModifiedBy          string    `json:"last_modified_by"` // Referenced value from `Users`.
 	LastModifiedFromIP      string    `json:"last_modified_from_ip"`
 	OrganizationName        string    `json:"organization_name"`
 	OrganizationTypeOf      int8      `json:"organization_type_of"`
 	OldId                   uint64    `json:"old_id"`
 
 	// -- abstract_postal_address.py
-	AddressCountry      string `json:"address_country"`
-	AddressRegion       string `json:"address_region"`
-	AddressLocality     string `json:"address_locality"`
-	PostOfficeBoxNumber string `json:"post_office_box_number"`
-	PostalCode          string `json:"postal_code"`
-	StreetAddress       string `json:"street_address"`
-	StreetAddressExtra  string `json:"street_address_extra"`
-	FullAddress         string `json:"full_address,omitempty"` // API generated
-	AddressUrl          string `json:"address_url,omitempty"`  // API generated
+	AddressCountry               string `json:"address_country"`
+	AddressRegion                string `json:"address_region"`
+	AddressLocality              string `json:"address_locality"`
+	PostOfficeBoxNumber          string `json:"post_office_box_number"`
+	PostalCode                   string `json:"postal_code"`
+	StreetAddress                string `json:"street_address"`
+	StreetAddressExtra           string `json:"street_address_extra"`
+	FullAddressWithoutPostalCode string `json:"full_address_without_postal_code,omitempty"` // Compiled value
+	FullAddressWithPostalCode    string `json:"full_address_with_postal_code,omitempty"`    // Compiled value
+	FullAddressUrl               string `json:"full_address_url,omitempty"`                 // Compiled value
 
 	// -- abstract_person.py
 	GivenName   string    `json:"given_name"`

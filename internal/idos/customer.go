@@ -64,24 +64,27 @@ type CustomerIDO struct {
 	DeactivationReasonOther string    `json:"deactivation_reason_other"`
 	CreatedTime             time.Time `json:"created_time"`
 	CreatedById             uint64    `json:"created_by_id"`
+	CreatedBy               string    `json:"created_by"` // Compiled value
 	CreatedFromIP           string    `json:"created_from_ip"`
 	LastModifiedTime        time.Time `json:"last_modified_time"`
 	LastModifiedById        uint64    `json:"last_modified_by_id"`
+	LastModifiedBy          string    `json:"last_modified_by"` // Compiled value.
 	LastModifiedFromIP      string    `json:"last_modified_from_ip"`
 	OrganizationName        string    `json:"organization_name"`
 	OrganizationTypeOf      int8      `json:"organization_type_of"`
 	OldId                   uint64    `json:"old_id"`
 
 	// -- abstract_postal_address.py
-	AddressCountry      string `json:"address_country"`
-	AddressRegion       string `json:"address_region"`
-	AddressLocality     string `json:"address_locality"`
-	PostOfficeBoxNumber string `json:"post_office_box_number"`
-	PostalCode          string `json:"postal_code"`
-	StreetAddress       string `json:"street_address"`
-	StreetAddressExtra  string `json:"street_address_extra"`
-	FullAddress         string `json:"full_address,omitempty"` // API generated
-	AddressUrl          string `json:"address_url,omitempty"`  // API generated
+	AddressCountry               string `json:"address_country"`
+	AddressRegion                string `json:"address_region"`
+	AddressLocality              string `json:"address_locality"`
+	PostOfficeBoxNumber          string `json:"post_office_box_number"`
+	PostalCode                   string `json:"postal_code"`
+	StreetAddress                string `json:"street_address"`
+	StreetAddressExtra           string `json:"street_address_extra"`
+	FullAddressWithoutPostalCode string `json:"full_address_without_postal_code,omitempty"` // Compiled value
+	FullAddressWithPostalCode    string `json:"full_address_with_postal_code,omitempty"`    // Compiled value
+	FullAddressUrl               string `json:"full_address_url,omitempty"`                 // Compiled value
 
 	// -- abstract_person.py
 	GivenName   string    `json:"given_name"`
@@ -142,6 +145,7 @@ func NewCustomerIDO(m *models.Customer) *CustomerIDO {
 		HowHearId:               m.HowHearId,
 		HowHearOld:              m.HowHearOld,
 		HowHearOther:            m.HowHearOther,
+		HowHearText:             m.HowHearText,
 		State:                   m.State,
 		DeactivationReason:      m.DeactivationReason,
 		DeactivationReasonOther: m.DeactivationReasonOther,
@@ -155,15 +159,16 @@ func NewCustomerIDO(m *models.Customer) *CustomerIDO {
 		OrganizationTypeOf:      m.OrganizationTypeOf,
 
 		// -- abstract_postal_address.py
-		AddressCountry:      m.AddressCountry,
-		AddressRegion:       m.AddressRegion,
-		AddressLocality:     m.AddressLocality,
-		PostOfficeBoxNumber: m.PostOfficeBoxNumber,
-		PostalCode:          m.PostalCode,
-		StreetAddress:       m.StreetAddress,
-		StreetAddressExtra:  m.StreetAddressExtra,
-		FullAddress:         m.FullAddress,
-		AddressUrl:          m.AddressUrl,
+		AddressCountry:               m.AddressCountry,
+		AddressRegion:                m.AddressRegion,
+		AddressLocality:              m.AddressLocality,
+		PostOfficeBoxNumber:          m.PostOfficeBoxNumber,
+		PostalCode:                   m.PostalCode,
+		StreetAddress:                m.StreetAddress,
+		StreetAddressExtra:           m.StreetAddressExtra,
+		FullAddressWithPostalCode:    m.FullAddressWithPostalCode,
+		FullAddressWithoutPostalCode: m.FullAddressWithoutPostalCode,
+		FullAddressUrl:               m.FullAddressUrl,
 
 		// -- abstract_person.py
 		GivenName:   m.GivenName,
@@ -202,7 +207,6 @@ func NewCustomerIDO(m *models.Customer) *CustomerIDO {
 		// IsBlacklisted bool `json:"is_blacklisted"`
 		// AvatarImageId sql.NullInt64  `json:"avatar_image_id"`
 		// -- Reference --
-		Tags:        m.Tags,
-		HowHearText: m.HowHearText,
+		Tags: m.Tags,
 	}
 }

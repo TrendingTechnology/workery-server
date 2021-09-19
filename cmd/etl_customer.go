@@ -65,6 +65,7 @@ func doRunImportCustomer() {
 	tr := repositories.NewTenantRepo(db)
 	ur := repositories.NewUserRepo(db)
 	om := repositories.NewCustomerRepo(db)
+	r := repositories.NewHowHearAboutUsItemRepo(db)
 
 	// Lookup the tenant.
 	tenant, err := tr.GetBySchemaName(ctx, customerETLSchemaName)
@@ -75,7 +76,7 @@ func doRunImportCustomer() {
 		log.Fatal("Tenant does not exist!")
 	}
 
-	runCustomerETL(ctx, tenant.Id, ur, om, oldDb)
+	runCustomerETL(ctx, tenant.Id, ur, om, r, oldDb)
 }
 
 type OldUCustomer struct {
@@ -208,17 +209,31 @@ func ListAllCustomers(db *sql.DB) ([]*OldUCustomer, error) {
 	return arr, err
 }
 
-func runCustomerETL(ctx context.Context, tenantId uint64, ur *repositories.UserRepo, omr *repositories.CustomerRepo, oldDb *sql.DB) {
+func runCustomerETL(
+	ctx context.Context,
+	tenantId uint64,
+	ur *repositories.UserRepo,
+	omr *repositories.CustomerRepo,
+	r *repositories.HowHearAboutUsItemRepo,
+	oldDb *sql.DB,
+) {
 	customers, err := ListAllCustomers(oldDb)
 	if err != nil {
 		log.Fatal("(0000)", err)
 	}
 	for _, om := range customers {
-		insertCustomerETL(ctx, tenantId, ur, omr, om)
+		insertCustomerETL(ctx, tenantId, ur, omr, r, om)
 	}
 }
 
-func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, omr *repositories.CustomerRepo, om *OldUCustomer) {
+func insertCustomerETL(
+	ctx context.Context,
+	tid uint64,
+	ur *repositories.UserRepo,
+	omr *repositories.CustomerRepo,
+	r *repositories.HowHearAboutUsItemRepo,
+	om *OldUCustomer,
+) {
 	var state int8 = 0
 	if om.State == "active" {
 		state = models.CustomerActiveState
@@ -332,68 +347,124 @@ func insertCustomerETL(ctx context.Context, tid uint64, ur *repositories.UserRep
 		lastModifiedById = userId
 	}
 
+	//
+	// Compile the `full address` and `address url`.
+	//
+
+	address := ""
+	if om.StreetAddress != "" && om.StreetAddress != "-" {
+		address += om.StreetAddress
+	}
+	if om.StreetAddressExtra.IsZero() != false && om.StreetAddressExtra.ValueOrZero() != "" {
+		address += om.StreetAddressExtra.ValueOrZero()
+	}
+	if om.StreetAddress != "" && om.StreetAddress != "-" {
+		address += ", "
+	}
+	address += om.AddressLocality
+	address += ", " + om.AddressRegion
+	address += ", " + om.AddressCountry
+	fullAddressWithoutPostalCode := address
+	fullAddressWithPostalCode := "-"
+	fullAddressUrl := ""
+	if om.PostalCode.String != "" {
+		fullAddressWithPostalCode = address + ", " + om.PostalCode.String
+		fullAddressUrl = "https://www.google.com/maps/place/" + fullAddressWithPostalCode
+	} else {
+		fullAddressUrl = "https://www.google.com/maps/place/" + fullAddressWithoutPostalCode
+	}
+
+	//
+	// Compile the `how hear` text.
+	//
+
+	howHearId := uint64(om.HowHearId.Int64)
+	howHearText := ""
+	howHear, err := r.GetById(ctx, howHearId)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	if howHearId == 1 {
+		if om.HowHearOther == "" {
+			howHearText = "-"
+		} else {
+			howHearText = om.HowHearOther
+		}
+	} else {
+		howHearText = howHear.Text
+	}
+
+	//
+	// Insert our `Customer` data.
+	//
+
 	m := &models.Customer{
-		OldId:                   om.Id,
-		Uuid:                    uuid.NewString(),
-		TenantId:                tid,
-		UserId:                  userId,
-		TypeOf:                  om.TypeOf,
-		IndexedText:             om.IndexedText.String,
-		IsOkToEmail:             om.IsOkToEmail,
-		IsOkToText:              om.IsOkToText,
-		IsBusiness:              om.IsBusiness,
-		IsSenior:                om.IsSenior,
-		IsSupport:               om.IsSupport,
-		JobInfoRead:             om.JobInfoRead.String,
-		HowHearId:               uint64(om.HowHearId.Int64),
-		HowHearOld:              om.HowHearOld,
-		HowHearOther:            om.HowHearOther,
-		State:                   state,
-		DeactivationReason:      om.DeactivationReason,
-		DeactivationReasonOther: om.DeactivationReasonOther,
-		CreatedTime:             om.Created,
-		CreatedById:             createdById,
-		CreatedFromIP:           om.CreatedFrom.String,
-		LastModifiedTime:        om.LastModified,
-		LastModifiedById:        lastModifiedById,
-		LastModifiedFromIP:      om.LastModifiedFrom.String,
-		OrganizationName:        om.OrganizationName.String,
-		AddressCountry:          om.AddressCountry,
-		AddressRegion:           om.AddressRegion,
-		AddressLocality:         om.AddressLocality,
-		PostOfficeBoxNumber:     om.PostOfficeBoxNumber.String,
-		PostalCode:              om.PostalCode.String,
-		StreetAddress:           om.StreetAddress,
-		StreetAddressExtra:      om.StreetAddressExtra.String,
-		GivenName:               om.GivenName.String,
-		MiddleName:              om.MiddleName.String,
-		LastName:                om.LastName.String,
-		Name:                    name,
-		LexicalName:             lexicalName,
-		Birthdate:               om.Birthdate,
-		JoinDate:                om.JoinDate,
-		Nationality:             om.Nationality.String,
-		Gender:                  om.Gender.String,
-		TaxId:                   om.TaxId.String,
-		Elevation:               om.Elevation.Float64,
-		Latitude:                om.Latitude.Float64,
-		Longitude:               om.Longitude.Float64,
-		AreaServed:              om.AreaServed.String,
-		AvailableLanguage:       om.AvailableLanguage.String,
-		ContactType:             om.ContactType.String,
-		Email:                   om.Email.String,
-		FaxNumber:               om.FaxNumber.String,
-		Telephone:               om.Telephone.String,
-		TelephoneTypeOf:         om.TelephoneTypeOf,
-		TelephoneExtension:      om.TelephoneExtension.String,
-		OtherTelephone:          om.OtherTelephone.String,
-		OtherTelephoneExtension: om.OtherTelephoneExtension.String,
-		OtherTelephoneTypeOf:    om.OtherTelephoneTypeOf,
+		OldId:                        om.Id,
+		Uuid:                         uuid.NewString(),
+		TenantId:                     tid,
+		UserId:                       userId,
+		TypeOf:                       om.TypeOf,
+		IndexedText:                  om.IndexedText.String,
+		IsOkToEmail:                  om.IsOkToEmail,
+		IsOkToText:                   om.IsOkToText,
+		IsBusiness:                   om.IsBusiness,
+		IsSenior:                     om.IsSenior,
+		IsSupport:                    om.IsSupport,
+		JobInfoRead:                  om.JobInfoRead.String,
+		HowHearId:                    uint64(om.HowHearId.Int64),
+		HowHearOld:                   om.HowHearOld,
+		HowHearOther:                 om.HowHearOther,
+		HowHearText:                  howHearText,
+		State:                        state,
+		DeactivationReason:           om.DeactivationReason,
+		DeactivationReasonOther:      om.DeactivationReasonOther,
+		CreatedTime:                  om.Created,
+		CreatedById:                  createdById,
+		CreatedFromIP:                om.CreatedFrom.String,
+		LastModifiedTime:             om.LastModified,
+		LastModifiedById:             lastModifiedById,
+		LastModifiedFromIP:           om.LastModifiedFrom.String,
+		OrganizationName:             om.OrganizationName.String,
+		AddressCountry:               om.AddressCountry,
+		AddressRegion:                om.AddressRegion,
+		AddressLocality:              om.AddressLocality,
+		PostOfficeBoxNumber:          om.PostOfficeBoxNumber.String,
+		PostalCode:                   om.PostalCode.String,
+		StreetAddress:                om.StreetAddress,
+		StreetAddressExtra:           om.StreetAddressExtra.String,
+		FullAddressWithoutPostalCode: fullAddressWithoutPostalCode,
+		FullAddressWithPostalCode:    fullAddressWithPostalCode,
+		FullAddressUrl:               fullAddressUrl,
+		GivenName:                    om.GivenName.String,
+		MiddleName:                   om.MiddleName.String,
+		LastName:                     om.LastName.String,
+		Name:                         name,
+		LexicalName:                  lexicalName,
+		Birthdate:                    om.Birthdate,
+		JoinDate:                     om.JoinDate,
+		Nationality:                  om.Nationality.String,
+		Gender:                       om.Gender.String,
+		TaxId:                        om.TaxId.String,
+		Elevation:                    om.Elevation.Float64,
+		Latitude:                     om.Latitude.Float64,
+		Longitude:                    om.Longitude.Float64,
+		AreaServed:                   om.AreaServed.String,
+		AvailableLanguage:            om.AvailableLanguage.String,
+		ContactType:                  om.ContactType.String,
+		Email:                        om.Email.String,
+		FaxNumber:                    om.FaxNumber.String,
+		Telephone:                    om.Telephone.String,
+		TelephoneTypeOf:              om.TelephoneTypeOf,
+		TelephoneExtension:           om.TelephoneExtension.String,
+		OtherTelephone:               om.OtherTelephone.String,
+		OtherTelephoneExtension:      om.OtherTelephoneExtension.String,
+		OtherTelephoneTypeOf:         om.OtherTelephoneTypeOf,
 	}
 
 	// fmt.Println(m) // For debugging purposes only.
 
-	err := omr.Insert(ctx, m)
+	err = omr.Insert(ctx, m)
 	if err != nil {
 		log.Panic(err)
 	}

@@ -28,12 +28,14 @@ func (r *StaffRepo) Insert(ctx context.Context, m *models.Staff) error {
 		telephone, telephone_type_of, telephone_extension,
 		other_telephone, other_telephone_extension, other_telephone_type_of,
 		address_country, address_locality, address_region, post_office_box_number,
-		postal_code, street_address, street_address_extra, elevation, latitude,
+		postal_code, street_address, street_address_extra,
+		full_address_without_postal_code, full_address_with_postal_code, full_address_url,
+		elevation, latitude,
 		longitude, given_name, middle_name, last_name, birthdate, join_date,
 		nationality, gender, tax_id, indexed_text,
 		created_from_ip, last_modified_from_ip,
 		state, created_by_id, last_modified_by_id,
-		user_id, how_hear_other, how_hear_id, avatar_image_id, personal_email,
+		user_id, how_hear_other, how_hear_id, how_hear_text, avatar_image_id, personal_email,
 		emergency_contact_alternative_telephone, emergency_contact_name,
 		emergency_contact_relationship, emergency_contact_telephone, police_check,
 		uuid, tenant_id, is_ok_to_email, is_ok_to_text, name, lexical_name
@@ -41,7 +43,7 @@ func (r *StaffRepo) Insert(ctx context.Context, m *models.Staff) error {
 	    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
 		$17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
 		$31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44,
-		$45, $46, $47, $48, $49, $50, $51, $52, $53
+		$45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57
 	)`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -55,12 +57,13 @@ func (r *StaffRepo) Insert(ctx context.Context, m *models.Staff) error {
 		m.Telephone, m.TelephoneTypeOf, m.TelephoneExtension,
 		m.OtherTelephone, m.OtherTelephoneExtension, m.OtherTelephoneTypeOf,
 		m.AddressCountry, m.AddressLocality, m.AddressRegion, m.PostOfficeBoxNumber,
-		m.PostalCode, m.StreetAddress, m.StreetAddressExtra, m.Elevation,
-		m.Latitude, m.Longitude, m.GivenName, m.MiddleName, m.LastName,
+		m.PostalCode, m.StreetAddress, m.StreetAddressExtra,
+		m.FullAddressWithoutPostalCode, m.FullAddressWithPostalCode, m.FullAddressUrl,
+		m.Elevation, m.Latitude, m.Longitude, m.GivenName, m.MiddleName, m.LastName,
 		m.Birthdate, m.JoinDate, m.Nationality, m.Gender, m.TaxId, m.IndexedText,
 		m.CreatedFromIP, m.LastModifiedFromIP,
 		m.State, m.CreatedById, m.LastModifiedById,
-		m.UserId, m.HowHearOther, m.HowHearId, m.AvatarImageId, m.PersonalEmail,
+		m.UserId, m.HowHearOther, m.HowHearId, m.HowHearText, m.AvatarImageId, m.PersonalEmail,
 		m.EmergencyContactAlternativeTelephone, m.EmergencyContactName,
 		m.EmergencyContactRelationship, m.EmergencyContactTelephone, m.PoliceCheck,
 		m.Uuid, m.TenantId, m.IsOkToEmail, m.IsOkToText, m.Name, m.LexicalName,

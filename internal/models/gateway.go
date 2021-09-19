@@ -14,7 +14,7 @@ type RegisterResponse struct {
 	Message string `json:"message"`
 }
 
-// The struct used to represent the user's `login` POST request data.
+// LoginRequest struct used to represent the user's `login` POST request data.
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`

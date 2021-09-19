@@ -65,6 +65,7 @@ func doRunImportStaff() {
 	tr := repositories.NewTenantRepo(db)
 	ur := repositories.NewUserRepo(db)
 	sr := repositories.NewStaffRepo(db)
+	r := repositories.NewHowHearAboutUsItemRepo(db)
 
 	// Lookup the tenant.
 	tenant, err := tr.GetBySchemaName(ctx, staffETLSchemaName)
@@ -75,7 +76,7 @@ func doRunImportStaff() {
 		log.Fatal("Tenant does not exist!")
 	}
 
-	runStaffETL(ctx, tenant.Id, ur, sr, oldDb)
+	runStaffETL(ctx, tenant.Id, ur, sr, r, oldDb)
 }
 
 type OldUStaff struct {
@@ -204,17 +205,31 @@ func ListAllStaffs(db *sql.DB) ([]*OldUStaff, error) {
 	return arr, err
 }
 
-func runStaffETL(ctx context.Context, tenantId uint64, ur *repositories.UserRepo, sr *repositories.StaffRepo, oldDb *sql.DB) {
+func runStaffETL(
+	ctx context.Context,
+	tenantId uint64,
+	ur *repositories.UserRepo,
+	sr *repositories.StaffRepo,
+	r *repositories.HowHearAboutUsItemRepo,
+	oldDb *sql.DB,
+) {
 	staffs, err := ListAllStaffs(oldDb)
 	if err != nil {
 		log.Fatal("(0000)", err)
 	}
 	for _, om := range staffs {
-		insertStaffETL(ctx, tenantId, ur, sr, om)
+		insertStaffETL(ctx, tenantId, ur, sr, r, om)
 	}
 }
 
-func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, sr *repositories.StaffRepo, om *OldUStaff) {
+func insertStaffETL(
+	ctx context.Context,
+	tid uint64,
+	ur *repositories.UserRepo,
+	sr *repositories.StaffRepo,
+	r *repositories.HowHearAboutUsItemRepo,
+	om *OldUStaff,
+) {
 	var state int8 = 1
 	if om.IsArchived == true {
 		state = 0
@@ -328,6 +343,50 @@ func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, 
 	}
 	etlLastModifiedById := null.NewInt(int64(lastModifiedById), lastModifiedById != 0)
 
+	//
+	// Compile the `full address` and `address url`.
+	//
+
+	address := ""
+	if om.StreetAddress != "" && om.StreetAddress != "-" {
+		address += om.StreetAddress
+	}
+	if om.StreetAddressExtra.IsZero() != false && om.StreetAddressExtra.ValueOrZero() != "" {
+		address += om.StreetAddressExtra.ValueOrZero()
+	}
+	if om.StreetAddress != "" && om.StreetAddress != "-" {
+		address += ", "
+	}
+	address += om.AddressLocality
+	address += ", " + om.AddressRegion
+	address += ", " + om.AddressCountry
+	fullAddressWithoutPostalCode := address
+	fullAddressWithPostalCode := "-"
+	fullAddressUrl := ""
+	if om.PostalCode.String != "" {
+		fullAddressWithPostalCode = address + ", " + om.PostalCode.String
+		fullAddressUrl = "https://www.google.com/maps/place/" + fullAddressWithPostalCode
+	} else {
+		fullAddressUrl = "https://www.google.com/maps/place/" + fullAddressWithoutPostalCode
+	}
+
+	//
+	// Compile the `how hear` text.
+	//
+
+	howHearId := uint64(om.HowHearId.Int64)
+	howHearText := ""
+	howHear, err := r.GetById(ctx, howHearId)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	howHearText = howHear.Text
+
+	//
+	// Insert our `Customer` data.
+	//
+
 	m := &models.Staff{
 		OldId:                                om.Id,
 		Uuid:                                 uuid.NewString(),
@@ -352,6 +411,9 @@ func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, 
 		PostalCode:                           om.PostalCode,
 		StreetAddress:                        om.StreetAddress,
 		StreetAddressExtra:                   om.StreetAddressExtra,
+		FullAddressWithoutPostalCode:         fullAddressWithoutPostalCode,
+		FullAddressWithPostalCode:            fullAddressWithPostalCode,
+		FullAddressUrl:                       fullAddressUrl,
 		Elevation:                            om.Elevation,
 		Latitude:                             om.Latitude,
 		Longitude:                            om.Longitude,
@@ -372,6 +434,7 @@ func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, 
 		LastModifiedById:                     etlLastModifiedById,
 		HowHearOther:                         om.HowHearOther,
 		HowHearId:                            om.HowHearId,
+		HowHearText:                          howHearText,
 		AvatarImageId:                        om.AvatarImageId,
 		PersonalEmail:                        om.PersonalEmail,
 		EmergencyContactAlternativeTelephone: om.EmergencyContactAlternativeTelephone,
@@ -384,7 +447,7 @@ func insertStaffETL(ctx context.Context, tid uint64, ur *repositories.UserRepo, 
 
 	// fmt.Println(m) // For debugging purposes only.
 
-	err := sr.Insert(ctx, m)
+	err = sr.Insert(ctx, m)
 	if err != nil {
 		log.Panic(err)
 	}

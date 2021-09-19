@@ -48,6 +48,9 @@ type Staff struct {
 	PostalCode                           null.String `json:"postal_code"`
 	StreetAddress                        string      `json:"street_address"`
 	StreetAddressExtra                   null.String `json:"street_address_extra"`
+	FullAddressWithoutPostalCode         string      `json:"full_address_without_postal_code,omitempty"` // Compiled value
+	FullAddressWithPostalCode            string      `json:"full_address_with_postal_code,omitempty"`    // Compiled value
+	FullAddressUrl                       string      `json:"full_address_url,omitempty"`                 // Compiled value
 	Elevation                            null.Float  `json:"elevation"`
 	Latitude                             null.Float  `json:"latitude"`
 	Longitude                            null.Float  `json:"longitude"`
@@ -71,8 +74,9 @@ type Staff struct {
 	CreatedById                          null.Int    `json:"created_by_id"`
 	LastModifiedById                     null.Int    `json:"last_modified_by_id"`
 	UserId                               uint64      `json:"user_id"`
-	HowHearOther                         null.String `json:"how_hear_other"`
 	HowHearId                            null.Int    `json:"how_hear_id"`
+	HowHearOther                         null.String `json:"how_hear_other"`
+	HowHearText                          string      `json:"how_hear_text"` // Referenced value from `HowHearAboutUsItem`.
 	AvatarImageId                        null.Int    `json:"avatar_image_id"`
 	PersonalEmail                        null.String `json:"personal_email"`
 	EmergencyContactAlternativeTelephone null.String `json:"emergency_contact_alternative_telephone"`

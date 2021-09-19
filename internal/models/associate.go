@@ -2,8 +2,9 @@ package models
 
 import (
 	"context"
-	"database/sql"
 	"time"
+
+	null "gopkg.in/guregu/null.v4"
 )
 
 const (
@@ -44,6 +45,7 @@ type Associate struct {
 	HowHearOld                    int8      `json:"how_hear_old"`
 	HowHearId                     uint64    `json:"how_hear_id"`
 	HowHearOther                  string    `json:"how_hear_other"`
+	HowHearText                   string    `json:"how_hear_text"` // Referenced value from `HowHearAboutUsItem`.
 	State                         int8      `json:"state"`
 	DeactivationReason            int8      `json:"deactivation_reason"`
 	DeactivationReasonOther       string    `json:"deactivation_reason_other"`
@@ -58,25 +60,28 @@ type Associate struct {
 	ServiceFeeId                  uint64    `json:"service_fee_id"`
 
 	// -- abstract_postal_address.py
-	AddressCountry      string `json:"address_country"`
-	AddressRegion       string `json:"address_region"`
-	AddressLocality     string `json:"address_locality"`
-	PostOfficeBoxNumber string `json:"post_office_box_number"`
-	PostalCode          string `json:"postal_code"`
-	StreetAddress       string `json:"street_address"`
-	StreetAddressExtra  string `json:"street_address_extra"`
+	AddressCountry               string `json:"address_country"`
+	AddressRegion                string `json:"address_region"`
+	AddressLocality              string `json:"address_locality"`
+	PostOfficeBoxNumber          string `json:"post_office_box_number"`
+	PostalCode                   string `json:"postal_code"`
+	StreetAddress                string `json:"street_address"`
+	StreetAddressExtra           string `json:"street_address_extra"`
+	FullAddressWithoutPostalCode string `json:"full_address_without_postal_code,omitempty"` // Compiled value
+	FullAddressWithPostalCode    string `json:"full_address_with_postal_code,omitempty"`    // Compiled value
+	FullAddressUrl               string `json:"full_address_url,omitempty"`                 // Compiled value
 
 	// -- abstract_person.py
-	GivenName   string       `json:"given_name"`
-	MiddleName  string       `json:"middle_name"`
-	LastName    string       `json:"last_name"`
-	Name        string       `json:"name,omitempty"`
-	LexicalName string       `json:"lexical_name,omitempty"`
-	Birthdate   sql.NullTime `json:"birthdate"`
-	JoinDate    sql.NullTime `json:"join_date"`
-	Nationality string       `json:"nationality"`
-	Gender      string       `json:"gender"`
-	TaxId       string       `json:"tax_id"`
+	GivenName   string    `json:"given_name"`
+	MiddleName  string    `json:"middle_name"`
+	LastName    string    `json:"last_name"`
+	Name        string    `json:"name,omitempty"`
+	LexicalName string    `json:"lexical_name,omitempty"`
+	Birthdate   null.Time `json:"birthdate"`
+	JoinDate    null.Time `json:"join_date"`
+	Nationality string    `json:"nationality"`
+	Gender      string    `json:"gender"`
+	TaxId       string    `json:"tax_id"`
 
 	// -- abstract_geo_coorindate.py
 	Elevation float64 `json:"elevation"`

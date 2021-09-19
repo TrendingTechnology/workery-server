@@ -166,8 +166,9 @@ func (h *Controller) customerGetEndpoint(w http.ResponseWriter, r *http.Request,
 	address += ", " + m.AddressLocality
 	address += ", " + m.AddressRegion
 	address += ", " + m.AddressCountry
-	m.FullAddress = address
-	m.AddressUrl = "https://www.google.com/maps/place/" + address
+	m.FullAddressWithoutPostalCode = address
+	m.FullAddressWithPostalCode = address + ", " + m.PostalCode
+	m.FullAddressUrl = "https://www.google.com/maps/place/" + m.FullAddressWithPostalCode
 
 	//
 	// Serialize the data.

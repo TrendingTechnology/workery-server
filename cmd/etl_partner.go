@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	null "gopkg.in/guregu/null.v4"
 
 	"github.com/over55/workery-server/internal/models"
 	"github.com/over55/workery-server/internal/repositories"
@@ -65,6 +66,7 @@ func doRunImportPartner() {
 	userRepo := repositories.NewUserRepo(db)
 	partnerRepo := repositories.NewPartnerRepo(db)
 	serviceFeeRepo := repositories.NewWorkOrderServiceFeeRepo(db)
+	r := repositories.NewHowHearAboutUsItemRepo(db)
 
 	// Lookup the tenant.
 	tenant, err := tenantRepo.GetBySchemaName(ctx, partnerETLSchemaName)
@@ -75,64 +77,64 @@ func doRunImportPartner() {
 		log.Fatal("Tenant does not exist!")
 	}
 
-	runPartnerETL(ctx, tenant.Id, userRepo, partnerRepo, serviceFeeRepo, oldDb)
+	runPartnerETL(ctx, tenant.Id, userRepo, partnerRepo, serviceFeeRepo, r, oldDb)
 }
 
 type OldUPartner struct {
-	Created                 time.Time       `json:"created"`
-	LastModified            time.Time       `json:"last_modified"`
-	AlternateName           sql.NullString  `json:"alternate_name"`
-	Description             sql.NullString  `json:"description"`
-	Name                    sql.NullString  `json:"name"`
-	Url                     sql.NullString  `json:"url"`
-	AreaServed              sql.NullString  `json:"area_served"`
-	AvailableLanguage       sql.NullString  `json:"available_language"`
-	ContactType             sql.NullString  `json:"contact_type"`
-	Email                   sql.NullString  `json:"email"`
-	FaxNumber               sql.NullString  `json:"fax_number"`
-	ProductSupported        sql.NullString  `json:"product_supported"`
-	Telephone               sql.NullString  `json:"telephone"`
-	TelephoneTypeOf         int8            `json:"telephone_type_of"`
-	TelephoneExtension      sql.NullString  `json:"telephone_extension"`
-	OtherTelephone          sql.NullString  `json:"other_telephone"`
-	OtherTelephoneExtension sql.NullString  `json:"other_telephone_extension"`
-	OtherTelephoneTypeOf    int8            `json:"other_telephone_type_of"`
-	AddressCountry          string          `json:"address_country"`
-	AddressLocality         string          `json:"address_locality"`
-	AddressRegion           string          `json:"address_region"`
-	PostOfficeBoxNumber     sql.NullString  `json:"post_office_box_number"`
-	PostalCode              sql.NullString  `json:"postal_code"`
-	StreetAddress           string          `json:"street_address"`
-	StreetAddressExtra      sql.NullString  `json:"street_address_extra"`
-	Elevation               sql.NullFloat64 `json:"elevation"`
-	Latitude                sql.NullFloat64 `json:"latitude"`
-	Longitude               sql.NullFloat64 `json:"longitude"`
-	GivenName               sql.NullString  `json:"given_name"`
-	MiddleName              sql.NullString  `json:"middle_name"`
-	LastName                sql.NullString  `json:"last_name"`
-	Birthdate               sql.NullTime    `json:"birthdate"`
-	JoinDate                sql.NullTime    `json:"join_date"`
-	Nationality             sql.NullString  `json:"nationality"`
-	Gender                  sql.NullString  `json:"gender"`
-	TaxId                   sql.NullString  `json:"tax_id"`
-	Id                      uint64          `json:"id"`
-	IndexedText             sql.NullString  `json:"indexed_text"`
+	Created                 time.Time   `json:"created"`
+	LastModified            time.Time   `json:"last_modified"`
+	AlternateName           null.String `json:"alternate_name"`
+	Description             null.String `json:"description"`
+	Name                    null.String `json:"name"`
+	Url                     null.String `json:"url"`
+	AreaServed              null.String `json:"area_served"`
+	AvailableLanguage       null.String `json:"available_language"`
+	ContactType             null.String `json:"contact_type"`
+	Email                   null.String `json:"email"`
+	FaxNumber               null.String `json:"fax_number"`
+	ProductSupported        null.String `json:"product_supported"`
+	Telephone               null.String `json:"telephone"`
+	TelephoneTypeOf         int8        `json:"telephone_type_of"`
+	TelephoneExtension      null.String `json:"telephone_extension"`
+	OtherTelephone          null.String `json:"other_telephone"`
+	OtherTelephoneExtension null.String `json:"other_telephone_extension"`
+	OtherTelephoneTypeOf    int8        `json:"other_telephone_type_of"`
+	AddressCountry          string      `json:"address_country"`
+	AddressLocality         string      `json:"address_locality"`
+	AddressRegion           string      `json:"address_region"`
+	PostOfficeBoxNumber     null.String `json:"post_office_box_number"`
+	PostalCode              null.String `json:"postal_code"`
+	StreetAddress           string      `json:"street_address"`
+	StreetAddressExtra      null.String `json:"street_address_extra"`
+	Elevation               null.Float  `json:"elevation"`
+	Latitude                null.Float  `json:"latitude"`
+	Longitude               null.Float  `json:"longitude"`
+	GivenName               null.String `json:"given_name"`
+	MiddleName              null.String `json:"middle_name"`
+	LastName                null.String `json:"last_name"`
+	Birthdate               null.Time   `json:"birthdate"`
+	JoinDate                null.Time   `json:"join_date"`
+	Nationality             null.String `json:"nationality"`
+	Gender                  null.String `json:"gender"`
+	TaxId                   null.String `json:"tax_id"`
+	Id                      uint64      `json:"id"`
+	IndexedText             null.String `json:"indexed_text"`
 	// TypeOf                   int8            `json:"type_of"`
-	IsOkToEmail              bool           `json:"is_ok_to_email"`
-	IsOkToText               bool           `json:"is_ok_to_text"`
-	CreatedFrom              sql.NullString `json:"created_from"`
-	CreatedFromIsPublic      bool           `json:"created_from_is_public"`
-	LastModifiedFrom         sql.NullString `json:"last_modified_from"`
-	LastModifiedFromIsPublic bool           `json:"last_modified_from_is_public"`
-	CreatedById              sql.NullInt64  `json:"created_by_id"`
-	LastModifiedById         sql.NullInt64  `json:"last_modified_by_id"`
-	OwnerId                  sql.NullInt64  `json:"owner_id"`
-	IsArchived               bool           `json:"is_archived"`
-	HowHearId                sql.NullInt64  `json:"how_hear_id"`
-	HowHearOld               int8           `json:"how_hear_old"`
-	OrganizationName         sql.NullString `json:"organization_name"`
-	OrganizationTypeOf       int8           `json:"organization_type_of"`
-	AvatarImageId            sql.NullInt64  `json:"avatar_image_id"`
+	IsOkToEmail              bool        `json:"is_ok_to_email"`
+	IsOkToText               bool        `json:"is_ok_to_text"`
+	CreatedFrom              null.String `json:"created_from"`
+	CreatedFromIsPublic      bool        `json:"created_from_is_public"`
+	LastModifiedFrom         null.String `json:"last_modified_from"`
+	LastModifiedFromIsPublic bool        `json:"last_modified_from_is_public"`
+	CreatedById              null.Int    `json:"created_by_id"`
+	LastModifiedById         null.Int    `json:"last_modified_by_id"`
+	OwnerId                  null.Int    `json:"owner_id"`
+	IsArchived               bool        `json:"is_archived"`
+	HowHearId                null.Int    `json:"how_hear_id"`
+	HowHearOld               int8        `json:"how_hear_old"`
+	OrganizationName         null.String `json:"organization_name"`
+	OrganizationTypeOf       int8        `json:"organization_type_of"`
+	AvatarImageId            null.Int    `json:"avatar_image_id"`
 }
 
 func ListAllPartners(db *sql.DB) ([]*OldUPartner, error) {
@@ -203,6 +205,7 @@ func runPartnerETL(
 	userRepo *repositories.UserRepo,
 	partnerRepo *repositories.PartnerRepo,
 	serviceFeeRepo *repositories.WorkOrderServiceFeeRepo,
+	r *repositories.HowHearAboutUsItemRepo,
 	oldDb *sql.DB,
 ) {
 	partners, err := ListAllPartners(oldDb)
@@ -210,7 +213,7 @@ func runPartnerETL(
 		log.Fatal("runPartnerETL | ListAllPartners | err:", err)
 	}
 	for _, oldPartner := range partners {
-		insertPartnerETL(ctx, tenantId, userRepo, partnerRepo, oldPartner)
+		insertPartnerETL(ctx, tenantId, userRepo, partnerRepo, r, oldPartner)
 	}
 }
 
@@ -219,6 +222,7 @@ func insertPartnerETL(
 	tenantId uint64,
 	userRepo *repositories.UserRepo,
 	partnerRepo *repositories.PartnerRepo,
+	r *repositories.HowHearAboutUsItemRepo,
 	oldPartner *OldUPartner,
 ) {
 	var state int8 = 1
@@ -332,6 +336,54 @@ func insertPartnerETL(
 		lastModifiedById = userId
 	}
 
+	//
+	// Compile the `full address` and `address url`.
+	//
+
+	address := ""
+	if oldPartner.StreetAddress != "" && oldPartner.StreetAddress != "-" {
+		address += oldPartner.StreetAddress
+	}
+	if oldPartner.StreetAddressExtra.IsZero() != false && oldPartner.StreetAddressExtra.ValueOrZero() != "" {
+		address += oldPartner.StreetAddressExtra.ValueOrZero()
+	}
+	if oldPartner.StreetAddress != "" && oldPartner.StreetAddress != "-" {
+		address += ", "
+	}
+	address += oldPartner.AddressLocality
+	address += ", " + oldPartner.AddressRegion
+	address += ", " + oldPartner.AddressCountry
+	fullAddressWithoutPostalCode := address
+	fullAddressWithPostalCode := "-"
+	fullAddressUrl := ""
+	if oldPartner.PostalCode.String != "" {
+		fullAddressWithPostalCode = address + ", " + oldPartner.PostalCode.String
+		fullAddressUrl = "https://www.google.com/maps/place/" + fullAddressWithPostalCode
+	} else {
+		fullAddressUrl = "https://www.google.com/maps/place/" + fullAddressWithoutPostalCode
+	}
+
+	//
+	// Compile the `how hear` text.
+	//
+
+	howHearId := uint64(oldPartner.HowHearId.Int64)
+	howHearText := ""
+	howHear, err := r.GetById(ctx, howHearId)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	if howHearId == 1 {
+		howHearText = "-"
+	} else {
+		howHearText = howHear.Text
+	}
+
+	//
+	// Insert our `Customer` data.
+	//
+
 	partner := &models.Partner{
 		OldId:    oldPartner.Id,
 		Uuid:     uuid.NewString(),
@@ -343,49 +395,53 @@ func insertPartnerETL(
 		IsOkToText:  oldPartner.IsOkToText,
 		HowHearId:   uint64(oldPartner.HowHearId.Int64),
 		HowHearOld:  oldPartner.HowHearOld,
+		HowHearText: howHearText,
 		// HowHearOther:            oldPartner.HowHearOther,
-		State:                   state,
-		CreatedTime:             oldPartner.Created,
-		CreatedById:             createdById,
-		CreatedFromIP:           oldPartner.CreatedFrom.String,
-		LastModifiedTime:        oldPartner.LastModified,
-		LastModifiedById:        lastModifiedById,
-		LastModifiedFromIP:      oldPartner.LastModifiedFrom.String,
-		OrganizationName:        oldPartner.OrganizationName.String,
-		AddressCountry:          oldPartner.AddressCountry,
-		AddressRegion:           oldPartner.AddressRegion,
-		AddressLocality:         oldPartner.AddressLocality,
-		PostOfficeBoxNumber:     oldPartner.PostOfficeBoxNumber.String,
-		PostalCode:              oldPartner.PostalCode.String,
-		StreetAddress:           oldPartner.StreetAddress,
-		StreetAddressExtra:      oldPartner.StreetAddressExtra.String,
-		GivenName:               oldPartner.GivenName.String,
-		MiddleName:              oldPartner.MiddleName.String,
-		LastName:                oldPartner.LastName.String,
-		Name:                    name,
-		LexicalName:             lexicalName,
-		Birthdate:               oldPartner.Birthdate,
-		JoinDate:                oldPartner.JoinDate,
-		Nationality:             oldPartner.Nationality.String,
-		Gender:                  oldPartner.Gender.String,
-		TaxId:                   oldPartner.TaxId.String,
-		Elevation:               oldPartner.Elevation.Float64,
-		Latitude:                oldPartner.Latitude.Float64,
-		Longitude:               oldPartner.Longitude.Float64,
-		AreaServed:              oldPartner.AreaServed.String,
-		AvailableLanguage:       oldPartner.AvailableLanguage.String,
-		ContactType:             oldPartner.ContactType.String,
-		Email:                   oldPartner.Email.String,
-		FaxNumber:               oldPartner.FaxNumber.String,
-		Telephone:               oldPartner.Telephone.String,
-		TelephoneTypeOf:         oldPartner.TelephoneTypeOf,
-		TelephoneExtension:      oldPartner.TelephoneExtension.String,
-		OtherTelephone:          oldPartner.OtherTelephone.String,
-		OtherTelephoneExtension: oldPartner.OtherTelephoneExtension.String,
-		OtherTelephoneTypeOf:    oldPartner.OtherTelephoneTypeOf,
+		State:                        state,
+		CreatedTime:                  oldPartner.Created,
+		CreatedById:                  createdById,
+		CreatedFromIP:                oldPartner.CreatedFrom.String,
+		LastModifiedTime:             oldPartner.LastModified,
+		LastModifiedById:             lastModifiedById,
+		LastModifiedFromIP:           oldPartner.LastModifiedFrom.String,
+		OrganizationName:             oldPartner.OrganizationName.String,
+		AddressCountry:               oldPartner.AddressCountry,
+		AddressRegion:                oldPartner.AddressRegion,
+		AddressLocality:              oldPartner.AddressLocality,
+		PostOfficeBoxNumber:          oldPartner.PostOfficeBoxNumber.String,
+		PostalCode:                   oldPartner.PostalCode.String,
+		StreetAddress:                oldPartner.StreetAddress,
+		StreetAddressExtra:           oldPartner.StreetAddressExtra.String,
+		FullAddressWithoutPostalCode: fullAddressWithoutPostalCode,
+		FullAddressWithPostalCode:    fullAddressWithPostalCode,
+		FullAddressUrl:               fullAddressUrl,
+		GivenName:                    oldPartner.GivenName.String,
+		MiddleName:                   oldPartner.MiddleName.String,
+		LastName:                     oldPartner.LastName.String,
+		Name:                         name,
+		LexicalName:                  lexicalName,
+		Birthdate:                    oldPartner.Birthdate,
+		JoinDate:                     oldPartner.JoinDate,
+		Nationality:                  oldPartner.Nationality.String,
+		Gender:                       oldPartner.Gender.String,
+		TaxId:                        oldPartner.TaxId.String,
+		Elevation:                    oldPartner.Elevation.Float64,
+		Latitude:                     oldPartner.Latitude.Float64,
+		Longitude:                    oldPartner.Longitude.Float64,
+		AreaServed:                   oldPartner.AreaServed.String,
+		AvailableLanguage:            oldPartner.AvailableLanguage.String,
+		ContactType:                  oldPartner.ContactType.String,
+		Email:                        oldPartner.Email.String,
+		FaxNumber:                    oldPartner.FaxNumber.String,
+		Telephone:                    oldPartner.Telephone.String,
+		TelephoneTypeOf:              oldPartner.TelephoneTypeOf,
+		TelephoneExtension:           oldPartner.TelephoneExtension.String,
+		OtherTelephone:               oldPartner.OtherTelephone.String,
+		OtherTelephoneExtension:      oldPartner.OtherTelephoneExtension.String,
+		OtherTelephoneTypeOf:         oldPartner.OtherTelephoneTypeOf,
 	}
 
-	err := partnerRepo.Insert(ctx, partner)
+	err = partnerRepo.Insert(ctx, partner)
 	if err != nil {
 		log.Panic("omr.Insert:", err)
 	}
