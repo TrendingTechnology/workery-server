@@ -225,15 +225,25 @@ func insertPartnerETL(
 	r *repositories.HowHearAboutUsItemRepo,
 	oldPartner *OldUPartner,
 ) {
+	//
+	// Set the `state`.
+	//
+
 	var state int8 = 1
 	if oldPartner.IsArchived == true {
 		state = 0
 	}
 
-	// Variable used to keep the ID of the user record in our database.
+	//
+	// Get `UserId` value - Variable used to keep the ID of the user record in our database.
+	//
+
 	userId := uint64(oldPartner.OwnerId.Int64)
 
+	//
 	// Generate our full name / lexical full name.
+	//
+
 	var name string
 	var lexicalName string
 	if oldPartner.MiddleName.Valid {
@@ -308,32 +318,61 @@ func insertPartnerETL(
 		userId = user.Id
 	}
 
-	var createdById uint64
-	if oldPartner.CreatedById.Valid {
-		createdById = uint64(oldPartner.CreatedById.Int64)
-		user, err := userRepo.GetByOldId(ctx, createdById)
+	//
+	// Get `createdById` and `createdByName` values.
+	//
+
+	var createdById null.Int
+	var createdByName null.String
+	if oldPartner.CreatedById.ValueOrZero() > 0 {
+		userId, err := userRepo.GetIdByOldId(ctx, tenantId, uint64(oldPartner.CreatedById.ValueOrZero()))
+
 		if err != nil {
-			log.Fatal("(F)", err)
+			log.Panic("userRepo.GetIdByOldId", err)
 		}
-		if user == nil {
-			log.Fatal("(G) User is null")
+		user, err := userRepo.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("userRepo.GetById", err)
 		}
-	} else {
-		createdById = userId
+
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
 	}
 
-	var lastModifiedById uint64
-	if oldPartner.LastModifiedById.Valid {
-		lastModifiedById = uint64(oldPartner.LastModifiedById.Int64)
-		user, err := userRepo.GetByOldId(ctx, lastModifiedById)
+	//
+	// Get `lastModifiedById` and `lastModifiedByName` values.
+	//
+
+	var lastModifiedById null.Int
+	var lastModifiedByName null.String
+	if oldPartner.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := userRepo.GetIdByOldId(ctx, tenantId, uint64(oldPartner.LastModifiedById.ValueOrZero()))
 		if err != nil {
-			log.Fatal("(F)", err)
+			log.Panic("userRepo.GetIdByOldId", err)
 		}
-		if user == nil {
-			log.Fatal("(G) User is null")
+		user, err := userRepo.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("userRepo.GetById", err)
 		}
-	} else {
-		lastModifiedById = userId
+
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
 	}
 
 	//
@@ -381,7 +420,7 @@ func insertPartnerETL(
 	}
 
 	//
-	// Insert our `Customer` data.
+	// Insert our `Partner` data.
 	//
 
 	partner := &models.Partner{
@@ -400,9 +439,11 @@ func insertPartnerETL(
 		State:                        state,
 		CreatedTime:                  oldPartner.Created,
 		CreatedById:                  createdById,
+		CreatedByName:                createdByName,
 		CreatedFromIP:                oldPartner.CreatedFrom.String,
 		LastModifiedTime:             oldPartner.LastModified,
 		LastModifiedById:             lastModifiedById,
+		LastModifiedByName:           lastModifiedByName,
 		LastModifiedFromIP:           oldPartner.LastModifiedFrom.String,
 		OrganizationName:             oldPartner.OrganizationName.String,
 		AddressCountry:               oldPartner.AddressCountry,

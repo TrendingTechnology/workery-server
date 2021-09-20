@@ -25,12 +25,12 @@ func (r *PrivateFileRepo) Insert(ctx context.Context, m *models.PrivateFile) err
 	query := `
     INSERT INTO private_files (
         uuid, tenant_id, s3_key, title, description, indexed_text, created_time,
-		created_from_ip, created_by_id, last_modified_time, last_modified_by_id,
+		created_from_ip, created_by_id, created_by_name, last_modified_time, last_modified_by_id, last_modified_by_name,
 		last_modified_from_ip, associate_id, customer_id, partner_id, staff_id,
 		work_order_id, state, old_id
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-		$17, $18, $19
+		$17, $18, $19, $20, $21
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -49,8 +49,10 @@ func (r *PrivateFileRepo) Insert(ctx context.Context, m *models.PrivateFile) err
 		m.CreatedTime,
 		m.CreatedFromIP,
 		m.CreatedById,
+		m.CreatedByName,
 		m.LastModifiedTime,
 		m.LastModifiedById,
+		m.LastModifiedByName,
 		m.LastModifiedFromIP,
 		m.AssociateId,
 		m.CustomerId,
@@ -74,9 +76,10 @@ func (r *PrivateFileRepo) UpdateById(ctx context.Context, m *models.PrivateFile)
         tenant_id = $1, s3_key = $2, title = $3, description = $4,
 		indexed_text = $5, last_modified_time = $6, last_modified_by_id = $7,
 		last_modified_from_ip = $8, associate_id = $9, customer_id = $10,
-		partner_id = $11, staff_id = $12, work_order_id = $13, state = $14
+		partner_id = $11, staff_id = $12, work_order_id = $13, state = $14,
+		last_modified_by_name = $15
     WHERE
-        id = $15`
+        id = $16`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -88,7 +91,7 @@ func (r *PrivateFileRepo) UpdateById(ctx context.Context, m *models.PrivateFile)
 		m.TenantId, m.S3Key, m.Title, m.Description, m.IndexedText,
 		m.LastModifiedTime, m.LastModifiedById, m.LastModifiedFromIP,
 		m.AssociateId, m.CustomerId, m.PartnerId, m.StaffId, m.WorkOrderId,
-		m.State, m.Id,
+		m.State, m.LastModifiedByName, m.Id,
 	)
 	return err
 }

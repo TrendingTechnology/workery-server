@@ -197,6 +197,10 @@ func insertTaskItemETL(
 	cr *repositories.CustomerRepo,
 	oti *OldUTaskItem,
 ) {
+	//
+	// Set the `state`.
+	//
+
 	var state int8 = 1
 
 	// log.Println("OngoingJobId --->>", oti.OngoingJobId)
@@ -204,22 +208,73 @@ func insertTaskItemETL(
 	// log.Println("CreatedById --->>", oti.CreatedById)
 	// log.Println("LastModifiedById --->>", oti.LastModifiedById)
 
+	//
+	// Get the `OrderId` value.
+	//
+
 	orderId, _ := wor.GetIdByOldId(ctx, tid, oti.JobId)
 	order, _ := wor.GetById(ctx, orderId)
 
+	//
+	// Get `createdById` and `createdByName` values.
+	//
+
 	var createdById null.Int
-	if oti.CreatedById.Valid {
-		val := oti.CreatedById.ValueOrZero()
-		id, _ := ur.GetIdByOldId(ctx, tid, uint64(val))
-		createdById = null.IntFrom(int64(id))
-		// log.Println("ID:", oir.Id, "|User|IN:", oir.CreatedById, "OUT:", createdById, "\tTenantId:", tid)
+	var createdByName null.String
+	if oti.CreatedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oti.CreatedById.ValueOrZero()))
+
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
 	}
+
+	//
+	// Get `lastModifiedById` and `lastModifiedByName` values.
+	//
+
 	var lastModifiedById null.Int
-	if oti.LastModifiedById.Valid {
-		val := oti.LastModifiedById.ValueOrZero()
-		id, _ := ur.GetIdByOldId(ctx, tid, uint64(val))
-		lastModifiedById = null.IntFrom(int64(id))
+	var lastModifiedByName null.String
+	if oti.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oti.LastModifiedById.ValueOrZero()))
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
 	}
+
+	//
+	//
+	//
 
 	var ongoingJobId null.Int
 	if oti.OngoingJobId.Valid {
@@ -245,9 +300,11 @@ func insertTaskItemETL(
 		CreatedTime:          oti.CreatedAt,
 		CreatedFromIP:        oti.CreatedFrom,
 		CreatedById:          createdById,
+		CreatedByName:        createdByName,
 		LastModifiedTime:     oti.LastModifiedAt,
 		LastModifiedFromIP:   oti.LastModifiedFrom,
 		LastModifiedById:     lastModifiedById,
+		LastModifiedByName:   lastModifiedByName,
 		State:                state,
 		OldId:                oti.Id,
 		AssociateId:          order.AssociateId,

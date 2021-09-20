@@ -34,9 +34,11 @@ type TaskItem struct {
 	CreatedTime          time.Time   `json:"created_time"`                     // 14
 	CreatedFromIP        null.String `json:"created_from_ip"`                  // 15
 	CreatedById          null.Int    `json:"created_by_id"`                    // 16
+	CreatedByName        null.String `json:"created_by_name"`                  // 29 (NOTE)
 	LastModifiedTime     time.Time   `json:"last_modified_time"`               // 17
 	LastModifiedFromIP   null.String `json:"last_modified_from_ip"`            // 18
 	LastModifiedById     null.Int    `json:"last_modified_by_id"`              // 19
+	LastModifiedByName   null.String `json:"last_modified_by_name"`            // 30 (NOTE)
 	State                int8        `json:"state"`                            // 20
 	OldId                uint64      `json:"old_id"`                           // 21
 	CustomerId           null.Int    `json:"customer_id"`                      // 22

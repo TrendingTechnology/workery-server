@@ -230,15 +230,25 @@ func insertStaffETL(
 	r *repositories.HowHearAboutUsItemRepo,
 	om *OldUStaff,
 ) {
+	//
+	// Set the `state`.
+	//
+
 	var state int8 = 1
 	if om.IsArchived == true {
 		state = 0
 	}
 
+	//
 	// Variable used to keep the ID of the user record in our database.
+	//
+
 	userId := uint64(om.OwnerId.Int64)
 
+	//
 	// Generate our full name / lexical full name.
+	//
+
 	var name string
 	var lexicalName string
 	if om.MiddleName.Valid {
@@ -250,6 +260,7 @@ func insertStaffETL(
 	}
 	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
 	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
+	lexicalName = strings.Replace(lexicalName, ", , ", ", ", 0)
 
 	// CASE 1: User record exists in our database.
 	if om.OwnerId.Valid {
@@ -313,35 +324,62 @@ func insertStaffETL(
 		userId = user.Id
 	}
 
-	var createdById uint64
-	if om.CreatedById.Valid {
-		createdById = uint64(om.CreatedById.Int64)
-		user, err := ur.GetByOldId(ctx, createdById)
-		if err != nil {
-			log.Fatal("(F)", err)
-		}
-		if user == nil {
-			log.Fatal("(G) User is null")
-		}
-	} else {
-		createdById = userId
-	}
-	etlCreatedById := null.NewInt(int64(createdById), createdById != 0)
+	//
+	// Get `createdById` and `createdByName` values.
+	//
 
-	var lastModifiedById uint64
-	if om.LastModifiedById.Valid {
-		lastModifiedById = uint64(om.LastModifiedById.Int64)
-		user, err := ur.GetByOldId(ctx, lastModifiedById)
+	var createdById null.Int
+	var createdByName null.String
+	if om.CreatedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(om.CreatedById.ValueOrZero()))
+
 		if err != nil {
-			log.Fatal("(F)", err)
+			log.Panic("ur.GetIdByOldId", err)
 		}
-		if user == nil {
-			log.Fatal("(G) User is null")
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
 		}
-	} else {
-		lastModifiedById = userId
+
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
 	}
-	etlLastModifiedById := null.NewInt(int64(lastModifiedById), lastModifiedById != 0)
+
+	//
+	// Get `lastModifiedById` and `lastModifiedByName` values.
+	//
+
+	var lastModifiedById null.Int
+	var lastModifiedByName null.String
+	if om.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(om.LastModifiedById.ValueOrZero()))
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
+	}
 
 	//
 	// Compile the `full address` and `address url`.
@@ -381,10 +419,14 @@ func insertStaffETL(
 		log.Fatal(err)
 		return
 	}
-	howHearText = howHear.Text
+
+	howHearText = "-"
+	if howHear != nil {
+		howHearText = howHear.Text
+	}
 
 	//
-	// Insert our `Customer` data.
+	// Insert our `Staff` data.
 	//
 
 	m := &models.Staff{
@@ -430,8 +472,10 @@ func insertStaffETL(
 		IndexedText:                          om.IndexedText,
 		CreatedFromIP:                        om.CreatedFrom,
 		LastModifiedFromIP:                   om.LastModifiedFrom,
-		CreatedById:                          etlCreatedById,
-		LastModifiedById:                     etlLastModifiedById,
+		CreatedById:                          createdById,
+		CreatedByName:                        createdByName,
+		LastModifiedById:                     lastModifiedById,
+		LastModifiedByName:                   lastModifiedByName,
 		HowHearOther:                         om.HowHearOther,
 		HowHearId:                            om.HowHearId,
 		HowHearText:                          howHearText,

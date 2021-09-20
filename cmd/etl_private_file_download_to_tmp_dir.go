@@ -204,7 +204,7 @@ func ListAllOldPrivateFiles(db *sql.DB) ([]*OldPrivateFile, error) {
 
 func runPrivateFileETL(
 	ctx context.Context,
-	tenantId uint64,
+	tid uint64,
 	pfr *repositories.PrivateFileRepo,
 	oldDb *sql.DB,
 	oldS3Client *s3.S3,
@@ -229,7 +229,7 @@ func runPrivateFileETL(
 	// upload AWS S3 files to match the key, then process the file.
 	for _, upload := range uploads {
 		s3key := utils.FindMatchingObjectKeyInS3Bucket(s3Objects, upload.DataFile)
-		insertPrivateFileETL(ctx, tenantId, pfr, upload, oldS3Client, oldBucketName, s3key, ur, ar, cr, pr, sr, wor)
+		insertPrivateFileETL(ctx, tid, pfr, upload, oldS3Client, oldBucketName, s3key, ur, ar, cr, pr, sr, wor)
 	}
 }
 
@@ -254,28 +254,61 @@ func insertPrivateFileETL(
 		panic(err)
 	}
 
+	//
+	// Get `createdById` and `createdByName` values.
+	//
+
 	var createdById null.Int
-	if opf.CreatedById.Valid {
-		CreatedByIdInt64 := opf.CreatedById.ValueOrZero()
-		CreatedByIdUint64, err := ur.GetIdByOldId(ctx, tid, uint64(CreatedByIdInt64))
+	var createdByName null.String
+	if opf.CreatedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(opf.CreatedById.ValueOrZero()))
+
 		if err != nil {
-			log.Panic("asr.GetIdByOldId | err", err)
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
 		}
 
-		// Convert from null supported integer times.
-		createdById = null.NewInt(int64(CreatedByIdUint64), CreatedByIdUint64 != 0)
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
 	}
 
+	//
+	// Get `lastModifiedById` and `lastModifiedByName` values.
+	//
+
 	var lastModifiedById null.Int
-	if opf.LastModifiedById.Valid {
-		int64Value := opf.LastModifiedById.ValueOrZero()
-		uint64Value, err := ur.GetIdByOldId(ctx, tid, uint64(int64Value))
+	var lastModifiedByName null.String
+	if opf.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(opf.LastModifiedById.ValueOrZero()))
 		if err != nil {
-			log.Panic("asr.GetIdByOldId | err", err)
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
 		}
 
-		// Convert from null supported integer times.
-		lastModifiedById = null.NewInt(int64(uint64Value), uint64Value != 0)
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
 	}
 
 	var associateId null.Int
@@ -349,9 +382,11 @@ func insertPrivateFileETL(
 		CreatedTime:        opf.CreatedAt,
 		CreatedFromIP:      opf.CreatedFrom,
 		CreatedById:        createdById,
+		CreatedByName:      createdByName,
 		LastModifiedTime:   opf.LastModifiedAt,
 		LastModifiedFromIP: opf.LastModifiedFrom,
 		LastModifiedById:   lastModifiedById,
+		LastModifiedByName: lastModifiedByName,
 		AssociateId:        associateId,
 		CustomerId:         customerId,
 		PartnerId:          partnerId,

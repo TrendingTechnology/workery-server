@@ -183,7 +183,6 @@ func insertWorkOrderDepositETL(
 	ur *repositories.UserRepo,
 	oir *OldUWorkOrderDeposit,
 ) {
-
 	//
 	// Set the `state`.
 	//
@@ -250,7 +249,15 @@ func insertWorkOrderDepositETL(
 		// log.Println("lastModifiedByName:", lastModifiedByName)
 	}
 
+	//
+	// Get our `OrderId` value.
+	//
+
 	orderId, _ := or.GetIdByOldId(ctx, tid, oir.OrderId)
+
+	//
+	// Insert our `WorkOrderDeposit` data.
+	//
 
 	m := &models.WorkOrderDeposit{
 		OldId:              oir.Id,

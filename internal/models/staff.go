@@ -72,7 +72,9 @@ type Staff struct {
 	LastModifiedFromIP                   null.String `json:"last_modified_from_ip"`
 	State                                int8        `json:"state"`
 	CreatedById                          null.Int    `json:"created_by_id"`
+	CreatedByName                        null.String `json:"created_by_name"`
 	LastModifiedById                     null.Int    `json:"last_modified_by_id"`
+	LastModifiedByName                   null.String `json:"last_modified_by_name"`
 	UserId                               uint64      `json:"user_id"`
 	HowHearId                            null.Int    `json:"how_hear_id"`
 	HowHearOther                         null.String `json:"how_hear_other"`

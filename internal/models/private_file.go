@@ -23,8 +23,10 @@ type PrivateFile struct {
 	CreatedTime        time.Time   `json:"created_time"`          // 8
 	CreatedFromIP      null.String `json:"created_from_ip"`       // 9
 	CreatedById        null.Int    `json:"created_by_id"`         // 10
+	CreatedByName      null.String `json:"created_by_name"`       // 21(!!!)
 	LastModifiedTime   time.Time   `json:"last_modified_time"`    // 11
 	LastModifiedById   null.Int    `json:"last_modified_by_id"`   // 12
+	LastModifiedByName null.String `json:"last_modified_by_name"` // 22 (!!!)
 	LastModifiedFromIP null.String `json:"last_modified_from_ip"` // 13
 	AssociateId        null.Int    `json:"associate_id"`          // 14
 	CustomerId         null.Int    `json:"customer_id"`           //15
