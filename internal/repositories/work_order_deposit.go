@@ -26,11 +26,11 @@ func (r *WorkOrderDepositRepo) Insert(ctx context.Context, m *models.WorkOrderDe
     INSERT INTO work_order_deposits (
         uuid, tenant_id, paid_at, deposit_method, paid_to, currency,
 		amount, paid_for, created_time, last_modified_time, created_by_id,
-		last_modified_by_id, order_id, created_from_ip,
+		created_by_name, last_modified_by_id, last_modified_by_name, order_id, created_from_ip,
 		last_modified_from_ip, state, old_id
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-		$17
+		$17, $18, $19
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -42,7 +42,7 @@ func (r *WorkOrderDepositRepo) Insert(ctx context.Context, m *models.WorkOrderDe
 		ctx,
 		m.Uuid, m.TenantId, m.PaidAt, m.DepositMethod, m.PaidTo, m.Currency,
 		m.Amount, m.PaidFor, m.CreatedTime, m.LastModifiedTime, m.CreatedById,
-		m.LastModifiedById, m.OrderId, m.CreatedFromIP,
+		m.CreatedByName, m.LastModifiedById, m.LastModifiedByName, m.OrderId, m.CreatedFromIP,
 		m.LastModifiedFromIP, m.State, m.OldId,
 	)
 	return err

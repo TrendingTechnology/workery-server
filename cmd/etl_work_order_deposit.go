@@ -183,21 +183,71 @@ func insertWorkOrderDepositETL(
 	ur *repositories.UserRepo,
 	oir *OldUWorkOrderDeposit,
 ) {
+
+	//
+	// Set the `state`.
+	//
+
 	var state int8 = 1
 	if oir.IsArchived == true {
 		state = 0
 	}
 
+	//
+	// Get `createdById` and `createdByName` values.
+	//
+
 	var createdById null.Int
-	if oir.CreatedById.Valid {
-		val := oir.CreatedById.ValueOrZero()
-		id, _ := ur.GetIdByOldId(ctx, tid, uint64(val))
-		createdById = null.IntFrom(int64(id))
+	var createdByName null.String
+	if oir.CreatedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oir.CreatedById.ValueOrZero()))
 
-		// log.Println("ID:", oir.Id, "|User|IN:", oir.CreatedById, "OUT:", createdById, "\tTenantId:", tid)
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
 	}
-	if oir.LastModifiedById.Valid {
 
+	//
+	// Get `lastModifiedById` and `lastModifiedByName` values.
+	//
+
+	var lastModifiedById null.Int
+	var lastModifiedByName null.String
+	if oir.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oir.LastModifiedById.ValueOrZero()))
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
 	}
 
 	orderId, _ := or.GetIdByOldId(ctx, tid, oir.OrderId)
@@ -215,7 +265,9 @@ func insertWorkOrderDepositETL(
 		CreatedTime:        oir.CreatedAt,
 		LastModifiedTime:   oir.LastModifiedAt,
 		CreatedById:        createdById,
-		LastModifiedById:   oir.LastModifiedById,
+		CreatedByName:      createdByName,
+		LastModifiedById:   lastModifiedById,
+		LastModifiedByName: lastModifiedByName,
 		OrderId:            orderId,
 		CreatedFromIP:      oir.CreatedFrom,
 		LastModifiedFromIP: oir.LastModifiedFrom,

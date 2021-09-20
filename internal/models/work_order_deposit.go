@@ -25,9 +25,11 @@ type WorkOrderDeposit struct {
 	PaidFor            int8        `json:"paid_for"`
 	CreatedTime        time.Time   `json:"created_time"`
 	CreatedById        null.Int    `json:"created_by_id"`
+	CreatedByName      null.String `json:"created_by_name"`
 	CreatedFromIP      null.String `json:"created_from_ip"`
 	LastModifiedTime   time.Time   `json:"last_modified_time"`
 	LastModifiedById   null.Int    `json:"last_modified_by_id"`
+	LastModifiedByName null.String `json:"last_modified_by_name"`
 	LastModifiedFromIP null.String `json:"last_modified_from_ip"`
 	State              int8        `json:"state"`
 	OldId              uint64      `json:"old_id"`
