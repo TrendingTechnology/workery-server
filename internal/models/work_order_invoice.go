@@ -110,7 +110,9 @@ type WorkOrderInvoice struct {
 	CreatedTime              time.Time   `json:"created_time"`
 	LastModifiedTime         time.Time   `json:"last_modified_time"`
 	CreatedById              uint64      `json:"created_by_id"`
+	CreatedByName            null.String `json:"created_by_name"`
 	LastModifiedById         uint64      `json:"last_modified_by_id"`
+	LastModifiedByName       null.String `json:"last_modified_by_name"`
 	CreatedFrom              string      `json:"created_from"`
 	CreatedFromIsPublic      bool        `json:"created_from_is_public"`
 	LastModifiedFrom         string      `json:"last_modified_from"`

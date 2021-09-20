@@ -156,6 +156,7 @@ func runUserInsert(ou *OldUser, tr *repositories.TenantRepo, ur *repositories.Us
 	lexicalName := ou.LastName + ", " + ou.FirstName
 	lexicalName = strings.Replace(lexicalName, ", ,", ",", 0)
 	lexicalName = strings.Replace(lexicalName, "  ", " ", 0)
+	lexicalName = strings.Replace(lexicalName, ", , ", ", ", 0)
 
 	m := &models.User{
 		OldId:             ou.Id,

@@ -31,8 +31,8 @@ func (r *WorkOrderRepo) Insert(ctx context.Context, m *models.WorkOrder) error {
 		was_associate_professional, would_customer_refer_our_organization, score,
         invoice_date, invoice_quote_amount, invoice_labour_amount, invoice_material_amount,
 		invoice_tax_amount, invoice_total_amount, invoice_service_fee_amount, invoice_service_fee_payment_date,
-        created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip, old_id,
+        created_time, created_by_id, created_by_name, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_by_name, last_modified_from_ip, old_id,
 		invoice_service_fee_id, latest_pending_task_id, ongoing_work_order_id,
 		was_survey_conducted, was_there_financials_inputted, invoice_actual_service_fee_amount_paid,
 		invoice_balance_owing_amount, invoice_quoted_labour_amount, invoice_quoted_material_amount,
@@ -46,7 +46,7 @@ func (r *WorkOrderRepo) Insert(ctx context.Context, m *models.WorkOrder) error {
 		$18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32,
 		$33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47,
 		$48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62,
-		$63, $64
+		$63, $64, $65, $66
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -63,8 +63,8 @@ func (r *WorkOrderRepo) Insert(ctx context.Context, m *models.WorkOrder) error {
 		m.WasAssociateProfessional, m.WouldCustomerReferOurOrganization, m.Score,
 		m.InvoiceDate, m.InvoiceQuoteAmount, m.InvoiceLabourAmount, m.InvoiceMaterialAmount,
 		m.InvoiceTaxAmount, m.InvoiceTotalAmount, m.InvoiceServiceFeeAmount, m.InvoiceServiceFeePaymentDate,
-		m.CreatedTime, m.CreatedById, m.CreatedFromIP,
-		m.LastModifiedTime, m.LastModifiedById, m.LastModifiedFromIP, m.OldId,
+		m.CreatedTime, m.CreatedById, m.CreatedByName, m.CreatedFromIP,
+		m.LastModifiedTime, m.LastModifiedById, m.LastModifiedByName, m.LastModifiedFromIP, m.OldId,
 		m.InvoiceServiceFeeId, m.LatestPendingTaskId, m.OngoingWorkOrderId,
 		m.WasSurveyConducted, m.WasThereFinancialsInputted, m.InvoiceActualServiceFeeAmountPaid,
 		m.InvoiceBalanceOwingAmount, m.InvoiceQuotedLabourAmount, m.InvoiceQuotedMaterialAmount,
@@ -118,8 +118,8 @@ func (r *WorkOrderRepo) GetById(ctx context.Context, id uint64) (*models.WorkOrd
 		was_associate_professional, would_customer_refer_our_organization, score,
         invoice_date, invoice_quote_amount, invoice_labour_amount, invoice_material_amount,
 		invoice_tax_amount, invoice_total_amount, invoice_service_fee_amount, invoice_service_fee_payment_date,
-        created_time, created_by_id, created_from_ip,
-		last_modified_time, last_modified_by_id, last_modified_from_ip,
+        created_time, created_by_id, created_by_name, created_from_ip,
+		last_modified_time, last_modified_by_id, last_modified_by_name, last_modified_from_ip,
 		invoice_service_fee_id, latest_pending_task_id, ongoing_work_order_id,
 		was_survey_conducted, was_there_financials_inputted, invoice_actual_service_fee_amount_paid,
 		invoice_balance_owing_amount, invoice_quoted_labour_amount, invoice_quoted_material_amount,
@@ -140,8 +140,8 @@ func (r *WorkOrderRepo) GetById(ctx context.Context, id uint64) (*models.WorkOrd
 		&m.WasAssociateProfessional, &m.WouldCustomerReferOurOrganization, &m.Score,
 		&m.InvoiceDate, &m.InvoiceQuoteAmount, &m.InvoiceLabourAmount, &m.InvoiceMaterialAmount,
 		&m.InvoiceTaxAmount, &m.InvoiceTotalAmount, &m.InvoiceServiceFeeAmount, &m.InvoiceServiceFeePaymentDate,
-		&m.CreatedTime, &m.CreatedById, &m.CreatedFromIP,
-		&m.LastModifiedTime, &m.LastModifiedById, &m.LastModifiedFromIP,
+		&m.CreatedTime, &m.CreatedById, &m.CreatedByName, &m.CreatedFromIP,
+		&m.LastModifiedTime, &m.LastModifiedById, &m.LastModifiedByName, &m.LastModifiedFromIP,
 		&m.InvoiceServiceFeeId, &m.LatestPendingTaskId, &m.OngoingWorkOrderId,
 		&m.WasSurveyConducted, &m.WasThereFinancialsInputted, &m.InvoiceActualServiceFeeAmountPaid,
 		&m.InvoiceBalanceOwingAmount, &m.InvoiceQuotedLabourAmount, &m.InvoiceQuotedMaterialAmount,

@@ -166,7 +166,7 @@ func insertActivitySheetItemETL(
 	oldRecord *OldUActivitySheetItem,
 ) {
 	//
-	// State
+	// Compile our `state`.
 	//
 
 	var state int8 = 1
@@ -179,19 +179,32 @@ func insertActivitySheetItemETL(
 	}
 
 	//
-	// CreatedById
+	// Compile `createdById` and `createdByName` values.
 	//
 
 	var createdById null.Int
-	if oldRecord.CreatedById.Valid {
-		createdByIdInt64 := oldRecord.CreatedById.ValueOrZero()
-		createdByIdUint64, err := ur.GetIdByOldId(ctx, tid, uint64(createdByIdInt64))
+	var createdByName null.String
+	if oldRecord.CreatedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oldRecord.CreatedById.ValueOrZero()))
+
 		if err != nil {
-			log.Panic("ur.GetIdByOldId | err", err)
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
 		}
 
-		// Convert from null supported integer times.
-		createdById = null.NewInt(int64(createdByIdUint64), createdByIdUint64 != 0)
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
 	}
 
 	//
@@ -201,6 +214,10 @@ func insertActivitySheetItemETL(
 	associateId, err := ar.GetIdByOldId(ctx, tid, oldRecord.AssociateId)
 	if err != nil {
 		log.Panic("ar.GetIdByOldId | err", err)
+	}
+	associate, err := ar.GetById(ctx, associateId)
+	if err != nil {
+		log.Panic("ar.GetById | err", err)
 	}
 
 	//
@@ -236,21 +253,24 @@ func insertActivitySheetItemETL(
 	}
 
 	//
-	// Insert into database
+	// Insert into `ActivitySheetItem` table.
 	//
 
 	m := &models.ActivitySheetItem{
-		OldId:          oldRecord.Id,
-		TenantId:       tid,
-		Uuid:           uuid.NewString(),
-		Comment:        oldRecord.Comment,
-		CreatedTime:    oldRecord.CreatedAt,
-		CreatedFromIP:  oldRecord.CreatedFrom,
-		CreatedById:    createdById,
-		AssociateId:    associateId,
-		State:          state,
-		OrderId:        workOrderId,
-		OngoingOrderId: ongoingWorkOrderId,
+		OldId:                oldRecord.Id,
+		TenantId:             tid,
+		Uuid:                 uuid.NewString(),
+		Comment:              oldRecord.Comment,
+		CreatedTime:          oldRecord.CreatedAt,
+		CreatedFromIP:        oldRecord.CreatedFrom,
+		CreatedById:          createdById,
+		CreatedByName:        createdByName,
+		AssociateId:          associateId,
+		AssociateName:        associate.Name,
+		AssociateLexicalName: associate.LexicalName,
+		State:                state,
+		OrderId:              workOrderId,
+		OngoingOrderId:       ongoingWorkOrderId,
 	}
 
 	err = asir.Insert(ctx, m)

@@ -48,7 +48,8 @@ func (r *WorkOrderInvoiceRepo) Insert(ctx context.Context, m *models.WorkOrderIn
 		payment_date, is_cash, is_cheque, is_debit, is_credit, is_other,
 		client_signature, associate_sign_date, associate_signature, created_time,
 		last_modified_time, created_by_id, last_modified_by_id, client_address,
-		revision_version, deposit, amount_due, sub_total, state
+		revision_version, deposit, amount_due, sub_total, state, created_by_name,
+		last_modified_by_name
     ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
 		$17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31,
@@ -57,7 +58,7 @@ func (r *WorkOrderInvoiceRepo) Insert(ctx context.Context, m *models.WorkOrderIn
 		$60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73,
 		$74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87,
 		$88, $89, $90, $91, $92, $93, $94, $95, $96, $97, $98, $99, $100, $101,
-		$102
+		$102, $103, $104
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -92,7 +93,7 @@ func (r *WorkOrderInvoiceRepo) Insert(ctx context.Context, m *models.WorkOrderIn
 		m.ClientSignature, m.AssociateSignDate, m.AssociateSignature,
 		m.CreatedTime, m.LastModifiedTime, m.CreatedById, m.LastModifiedById,
 		m.ClientAddress, m.RevisionVersion, m.Deposit, m.AmountDue, m.SubTotal,
-		m.State,
+		m.State, m.CreatedByName, m.LastModifiedByName,
 	)
 	return err
 }

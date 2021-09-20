@@ -69,8 +69,9 @@ func doRunImportWorkOrder() {
 	cr := repositories.NewCustomerRepo(db)
 	isfr := repositories.NewWorkOrderServiceFeeRepo(db)
 	owor := repositories.NewOngoingWorkOrderRepo(db)
+	ur := repositories.NewUserRepo(db)
 
-	runWorkOrderETL(ctx, uint64(woETLTenantId), asr, ar, cr, isfr, owor, oldDb)
+	runWorkOrderETL(ctx, uint64(woETLTenantId), asr, ar, cr, isfr, owor, ur, oldDb)
 }
 
 func runWorkOrderETL(
@@ -81,6 +82,7 @@ func runWorkOrderETL(
 	cr *repositories.CustomerRepo,
 	isfr *repositories.WorkOrderServiceFeeRepo,
 	owor *repositories.OngoingWorkOrderRepo,
+	ur *repositories.UserRepo,
 	oldDb *sql.DB,
 ) {
 	ass, err := ListAllWorkOrders(oldDb)
@@ -88,7 +90,7 @@ func runWorkOrderETL(
 		log.Fatal("ListAllWorkOrders", err)
 	}
 	for _, oss := range ass {
-		insertWorkOrderETL(ctx, tenantId, asr, ar, cr, isfr, owor, oss)
+		insertWorkOrderETL(ctx, tenantId, asr, ar, cr, isfr, owor, ur, oss)
 	}
 }
 
@@ -237,8 +239,13 @@ func insertWorkOrderETL(
 	cr *repositories.CustomerRepo,
 	isfr *repositories.WorkOrderServiceFeeRepo,
 	owor *repositories.OngoingWorkOrderRepo,
+	ur *repositories.UserRepo,
 	oss *OldWorkOrder,
 ) {
+	//
+	// Get the optional `Associate` data to compile `name` and `lexical name` field.
+	//
+
 	var associateId null.Int
 	var associateName null.String
 	var associateLexicalName null.String
@@ -279,6 +286,10 @@ func insertWorkOrderETL(
 		}
 	}
 
+	//
+	// Get the required `customer` data.
+	//
+
 	customerId, err := cr.GetIdByOldId(ctx, tid, oss.CustomerId)
 	if err != nil {
 		log.Panic("cr.GetIdByOldId | err", err)
@@ -287,7 +298,10 @@ func insertWorkOrderETL(
 	// Lookup our customer record so we can generate the full name / lexical full name.
 	customer, err := cr.GetById(ctx, customerId)
 
+	//
 	// Generate our full name / lexical full name.
+	//
+
 	var customerName string
 	var customerLexicalName string
 	if customer.MiddleName != "" {
@@ -299,6 +313,10 @@ func insertWorkOrderETL(
 	}
 	customerLexicalName = strings.Replace(customerLexicalName, ", ,", ",", 0)
 	customerLexicalName = strings.Replace(customerLexicalName, "  ", " ", 0)
+
+	//
+	// Compile our `state`.
+	//
 
 	var state int8
 	switch s := oss.State; s {
@@ -326,6 +344,10 @@ func insertWorkOrderETL(
 		state = models.WorkOrderArchivedState
 	}
 
+	//
+	// Get the optional `invoiceServiceFeeId` value.
+	//
+
 	var invoiceServiceFeeId null.Int
 	if oss.InvoiceServiceFeeId.Valid {
 		invoiceServiceFeeIdInt64 := oss.InvoiceServiceFeeId.ValueOrZero()
@@ -337,6 +359,10 @@ func insertWorkOrderETL(
 		// Convert from null supported integer times.
 		invoiceServiceFeeId = null.NewInt(int64(invoiceServiceFeeIdUint64), invoiceServiceFeeIdUint64 != 0)
 	}
+
+	//
+	// Get the optional `OngoingWorkOrderId` value.
+	//
 
 	var ongoingWorkOrderId null.Int
 	if oss.OngoingWorkOrderId.Valid {
@@ -350,6 +376,10 @@ func insertWorkOrderETL(
 		ongoingWorkOrderId = null.NewInt(int64(ongoingWorkOrderIdUint64), ongoingWorkOrderIdUint64 != 0)
 	}
 
+	//
+	// Get the optional `ClonedFromId` value.
+	//
+
 	var clonedFromId null.Int
 	if oss.ClonedFromId.Valid {
 		clonedFromIdInt64 := oss.ClonedFromId.ValueOrZero()
@@ -362,7 +392,66 @@ func insertWorkOrderETL(
 		clonedFromId = null.NewInt(int64(clonedFromIdUint64), clonedFromIdUint64 != 0)
 	}
 
-	// InvoicePaidTo
+	//
+	// Compile `createdById` and `createdByName` values.
+	//
+
+	var createdById null.Int
+	var createdByName null.String
+	if oss.CreatedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oss.CreatedById.ValueOrZero()))
+
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
+	}
+
+	//
+	// Compile `lastModifiedById` and `lastModifiedByName` values.
+	//
+
+	var lastModifiedById null.Int
+	var lastModifiedByName null.String
+	if oss.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oss.LastModifiedById.ValueOrZero()))
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
+	}
+
+	//
+	// Insert our `WorkOrder` data.
+	//
 
 	m := &models.WorkOrder{
 		OldId:                             oss.Id,
@@ -402,10 +491,12 @@ func insertWorkOrderETL(
 		InvoiceServiceFeeAmount:           oss.InvoiceServiceFeeAmount,
 		InvoiceServiceFeePaymentDate:      oss.InvoiceServiceFeePaymentDate,
 		CreatedTime:                       oss.Created,
-		CreatedById:                       oss.CreatedById,
+		CreatedById:                       createdById,
+		CreatedByName:                     createdByName,
 		CreatedFromIP:                     oss.CreatedFrom,
 		LastModifiedTime:                  oss.LastModified,
-		LastModifiedById:                  oss.LastModifiedById,
+		LastModifiedById:                  lastModifiedById,
+		LastModifiedByName:                lastModifiedByName,
 		LastModifiedFromIP:                oss.LastModifiedFrom,
 		InvoiceServiceFeeId:               invoiceServiceFeeId,
 		LatestPendingTaskId:               oss.LatestPendingTaskId,

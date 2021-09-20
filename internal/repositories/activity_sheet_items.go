@@ -24,10 +24,22 @@ func (r *ActivitySheetItemRepo) Insert(ctx context.Context, m *models.ActivitySh
 
 	query := `
     INSERT INTO activity_sheet_items (
-        uuid, tenant_id, comment, created_time, created_by_id, created_from_ip,
-		associate_id, order_id, state, ongoing_order_id, old_id
+        uuid,
+		tenant_id,
+		comment,
+		created_time,
+		created_by_id,
+		created_by_name,
+		created_from_ip,
+		associate_id,
+		associate_name,
+		associate_lexical_name,
+		order_id,
+		state,
+		ongoing_order_id,
+		old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -37,8 +49,8 @@ func (r *ActivitySheetItemRepo) Insert(ctx context.Context, m *models.ActivitySh
 
 	_, err = stmt.ExecContext(
 		ctx,
-		m.Uuid, m.TenantId, m.Comment, m.CreatedTime, m.CreatedById,
-		m.CreatedFromIP, m.AssociateId, m.OrderId, m.State, m.OngoingOrderId,
+		m.Uuid, m.TenantId, m.Comment, m.CreatedTime, m.CreatedById, m.CreatedByName,
+		m.CreatedFromIP, m.AssociateId, m.AssociateName, m.AssociateLexicalName, m.OrderId, m.State, m.OngoingOrderId,
 		m.OldId,
 	)
 	return err
@@ -76,15 +88,25 @@ func (r *ActivitySheetItemRepo) GetById(ctx context.Context, id uint64) (*models
 
 	query := `
     SELECT
-        id, uuid, tenant_id, comment, created_time, created_by_id,
-		created_from_ip, associate_id, order_id, state, ongoing_order_id
+        id, uuid, tenant_id,
+		comment,
+		created_time,
+		created_by_id,
+		created_by_name,
+		created_from_ip,
+		associate_id,
+		associate_name,
+		associate_lexical_name,
+		order_id,
+		state,
+		ongoing_order_id
 	FROM
         activity_sheet_items
     WHERE
         id = $1`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&m.Id, &m.Uuid, &m.TenantId, &m.Comment, &m.CreatedTime, &m.CreatedById,
-		&m.CreatedFromIP, &m.AssociateId, &m.OrderId, &m.State, &m.OngoingOrderId,
+		&m.Id, &m.Uuid, &m.TenantId, &m.Comment, &m.CreatedTime, &m.CreatedById, &m.CreatedByName,
+		&m.CreatedFromIP, &m.AssociateId, &m.AssociateName, &m.AssociateLexicalName, &m.OrderId, &m.State, &m.OngoingOrderId,
 	)
 	if err != nil {
 		// CASE 1 OF 2: Cannot find record with that email.

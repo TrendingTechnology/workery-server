@@ -86,7 +86,7 @@ func runWorkOrderInvoiceETL(
 ) {
 	aats, err := ListAllWorkOrderInvoices(oldDb)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("ListAllWorkOrderInvoices|err:", err)
 	}
 	for _, oss := range aats {
 		insertWorkOrderInvoiceETL(ctx, tenantId, wotp, ar, ur, oss)
@@ -272,7 +272,7 @@ func ListAllWorkOrderInvoices(db *sql.DB) ([]*OldWorkOrderInvoice, error) {
 	FROM
         workery_work_order_invoices
 	ORDER BY
-	    id
+	    order_id
 	ASC
 	`
 	rows, err := db.QueryContext(ctx, query)
@@ -312,7 +312,7 @@ func ListAllWorkOrderInvoices(db *sql.DB) ([]*OldWorkOrderInvoice, error) {
 			&m.Deposit, &m.AmountDue, &m.SubTotal, &m.SubTotalCurrency,
 		)
 		if err != nil {
-			panic(err)
+			log.Fatalln("rows.Scan|err:", err)
 		}
 		arr = append(arr, m)
 	}
@@ -332,7 +332,7 @@ func insertWorkOrderInvoiceETL(
 	oss *OldWorkOrderInvoice,
 ) {
 	//
-	// OrderId
+	// Get our `orderId` value.
 	//
 
 	orderId, err := wor.GetIdByOldId(ctx, tid, oss.OrderId)
@@ -341,12 +341,16 @@ func insertWorkOrderInvoiceETL(
 	}
 
 	//
-	// UserId
+	// Get our `UserId` value.
 	//
 
-	userId, err := wor.GetIdByOldId(ctx, tid, oss.CreatedById)
+	userId, err := ur.GetIdByOldId(ctx, tid, oss.CreatedById)
 	if err != nil {
-		log.Panic("ar.GetIdByOldId | err", err)
+		log.Panic("ur.GetIdByOldId | err", err)
+	}
+	user, err := ur.GetById(ctx, userId)
+	if err != nil {
+		log.Panic("ur.GetById | err", err)
 	}
 
 	// //
@@ -455,7 +459,7 @@ func insertWorkOrderInvoiceETL(
 		ClientSignature:          oss.ClientSignature,          // 90
 		AssociateSignDate:        oss.AssociateSignDate,        // 91
 		AssociateSignature:       oss.AssociateSignature,       // 92
-		// WorkOrderId       uint64 `json:"work_order_id"`
+		// WorkOrderId            uint64 `json:"work_order_id"`
 		CreatedTime:      oss.CreatedAt,      // 93
 		LastModifiedTime: oss.LastModifiedAt, // 94
 		CreatedById:      userId,             // 95
@@ -469,7 +473,9 @@ func insertWorkOrderInvoiceETL(
 		Deposit:         oss.Deposit,         // 99
 		AmountDue:       oss.AmountDue,       // 100
 		SubTotal:        oss.SubTotal,        // 101
-		// State:               oss.State,               // 102 (TODO)
+		// State:                 oss.State,           // 102 (TODO)
+		CreatedByName:      null.StringFrom(user.Name), // 103
+		LastModifiedByName: null.StringFrom(user.Name), // 104
 	}
 
 	fmt.Println("OrderId:", orderId)
