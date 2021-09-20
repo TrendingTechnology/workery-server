@@ -35,12 +35,14 @@ func (r *OngoingWorkOrderRepo) Insert(ctx context.Context, m *models.OngoingWork
 		state,
 		created_time,
 		created_by_id,
+		created_by_name,
 		created_from_ip,
 		last_modified_time,
 		last_modified_by_id,
+		last_modified_by_name,
 		last_modified_from_ip, old_id
     ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
     )`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -61,9 +63,11 @@ func (r *OngoingWorkOrderRepo) Insert(ctx context.Context, m *models.OngoingWork
 		m.State,
 		m.CreatedTime,
 		m.CreatedById,
+		m.CreatedByName,
 		m.CreatedFromIP,
 		m.LastModifiedTime,
 		m.LastModifiedById,
+		m.LastModifiedByName,
 		m.LastModifiedFromIP,
 		m.OldId,
 	)
@@ -84,9 +88,10 @@ func (r *OngoingWorkOrderRepo) UpdateById(ctx context.Context, m *models.Ongoing
 		state = $4,
 		last_modified_time = $5,
 		last_modified_by_id = $6,
-		last_modified_from_ip = $7
+		last_modified_by_name = $7,
+		last_modified_from_ip = $8
     WHERE
-        id = $8`
+        id = $9`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return err
@@ -101,6 +106,7 @@ func (r *OngoingWorkOrderRepo) UpdateById(ctx context.Context, m *models.Ongoing
 		m.State,
 		m.LastModifiedTime,
 		m.LastModifiedById,
+		m.LastModifiedByName,
 		m.LastModifiedFromIP,
 		m.Id,
 	)
@@ -127,9 +133,11 @@ func (r *OngoingWorkOrderRepo) GetById(ctx context.Context, id uint64) (*models.
 		state,
 		created_time,
 		created_by_id,
+		created_by_name,
 		created_from_ip,
 		last_modified_time,
 		last_modified_by_id,
+		last_modified_by_name,
 		last_modified_from_ip
 	FROM
         ongoing_work_orders
@@ -148,9 +156,11 @@ func (r *OngoingWorkOrderRepo) GetById(ctx context.Context, id uint64) (*models.
 		&m.State,
 		&m.CreatedTime,
 		&m.CreatedById,
+		&m.CreatedByName,
 		&m.CreatedFromIP,
 		&m.LastModifiedTime,
 		&m.LastModifiedById,
+		&m.LastModifiedByName,
 		&m.LastModifiedFromIP,
 	)
 	if err != nil {

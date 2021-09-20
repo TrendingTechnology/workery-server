@@ -66,8 +66,9 @@ func doRunImportOngoingWorkOrder() {
 	asr := repositories.NewOngoingWorkOrderRepo(db)
 	ar := repositories.NewAssociateRepo(db)
 	cr := repositories.NewCustomerRepo(db)
+	ur := repositories.NewUserRepo(db)
 
-	runOngoingWorkOrderETL(ctx, uint64(owoETLTenantId), asr, ar, cr, oldDb)
+	runOngoingWorkOrderETL(ctx, uint64(owoETLTenantId), asr, ar, cr, ur, oldDb)
 }
 
 func runOngoingWorkOrderETL(
@@ -76,6 +77,7 @@ func runOngoingWorkOrderETL(
 	asr *repositories.OngoingWorkOrderRepo,
 	ar *repositories.AssociateRepo,
 	cr *repositories.CustomerRepo,
+	ur *repositories.UserRepo,
 	oldDb *sql.DB,
 ) {
 	ass, err := ListAllOngoingWorkOrders(oldDb)
@@ -83,7 +85,7 @@ func runOngoingWorkOrderETL(
 		log.Fatal("ListAllOngoingWorkOrders", err)
 	}
 	for _, oss := range ass {
-		insertOngoingWorkOrderETL(ctx, tenantId, asr, ar, cr, oss)
+		insertOngoingWorkOrderETL(ctx, tenantId, asr, ar, cr, ur, oss)
 	}
 }
 
@@ -152,8 +154,13 @@ func insertOngoingWorkOrderETL(
 	asr *repositories.OngoingWorkOrderRepo,
 	ar *repositories.AssociateRepo,
 	cr *repositories.CustomerRepo,
+	ur *repositories.UserRepo,
 	oss *OldOngoingWorkOrder,
 ) {
+	//
+	// Get the optional `Associate` data to compile `name` and `lexical name` field.
+	//
+
 	var associateId null.Int
 	var associateName null.String
 	var associateLexicalName null.String
@@ -177,13 +184,82 @@ func insertOngoingWorkOrderETL(
 		}
 	}
 
+	//
+	// Get the required `customer` data.
+	//
+
 	customerId, err := cr.GetIdByOldId(ctx, tid, oss.CustomerId)
 	customer, err := cr.GetById(ctx, customerId)
+
+	//
+	// Compile our `state`.
+	//
 
 	var state int8 = 1 // Running
 	if oss.State == "terminated" {
 		state = 2
 	}
+
+	//
+	// Compile `createdById` and `createdByName` values.
+	//
+
+	var createdById null.Int
+	var createdByName null.String
+	if oss.CreatedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oss.CreatedById.ValueOrZero()))
+
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			createdById = null.IntFrom(int64(userId))
+			createdByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("createdById:", createdById)
+		// log.Println("createdByName:", createdByName)
+	}
+
+	//
+	// Compile `lastModifiedById` and `lastModifiedByName` values.
+	//
+
+	var lastModifiedById null.Int
+	var lastModifiedByName null.String
+	if oss.LastModifiedById.ValueOrZero() > 0 {
+		userId, err := ur.GetIdByOldId(ctx, tid, uint64(oss.LastModifiedById.ValueOrZero()))
+		if err != nil {
+			log.Panic("ur.GetIdByOldId", err)
+		}
+		user, err := ur.GetById(ctx, userId)
+		if err != nil {
+			log.Panic("ur.GetById", err)
+		}
+
+		if user != nil {
+			lastModifiedById = null.IntFrom(int64(userId))
+			lastModifiedByName = null.StringFrom(user.Name)
+		} else {
+			log.Println("WARNING: D.N.E.")
+		}
+
+		// // For debugging purposes only.
+		// log.Println("lastModifiedById:", lastModifiedById)
+		// log.Println("lastModifiedByName:", lastModifiedByName)
+	}
+
+	//
+	// Insert our `OngoingWorkOrder` data.
+	//
 
 	m := &models.OngoingWorkOrder{
 		OldId:                oss.Id,
@@ -197,10 +273,12 @@ func insertOngoingWorkOrderETL(
 		AssociateLexicalName: associateLexicalName,
 		State:                state,
 		CreatedTime:          oss.CreatedAt,
-		CreatedById:          oss.CreatedById,
+		CreatedById:          createdById,
+		CreatedByName:        createdByName,
 		CreatedFromIP:        oss.CreatedFrom,
 		LastModifiedTime:     oss.LastModifiedAt,
-		LastModifiedById:     oss.LastModifiedById,
+		LastModifiedById:     lastModifiedById,
+		LastModifiedByName:   lastModifiedByName,
 		LastModifiedFromIP:   oss.LastModifiedFrom,
 	}
 	err = asr.Insert(ctx, m)
