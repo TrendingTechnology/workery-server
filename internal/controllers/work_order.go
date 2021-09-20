@@ -35,7 +35,7 @@ func (h *Controller) workOrdersListEndpoint(w http.ResponseWriter, r *http.Reque
 	}
 	sortFieldString := r.FormValue("sort_field")
 	if sortFieldString == "" {
-		sortFieldString = "last_name"
+		sortFieldString = "id"
 	}
 
 	// Start by defining our base listing filter and then append depending on
